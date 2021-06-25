@@ -2,6 +2,7 @@ package com.arrietty.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.arrietty.consts.Api;
 
 /**
  * @Author: Yuechuan Zhang
@@ -9,11 +10,12 @@ import org.springframework.web.bind.annotation.RestController;
  */
 
 @RestController
-@RequestMapping("/helloWorld")
-public class HelloWorldController {
+@RequestMapping("/service")
+public class ServiceController {
 
-        @RequestMapping("/hello")
-        public String hello(){
+        // profile APIs
+        @RequestMapping(Api.PROFILE)
+        public String getProfile(String netId){
             return "Hello World";
         }
 
