@@ -1,15 +1,13 @@
 package com.arrietty.controller;
 
-import com.arrietty.service.impl.RedisTestService;
+import com.arrietty.entity.User;
+import com.arrietty.service.redis.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
-import com.fasterxml.jackson.core.JsonParser;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.arrietty.consts.Api;
+
 
 /**
  * @Author: Yuechuan Zhang
@@ -21,29 +19,39 @@ import com.arrietty.consts.Api;
 public class ServiceController {
 
     @Autowired
-    private RedisTestService redisTestService;
+    private RedisServiceImpl redisServiceImpl;
 
-    // profile APIs
-    @RequestMapping(Api.PROFILE)
-    public String getProfile(String netId){
-        return "Hello World";
+    // Debugging APIs for setting user sessions
+    @RequestMapping(Api.DEBUG+"/session")
+    public String getUserName(@RequestParam("userId") Long userId){
+        User user = redisServiceImpl.getUserSession(userId);
+        return user.getFirstName()+", "+user.getLastName();
+    }
+
+    @PostMapping(Api.DEBUG+"/session")
+    public String postUserSession(@RequestBody User user){
+        redisServiceImpl.setUserSession(user);
+        return "success";
     }
 
 
     @RequestMapping("/set")
     public String set(@RequestParam("key") String key, @RequestParam("value") String value) {
-        redisTestService.set(key,value);
+        redisServiceImpl.set(key,value);
         return "operation succeeds";
     }
 
     @RequestMapping("/get")
     public String get(@RequestParam("key") String key) {
-        String result = (String) redisTestService.get(key);
+        String result = (String) redisServiceImpl.get(key);
         Response<String> response = Response.buildSuccessResponse(String.class, result);
         Gson gson = new Gson();
         String res = gson.toJson(response);
         return res;
     }
+
+
+
 
 
 
