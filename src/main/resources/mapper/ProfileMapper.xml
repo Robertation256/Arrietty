@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.arrietty.mapper.ProfileMapper">
+
+    <resultMap id="BaseResultMap" type="com.arrietty.entity.Profile">
+        <result column="profile_id" jdbcType="BIGINT" property="profileId" />
+        <result column="school_year" jdbcType="VARCHAR" property="schoolYear" />
+        <result column="class" jdbcType="INTEGER" property="classYear" />
+        <result column="major" jdbcType="VARCHAR" property="major" />
+        <result column="avatar_image_ids" jdbcType="VARCHAR" property="avatarImageIds" />
+    </resultMap>
+
+
+    <select id="queryProfileByUserId" resultType="com.arrietty.entity.Profile" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select profile_id,school_year,class,major, avatar_image_ids
+        from user_profile
+        where user_id = #{userId}
+        limit 1
+    </select>
+</mapper>
