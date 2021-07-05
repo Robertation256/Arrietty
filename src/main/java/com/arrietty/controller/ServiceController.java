@@ -1,12 +1,24 @@
 package com.arrietty.controller;
 
+import com.arrietty.annotations.Auth;
+import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.entity.User;
 import com.arrietty.service.redis.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
+import com.arrietty.utils.session.SessionContext;
+import com.arrietty.utils.session.SessionIdGenerator;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.arrietty.consts.Api;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.UUID;
 
 
 /**
@@ -22,36 +34,24 @@ public class ServiceController {
     private RedisServiceImpl redisServiceImpl;
 
     // Debugging APIs for setting user sessions
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @RequestMapping(Api.DEBUG+"/session")
-    public String getUserName(@RequestParam("userId") Long userId){
-        User user = redisServiceImpl.getUserSession(userId);
-        return user.getFirstName()+", "+user.getLastName();
+    public String getUserName(){
+        User user = SessionContext.getUser();
+        String id = SessionContext.getUserSessionId();
+        return user.getFirstName()+", "+user.getLastName()+" Id:"+id.toString();
     }
 
-    @PostMapping(Api.DEBUG+"/session")
-    public String postUserSession(@RequestBody User user){
-        redisServiceImpl.setUserSession(user);
-        return "success";
+    @PostMapping(Api.DEBUG+"/login")
+    public String postUserLogin(@RequestBody User user){
+        String userSessionId = SessionIdGenerator.generate();
+        redisServiceImpl.setUserSession(userSessionId, user);
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
+        Cookie sessionCookie = new Cookie("userSessionId", userSessionId);
+        response.addCookie(sessionCookie);
+        return "login succeeds";
     }
-
-
-    @RequestMapping("/set")
-    public String set(@RequestParam("key") String key, @RequestParam("value") String value) {
-        redisServiceImpl.set(key,value);
-        return "operation succeeds";
-    }
-
-    @RequestMapping("/get")
-    public String get(@RequestParam("key") String key) {
-        String result = (String) redisServiceImpl.get(key);
-        Response<String> response = Response.buildSuccessResponse(String.class, result);
-        Gson gson = new Gson();
-        String res = gson.toJson(response);
-        return res;
-    }
-
-
-
 
 
 

@@ -27,14 +27,14 @@ public class RedisServiceImpl {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public void setUserSession(User user){
+    public void setUserSession(String userSessionId, User user){
         Gson gson = new Gson();
         String serialized = gson.toJson(user, User.class);
-        redisTemplate.opsForValue().set(RedisKey.USER_SESSION+user.getUserId().toString(),serialized);
+        redisTemplate.opsForValue().set(RedisKey.USER_SESSION+userSessionId,serialized);
     }
 
-    public User getUserSession(Long userId){
-        Object obj = redisTemplate.opsForValue().get(RedisKey.USER_SESSION+userId.toString());
+    public User getUserSession(String  userSessionId){
+        Object obj = redisTemplate.opsForValue().get(RedisKey.USER_SESSION+userSessionId);
         if (obj == null) return null;
         String jsonString = (String) obj;
         Gson gson = new Gson();
