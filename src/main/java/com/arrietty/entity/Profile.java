@@ -45,15 +45,15 @@ public class Profile {
     }
 
     public String getAvatarImageIds() {
-        return avatarImageIds;
+        return avatarImageId;
     }
 
     public void setAvatarImageIds(String avatarImageIds) {
-        this.avatarImageIds = avatarImageIds;
+        this.avatarImageId = avatarImageIds;
     }
 
     private String major;
     private Integer classYear;
     private String schoolYear;
-    private String avatarImageIds;
+    private String avatarImageId;
 }

@@ -29,7 +29,7 @@ import java.util.UUID;
  */
 
 @RestController
-@RequestMapping("/service")
+@RequestMapping("/serviceV0")
 public class ServiceController {
 
     @Autowired

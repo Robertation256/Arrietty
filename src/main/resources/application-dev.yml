@@ -18,6 +18,8 @@ spring:
       max-idle: 8
       min-idle: 0
     timeout: 5000
+  resources:
+    static-locations: file:${file.image-path}, classpath:/static/
 
 mybatis:
   mapper-locations: classpath:/mapper/*Mapper.xml
@@ -34,3 +36,7 @@ logging:
     com:
       arrietty:
         info
+
+file:
+  image-path: D:/Users/yuechuanzhang/image/
+  avatar-image-path: D:/Users/yuechuanzhang/image/avatars
