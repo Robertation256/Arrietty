@@ -2,7 +2,9 @@ package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
+import com.arrietty.entity.Profile;
 import com.arrietty.entity.User;
+import com.arrietty.service.ProfileServiceImpl;
 import com.arrietty.service.redis.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
 import com.arrietty.utils.session.SessionContext;
@@ -33,6 +35,9 @@ public class ServiceController {
     @Autowired
     private RedisServiceImpl redisServiceImpl;
 
+    @Autowired
+    private ProfileServiceImpl profileService;
+
     // Debugging APIs for setting user sessions
     @Auth(authMode = AuthModeEnum.REGULAR)
     @RequestMapping(Api.DEBUG+"/session")
@@ -53,8 +58,12 @@ public class ServiceController {
         return "login succeeds";
     }
 
-
-
-
-
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @RequestMapping(Api.PROFILE)
+    public String queryProfile(){
+        Profile profile = profileService.queryCurrentUserProfile();
+        Response<Profile> response = Response.buildSuccessResponse(Profile.class, profile);
+        Gson gson = new Gson();
+        return gson.toJson(response, Response.class);
+    }
 }
