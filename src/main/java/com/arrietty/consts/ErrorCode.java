@@ -7,7 +7,7 @@ public class ErrorCode {
 
     //file storage error
     public static final int IMAGE_UPLOAD_ERROR = 2000;
-
+    public static final int IMAGE_LOAD_ERROR = 2001;
 
 
 }

@@ -1,5 +1,6 @@
 package com.arrietty.service.file;
 
+import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public interface FileStorageService {
     //return fileId
     String save(MultipartFile file);
 
-    void load(String fileId);
+    Resource load(String externalFileId);
 
-    void delete(List<String> fileIds);
+    void delete(List<String> externalFileIds);
 }

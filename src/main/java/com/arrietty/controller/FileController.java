@@ -1,5 +1,7 @@
 package com.arrietty.controller;
 
+import com.arrietty.service.file.FileStorageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -7,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @Author: Yuechuan Zhang
@@ -17,21 +20,15 @@ import java.io.IOException;
 @RequestMapping("/serviceV0")
 public class FileController {
 
-    @Value("${file.image-path}")
-    private String imageStoragePath;
+    @Autowired
+    private Map<String, FileStorageService> fileStorageServiceMap;
 
     @PostMapping("/avatar")
     @ResponseBody
     public String upload(@RequestParam("file") MultipartFile uploadedFile){
-        String fileName = uploadedFile.getOriginalFilename();
-        try {
-            uploadedFile.transferTo(new File(imageStoragePath+fileName));
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
 
-        return "Success";
+        FileStorageService avatarStorageService = fileStorageServiceMap.get("avatarStorageService");
+        return avatarStorageService.save(uploadedFile);
 
     }
 
