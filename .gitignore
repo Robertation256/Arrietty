@@ -33,5 +33,5 @@ log/
 
 # Configuration
 src/main/resources/mybatis-generator/
-src/main/resources/application-dev.yml
+src/main/resources/*.yml
 

@@ -7,7 +7,11 @@ package com.arrietty.consts;
 public class Api {
 
     public static final String SERVICE_VERSION = "/serviceV0";
+
+
     public static final String DEBUG = "/debug";
+
+    public static final String AUTH = "/auth";
     public static final String PROFILE = "/profile";
     public static final String POST = "/post";
 }

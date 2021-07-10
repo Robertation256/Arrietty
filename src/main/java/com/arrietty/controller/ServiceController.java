@@ -2,8 +2,10 @@ package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
+import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.Profile;
 import com.arrietty.entity.User;
+import com.arrietty.service.AuthServiceImpl;
 import com.arrietty.service.ProfileServiceImpl;
 import com.arrietty.service.redis.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
@@ -11,16 +13,16 @@ import com.arrietty.utils.session.SessionContext;
 import com.arrietty.utils.session.SessionIdGenerator;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import com.arrietty.consts.Api;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
+import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
+
 
 
 /**
@@ -32,11 +34,17 @@ import java.util.UUID;
 @RequestMapping(Api.SERVICE_VERSION)
 public class ServiceController {
 
+    @Value("${auth.client-id}")
+    private String clientId;
+
     @Autowired
     private RedisServiceImpl redisServiceImpl;
 
     @Autowired
     private ProfileServiceImpl profileService;
+
+    @Autowired
+    private AuthServiceImpl authService;
 
     // Debugging APIs for setting user sessions
     @Auth(authMode = AuthModeEnum.REGULAR)
@@ -66,4 +74,33 @@ public class ServiceController {
         Gson gson = new Gson();
         return gson.toJson(response, Response.class);
     }
+
+
+
+
+
+    /**
+     *
+     * Interfaces for testing Shibboleth
+     * */
+    @RequestMapping(Api.AUTH+"/login")
+    public ModelAndView handleLoginSSORedirect(){
+        String ssoUrl = authService.getSSOUrl();
+        return new ModelAndView("redirect:"+ssoUrl);
+    }
+
+    @RequestMapping(Api.AUTH+"/redirect")
+    public Object handleShibbolethCallBack(@RequestParam("token") String token, @RequestParam("clientId") String clientId){
+        if (!this.clientId.equals(clientId)){
+            return Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "No client ID");
+        }
+
+        if (token == null){
+            return Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Token is empty");
+        }
+
+        return authService.getUserInfoByToken(token);
+    }
+
+
 }
