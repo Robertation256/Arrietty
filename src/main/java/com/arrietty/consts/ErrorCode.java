@@ -5,6 +5,9 @@ public class ErrorCode {
     public static final int UNAUTHORIZED_USER_REQUEST = 10001; //Service denial for non logged in users
 
 
+    //file storage error
+    public static final int IMAGE_UPLOAD_ERROR = 2000;
+    public static final int IMAGE_LOAD_ERROR = 2001;
 
 
 }

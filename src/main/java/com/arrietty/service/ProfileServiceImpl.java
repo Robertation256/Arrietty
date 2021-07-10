@@ -2,7 +2,7 @@ package com.arrietty.service;
 
 
 import com.arrietty.entity.Profile;
-import com.arrietty.mapper.ProfileMapper;
+import com.arrietty.dao.ProfileMapper;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class ProfileServiceImpl {
     public Profile queryCurrentUserProfile(){
         //obtain userId from session
         Long userId = SessionContext.getUserId();
-        Profile profile = profileMapper.queryProfileByUserId(userId);
+        Profile profile = profileMapper.queryByUserId(userId);
         return  profile;
     }
 
