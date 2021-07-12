@@ -42,7 +42,6 @@ public class AuthAspect {
     @Around("@annotation(com.arrietty.annotations.Auth)")
     public String authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         AuthModeEnum authMode = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Auth.class).authMode();
-        System.out.println("hello");
         if (authMode.equals(AuthModeEnum.REGULAR)){
             return handleRegularAuth(joinPoint);
         }

@@ -39,12 +39,16 @@ public class AvatarStorageService implements FileStorageService{
 
     @Override
     public void init() {
-        try {
-            Files.createDirectory(Paths.get(BASE_PATH));
+        Path avatarPath = Paths.get(BASE_PATH);
+        if (!Files.exists(avatarPath)){
+            try {
+                Files.createDirectory(Paths.get(BASE_PATH));
+            }
+            catch (IOException e) {
+                throw new RuntimeException("Cannot create folder for avatar images.");
+            }
         }
-        catch (IOException e) {
-            throw new RuntimeException("Cannot create folder for avatar images.");
-        }
+
     }
 
     @Override
