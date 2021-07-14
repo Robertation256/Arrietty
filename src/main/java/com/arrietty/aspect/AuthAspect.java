@@ -66,7 +66,8 @@ public class AuthAspect {
             User userInfo = redisService.getUserSession(userSessionId);
             if (userInfo != null){
                 SessionContext.initialize(userSessionId,userInfo);
-                return (String) joinPoint.proceed();
+                Object response = joinPoint.proceed();
+                return new Gson().toJson(response);
             }
         }
 
