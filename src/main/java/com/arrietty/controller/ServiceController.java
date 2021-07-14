@@ -54,16 +54,20 @@ public class ServiceController {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
         Cookie sessionCookie = new Cookie("userSessionId", userSessionId);
+        sessionCookie.setPath("/serviceV0");
         response.addCookie(sessionCookie);
         return "login succeeds";
     }
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @RequestMapping(Api.PROFILE)
-    public String queryProfile(){
-        Profile profile = profileService.queryCurrentUserProfile();
-        Response<Profile> response = Response.buildSuccessResponse(Profile.class, profile);
-        Gson gson = new Gson();
-        return gson.toJson(response, Response.class);
+    public Object queryProfile(){
+        return profileService.queryCurrentUserProfile();
+    }
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @PostMapping(Api.PROFILE)
+    public Object updateProfile(@RequestBody Profile profile){
+        return profileService.updateUserProfile(profile);
     }
 }
