@@ -1,6 +1,11 @@
 package com.arrietty.controller;
 
+import com.arrietty.consts.Api;
+import com.arrietty.consts.ErrorCode;
+import com.arrietty.exception.LogicException;
+import com.arrietty.pojo.ImageResponseType;
 import com.arrietty.service.file.FileStorageService;
+import com.arrietty.utils.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -17,18 +22,30 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/serviceV0")
+@RequestMapping(Api.SERVICE_VERSION)
 public class FileController {
+
+    private static final String AVATAR_TYPE = "avatar";
 
     @Autowired
     private Map<String, FileStorageService> fileStorageServiceMap;
 
-    @PostMapping("/avatar")
+    @PostMapping(Api.IMAGE)
     @ResponseBody
-    public String upload(@RequestParam("file") MultipartFile uploadedFile){
+    public Object postImage(@RequestParam("type") String type, @RequestParam("file") MultipartFile uploadedFile){
 
-        FileStorageService avatarStorageService = fileStorageServiceMap.get("avatarStorageService");
-        return avatarStorageService.save(uploadedFile);
+        if (type == null){
+            throw new LogicException(ErrorCode.IMAGE_UPLOAD_ERROR, "invalid type");
+        }
+        else if (AVATAR_TYPE.equals(type)){
+            FileStorageService avatarStorageService = fileStorageServiceMap.get("avatarStorageService");
+            String imageId =  avatarStorageService.save(uploadedFile);
+            imageId = imageId==null?"":imageId;
+            ImageResponseType imageResponseType = new ImageResponseType();
+            imageResponseType.setImageId(imageId);
+            return Response.buildSuccessResponse(ImageResponseType.class, imageResponseType);
+        }
+
 
     }
 

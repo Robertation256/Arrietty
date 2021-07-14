@@ -10,4 +10,7 @@ public class Api {
     public static final String DEBUG = "/debug";
     public static final String PROFILE = "/profile";
     public static final String POST = "/post";
+
+
+    public static final String IMAGE = "/image";
 }
