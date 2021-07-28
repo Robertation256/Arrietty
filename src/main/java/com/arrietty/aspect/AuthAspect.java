@@ -12,7 +12,6 @@ import com.google.gson.Gson;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -20,8 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -40,7 +37,7 @@ public class AuthAspect {
     RedisServiceImpl redisService;
 
     @Around("@annotation(com.arrietty.annotations.Auth)")
-    public String authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         AuthModeEnum authMode = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Auth.class).authMode();
         if (authMode.equals(AuthModeEnum.REGULAR)){
             return handleRegularAuth(joinPoint);
@@ -49,10 +46,10 @@ public class AuthAspect {
             return handleAdminAuth(joinPoint);
         }
 
-            return (String) joinPoint.proceed();
+            return joinPoint.proceed();
         }
 
-    private String handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+    private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
@@ -67,13 +64,16 @@ public class AuthAspect {
             if (userInfo != null){
                 SessionContext.initialize(userSessionId,userInfo);
                 Object response = joinPoint.proceed();
-                return new Gson().toJson(response);
+                if (response instanceof Response){
+                    return new Gson().toJson(response);
+                }
+                return response;
+
             }
         }
 
         Response response =  Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Please login first");
-        Gson gson = new Gson();
-        return gson.toJson(response, Response.class);
+        return  new Gson().toJson(response, Response.class);
     }
 
     private String handleAdminAuth(ProceedingJoinPoint joinPoint){

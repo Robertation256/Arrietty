@@ -4,11 +4,14 @@ import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.ImageMapper;
 import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
+import com.arrietty.utils.response.Response;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
@@ -89,22 +92,19 @@ public class AvatarStorageService implements FileStorageService{
         }
     }
 
-    @Override
-    public Resource load(String externalImageId) {
-        if (externalImageId == null || externalImageId.length()<32){
-            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Bad image id");
-        }
-
-        Image image = imageMapper.queryByExternalImageId(externalImageId);
-        if (image == null){
+    public ResponseEntity<Resource> load() {
+        Image avatar = imageMapper.queryByUploadUserId(SessionContext.getUserId());
+        if (avatar==null||avatar.getExternalImageId()==null){
             throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Image not found");
         }
 
-        Path imagePath = Paths.get(BASE_PATH + image.getExternalImageId() + "." + image.getImageFormat());
+        Path imagePath = Paths.get(BASE_PATH + avatar.getExternalImageId() + "." + avatar.getImageFormat());
         try {
             Resource resource = new UrlResource(imagePath.toUri());
             if (resource.exists() || resource.isReadable()){
-                return resource;
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType("image/"+avatar.getImageFormat()))
+                        .body(resource);
             }
         }
         catch ( MalformedURLException e) {

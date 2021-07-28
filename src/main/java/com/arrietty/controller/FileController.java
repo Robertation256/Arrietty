@@ -2,12 +2,17 @@ package com.arrietty.controller;
 
 import com.arrietty.consts.Api;
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.entity.Profile;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.ImageResponseType;
+import com.arrietty.service.file.AvatarService;
 import com.arrietty.service.file.FileStorageService;
 import com.arrietty.utils.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,7 +33,7 @@ public class FileController {
     private static final String AVATAR_TYPE = "avatar";
 
     @Autowired
-    private Map<String, FileStorageService> fileStorageServiceMap;
+    private AvatarService avatarService;
 
     @PostMapping(Api.IMAGE)
     @ResponseBody
@@ -37,17 +42,26 @@ public class FileController {
         if (type == null){
             throw new LogicException(ErrorCode.IMAGE_UPLOAD_ERROR, "invalid type");
         }
-        else if (AVATAR_TYPE.equals(type)){
-            FileStorageService avatarStorageService = fileStorageServiceMap.get("avatarStorageService");
-            String imageId =  avatarStorageService.save(uploadedFile);
-            imageId = imageId==null?"":imageId;
-            ImageResponseType imageResponseType = new ImageResponseType();
-            imageResponseType.setImageId(imageId);
-            return Response.buildSuccessResponse(ImageResponseType.class, imageResponseType);
+
+        if (AVATAR_TYPE.equals(type)){
+            return avatarService.saveAvatar(uploadedFile);
         }
 
-
+        return null;
     }
+
+    @GetMapping(Api.IMAGE)
+    public ResponseEntity<Resource> getImage(@RequestParam("type") String type, @RequestParam(required = false, value = "imageId") String imageId){
+        if (type == null){
+            throw new LogicException(ErrorCode.IMAGE_UPLOAD_ERROR, "invalid type");
+        }
+
+        if (AVATAR_TYPE.equals(type)){
+            return avatarService.loadAvatar();
+        }
+        return null;
+    }
+
 
 
 
