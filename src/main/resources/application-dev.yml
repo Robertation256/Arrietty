@@ -1,0 +1,46 @@
+server:
+  port: 8000
+  ssl:
+    enable: true
+    client-auth: need #双向认证need
+    key-store: classpath:ssl/server-one.p12
+    key-store-password: robert
+    key-store-type: PKCS12
+    key-alias: server-one
+    trust-store: classpath:ssl/trustKeys.p12
+    trust-store-password: robert
+    trust-store-type: PKCS12
+
+spring:
+  datasource:
+    username: root
+    password: 123
+    url: jdbc:mysql://localhost:3306/arrietty_fat_db?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    hostname: 127.0.0.1
+    port: 6379
+    database: 0
+    password:
+    lettuce:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+    timeout: 5000
+
+mybatis:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  type-aliases-package: com.arrietty.entity
+
+
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n"
+  file: log/info.log
+  level:
+    com:
+      arrietty:
+        info
