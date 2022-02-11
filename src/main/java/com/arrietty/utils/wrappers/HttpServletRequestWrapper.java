@@ -16,7 +16,7 @@ public class HttpServletRequestWrapper {
 
     public HttpServletRequestWrapper(HttpServletRequest request){
         this.rawServletRequest = request;
-        Map<String, String> cookieMap = new HashMap<>(request.getCookies().length);
+        Map<String, String> cookieMap = new HashMap<>();
         for (Cookie c: request.getCookies()){
             cookieMap.put(c.getName(),c.getValue());
         }

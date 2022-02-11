@@ -4,7 +4,8 @@ import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.User;
-import com.arrietty.service.redis.RedisServiceImpl;
+import com.arrietty.service.AuthServiceImpl;
+import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
 import com.arrietty.utils.session.SessionContext;
 import com.arrietty.utils.wrappers.HttpServletRequestWrapper;
@@ -12,7 +13,6 @@ import com.google.gson.Gson;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -21,7 +21,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -37,15 +36,20 @@ import javax.servlet.http.HttpServletRequest;
 public class AuthAspect {
 
     @Autowired
-    RedisServiceImpl redisService;
+    private RedisServiceImpl redisService;
+
+    @Autowired
+    private AuthServiceImpl authService;
 
     @Around("@annotation(com.arrietty.annotations.Auth)")
-    public String authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
         AuthModeEnum authMode = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Auth.class).authMode();
-        System.out.println("hello");
+
+        // regular user auth
         if (authMode.equals(AuthModeEnum.REGULAR)){
             return handleRegularAuth(joinPoint);
         }
+        // admin auth
         else if (authMode.equals(AuthModeEnum.ADMIN)){
             return handleAdminAuth(joinPoint);
         }
@@ -53,7 +57,7 @@ public class AuthAspect {
             return (String) joinPoint.proceed();
         }
 
-    private String handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+    private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
@@ -63,10 +67,15 @@ public class AuthAspect {
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
+
+        if(userSessionId==null || redisService.getUserSession(userSessionId)==null){
+            return authService.getSSOUrl();
+        }
+
         if (userSessionId != null){
-            User userInfo = redisService.getUserSession(userSessionId);
-            if (userInfo != null){
-                SessionContext.initialize(userSessionId,userInfo);
+            User user = redisService.getUserSession(userSessionId);
+            if (user != null){
+                SessionContext.initialize(userSessionId,user);
                 return (String) joinPoint.proceed();
             }
         }
@@ -76,7 +85,7 @@ public class AuthAspect {
         return gson.toJson(response, Response.class);
     }
 
-    private String handleAdminAuth(ProceedingJoinPoint joinPoint){
+    private Object handleAdminAuth(ProceedingJoinPoint joinPoint){
         //To-do: add admin authentication
         Response response =  Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "No admin authority");
         Gson gson = new Gson();

@@ -1,0 +1,6 @@
+jdbc_driver: com.mysql.cj.jdbc.Driver
+jdbc_url: jdbc:mysql://localhost:3306/arrietty_fat_db?useUnicode=true&characterEncoding=utf-8&useSSL=true&serverTimezone=UTC
+jdbc_user: root
+jdbc_password: 123
+java_files: C:/Users/yz391/Desktop/Arrietty/src/main/java
+resources: C:/Users/yz391/Desktop/Arrietty/src/main/resources

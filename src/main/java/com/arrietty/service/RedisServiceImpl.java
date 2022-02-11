@@ -1,4 +1,4 @@
-package com.arrietty.service.redis;
+package com.arrietty.service;
 
 import com.arrietty.consts.RedisKey;
 import com.arrietty.entity.User;

@@ -1,14 +1,10 @@
 package com.arrietty.controller;
 
-import com.arrietty.service.file.FileStorageService;
+import com.arrietty.service.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -17,7 +13,6 @@ import java.util.Map;
  */
 
 @RestController
-@RequestMapping("/serviceV0")
 public class FileController {
 
     @Autowired

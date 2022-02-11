@@ -1,6 +1,6 @@
 package com.arrietty;
 
-import com.arrietty.service.file.FileStorageService;
+import com.arrietty.service.FileStorageService;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;

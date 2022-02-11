@@ -1,4 +1,4 @@
-package com.arrietty.service.file;
+package com.arrietty.service;
 
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;

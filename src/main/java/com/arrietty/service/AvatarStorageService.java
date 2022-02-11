@@ -1,8 +1,7 @@
-package com.arrietty.service.file;
+package com.arrietty.service;
 
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.ImageMapper;
-import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ import java.util.UUID;
  */
 
 @Service
-public class AvatarStorageService implements FileStorageService{
+public class AvatarStorageService implements FileStorageService {
 
     private static final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList("jpg","jpeg","png");
 
@@ -39,11 +38,14 @@ public class AvatarStorageService implements FileStorageService{
 
     @Override
     public void init() {
-        try {
-            Files.createDirectory(Paths.get(BASE_PATH));
-        }
-        catch (IOException e) {
-            throw new RuntimeException("Cannot create folder for avatar images.");
+        Path avatarPath = Paths.get(BASE_PATH);
+        if (!Files.exists(avatarPath)){
+            try {
+                Files.createDirectory(Paths.get(BASE_PATH));
+            }
+            catch (IOException e) {
+                throw new RuntimeException("Cannot create folder for avatar images.");
+            }
         }
     }
 

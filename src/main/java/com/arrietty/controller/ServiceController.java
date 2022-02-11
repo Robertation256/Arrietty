@@ -2,10 +2,9 @@ package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
-import com.arrietty.entity.Profile;
 import com.arrietty.entity.User;
 import com.arrietty.service.ProfileServiceImpl;
-import com.arrietty.service.redis.RedisServiceImpl;
+import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
 import com.arrietty.utils.session.SessionContext;
 import com.arrietty.utils.session.SessionIdGenerator;
@@ -18,9 +17,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.UUID;
 
 
 /**
@@ -29,7 +26,6 @@ import java.util.UUID;
  */
 
 @RestController
-@RequestMapping(Api.SERVICE_VERSION)
 public class ServiceController {
 
     @Autowired
@@ -38,14 +34,7 @@ public class ServiceController {
     @Autowired
     private ProfileServiceImpl profileService;
 
-    // Debugging APIs for setting user sessions
-    @Auth(authMode = AuthModeEnum.REGULAR)
-    @RequestMapping(Api.DEBUG+"/session")
-    public String getUserName(){
-        User user = SessionContext.getUser();
-        String id = SessionContext.getUserSessionId();
-        return user.getFirstName()+", "+user.getLastName()+" Id:"+id.toString();
-    }
+
 
     @PostMapping(Api.DEBUG+"/login")
     public String postUserLogin(@RequestBody User user){
@@ -58,12 +47,10 @@ public class ServiceController {
         return "login succeeds";
     }
 
-    @Auth(authMode = AuthModeEnum.REGULAR)
-    @RequestMapping(Api.PROFILE)
-    public String queryProfile(){
-        Profile profile = profileService.queryCurrentUserProfile();
-        Response<Profile> response = Response.buildSuccessResponse(Profile.class, profile);
-        Gson gson = new Gson();
-        return gson.toJson(response, Response.class);
-    }
+    @Auth(authMode=)
+    @GetMapping("/home")
+    public String 
+
+
+
 }

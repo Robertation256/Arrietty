@@ -30,7 +30,7 @@ public class SessionContext {
 
     public static Long getUserId(){
         SessionContext context = threadLocal.get();
-        return context.userInfo==null? null : context.userInfo.getUserId();
+        return context.userInfo==null? null : context.userInfo.getId();
     }
 
     public static User getUser(){
