@@ -37,18 +37,18 @@ public class LogAspect {
     public void controllerLogPointCut(){}
 
     @Around("controllerLogPointCut()")
-    public String controllerLog(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object controllerLog(ProceedingJoinPoint joinPoint) throws Throwable {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
-        String response = (String) joinPoint.proceed();
+        Object response = joinPoint.proceed();
 
         String s1 = String.format("%s - [%6s] [%15s] [%30s] - [%6s] ",
                 dtf.format(LocalDateTime.now()),
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString(),
-                response
+                response.toString()
                 );
 
         logger.info(s1);

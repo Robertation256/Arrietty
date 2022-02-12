@@ -9,5 +9,8 @@ public class ErrorCode {
     public static final int IMAGE_UPLOAD_ERROR = 2000;
     public static final int IMAGE_LOAD_ERROR = 2001;
 
+    //profile edit error
+    public static final int PROFILE_EDIT_ERROR = 3001;
+
 
 }

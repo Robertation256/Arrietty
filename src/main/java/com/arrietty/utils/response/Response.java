@@ -26,6 +26,10 @@ public class Response<T> {
         return response;
     }
 
+    public static Response<String> buildSuccessResponse(){
+        return buildSuccessResponse(String.class, "Success");
+    }
+
 
     public static Response buildFailedResponse(){
         Response response = new Response();
