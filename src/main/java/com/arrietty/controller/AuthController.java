@@ -7,7 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import com.arrietty.consts.Api;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.view.RedirectView;
+
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 public class AuthController {
@@ -17,12 +22,23 @@ public class AuthController {
 
 
     // 接受shibboleth 回调
-    @GetMapping(value = "/login")
-    public RedirectView login(@RequestParam("token") String token, @RequestParam("clientId") String clientId){
+    @GetMapping(value = "/SSOCallback")
+    public String ssoCallback(@RequestParam("token") String token, @RequestParam("clientId") String clientId){
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
+
+        response.setStatus(302);
+
+
         if(authService.login(token,clientId)){
-            return new RedirectView("/home");
+            response.setHeader("Location", "https://localhost:8000/home");
+            return "login success";
         }
 
-        return new RedirectView("/error");
+        response.setHeader("Location", "https://localhost:8000/erro");
+        return "login failed";
     }
+
+
+
 }

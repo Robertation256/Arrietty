@@ -9,6 +9,8 @@ import java.util.Map;
  * @Author: Yuechuan Zhang
  * @Date: 2021/7/5 16:54
  */
+
+// 取出cookie 而已
 public class HttpServletRequestWrapper {
 
     private Map<String, String> cookieMap;
@@ -17,9 +19,13 @@ public class HttpServletRequestWrapper {
     public HttpServletRequestWrapper(HttpServletRequest request){
         this.rawServletRequest = request;
         Map<String, String> cookieMap = new HashMap<>();
-        for (Cookie c: request.getCookies()){
-            cookieMap.put(c.getName(),c.getValue());
+
+        if (request.getCookies()!=null){
+            for (Cookie c: request.getCookies()){
+                cookieMap.put(c.getName(),c.getValue());
+            }
         }
+
         this.cookieMap = cookieMap;
     }
 

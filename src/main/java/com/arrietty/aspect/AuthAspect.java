@@ -4,6 +4,7 @@ import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.User;
+import com.arrietty.exception.LogicException;
 import com.arrietty.service.AuthServiceImpl;
 import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.utils.response.Response;
@@ -22,7 +23,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 
 /**
@@ -57,39 +59,57 @@ public class AuthAspect {
             return (String) joinPoint.proceed();
         }
 
-    private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+    private String handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
-        // A demo session auth process by checking "userSessionKey" in user cookie
-        //To-do: implement real authentication by checking cookie
 
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
+        User user = null;
 
-        if(userSessionId==null || redisService.getUserSession(userSessionId)==null){
-            return authService.getSSOUrl();
+        // user session expires or user has not yet logged in, redirect to Shibboleth
+        if(userSessionId==null || (user = redisService.getUserSession(userSessionId))==null){
+            HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+            httpServletResponse.setHeader("Location", authService.getSSOUrl());
+            httpServletResponse.setStatus(302);
+            return null;
         }
 
-        if (userSessionId != null){
-            User user = redisService.getUserSession(userSessionId);
-            if (user != null){
-                SessionContext.initialize(userSessionId,user);
-                return (String) joinPoint.proceed();
-            }
-        }
+        // otherwise initialize thread local with user session
+        SessionContext.initialize(userSessionId,user);
+        return (String)joinPoint.proceed();
 
-        Response response =  Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Please login first");
-        Gson gson = new Gson();
-        return gson.toJson(response, Response.class);
     }
 
-    private Object handleAdminAuth(ProceedingJoinPoint joinPoint){
-        //To-do: add admin authentication
-        Response response =  Response.buildFailedResponse(ErrorCode.UNAUTHORIZED_USER_REQUEST, "No admin authority");
-        Gson gson = new Gson();
-        return gson.toJson(response, Response.class);
+    private String handleAdminAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+
+
+        HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
+        String userSessionId = requestWrapper.getCookieValue("userSessionId");
+
+        User user = null;
+
+        // user session expires or user has not yet logged in, redirect to Shibboleth
+        if(userSessionId==null || (user = redisService.getUserSession(userSessionId))==null){
+            HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+            httpServletResponse.setHeader("Location", authService.getSSOUrl());
+            httpServletResponse.setStatus(302);
+            return null;
+
+        }
+
+        // otherwise initialize thread local with user session
+        SessionContext.initialize(userSessionId,user);
+
+        if(!user.getIsAdmin()){
+            throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
+        }
+        return (String)joinPoint.proceed();
+
     }
 
 

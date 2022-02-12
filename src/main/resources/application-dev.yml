@@ -2,7 +2,6 @@ server:
   port: 8000
   ssl:
     enable: true
-    client-auth: need #双向认证need
     key-store: classpath:ssl/server-one.p12
     key-store-password: robert
     key-store-type: PKCS12
@@ -44,3 +43,9 @@ logging:
     com:
       arrietty:
         info
+
+auth:
+  token-obtain-url: https://localhost:8001/app/rest/keycloak/auth?clientId=%s&authType=%s
+  access-token-obtain-url: https://localhost:8001/app/rest/keycloak/token?token=%s
+  user-info-obtain-url: https://localhost:8001/app/rest/keycloak/welcome
+  client-id: test

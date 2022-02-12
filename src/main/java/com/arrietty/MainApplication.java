@@ -16,18 +16,10 @@ import java.util.Map;
  */
 @MapperScan(basePackages = "com.arrietty.mapper")
 @SpringBootApplication
-public class MainApplication implements CommandLineRunner {
-
-    @Autowired
-    private Map<String, FileStorageService> fileStorageServiceMap;
+public class MainApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class,args);
     }
 
-    @Override
-    public void run(String ... arg) throws Exception {
-        FileStorageService avatarStorageService = fileStorageServiceMap.get("avatarStorageService");
-        avatarStorageService.init();
-    }
 }

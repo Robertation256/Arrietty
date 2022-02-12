@@ -36,21 +36,11 @@ public class ServiceController {
 
 
 
-    @PostMapping(Api.DEBUG+"/login")
-    public String postUserLogin(@RequestBody User user){
-        String userSessionId = SessionIdGenerator.generate();
-        redisServiceImpl.setUserSession(userSessionId, user);
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
-        Cookie sessionCookie = new Cookie("userSessionId", userSessionId);
-        response.addCookie(sessionCookie);
-        return "login succeeds";
-    }
 
-    @Auth(authMode=)
+    @Auth(authMode=AuthModeEnum.REGULAR)
     @GetMapping("/home")
-    public String 
-
-
+    public String userHome(){
+        return "welcome";
+    }
 
 }

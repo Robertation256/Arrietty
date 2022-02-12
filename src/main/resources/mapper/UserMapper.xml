@@ -48,7 +48,7 @@
     select id, net_id, username, school_year, major, avatar_image_id, last_login_time,
     is_admin, bio
     from user
-    where net_id = {$netId}
+    where net_id = #{netId}
   </select>
 
 
