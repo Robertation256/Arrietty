@@ -1,6 +1,7 @@
 package com.arrietty.dao;
 
 import com.arrietty.entity.User;
+import com.arrietty.pojo.ProfilePO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -24,4 +25,8 @@ public interface UserMapper {
     List<User> selectAll();
 
     User selectByNetId(String netId);
+
+    User selectById(Long id);
+
+    boolean updateProfile(ProfilePO profile);
 }
