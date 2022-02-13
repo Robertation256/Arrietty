@@ -3,6 +3,7 @@ package com.arrietty.service;
 import com.arrietty.consts.RedisKey;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
+import com.arrietty.pojo.SessionPO;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,18 +29,18 @@ public class RedisServiceImpl {
         return redisTemplate.opsForValue().get(key);
     }
 
-    public void setUserSession(String userSessionId, User user){
+    public void setUserSession(String userSessionId, SessionPO sessionPO){
         Gson gson = new Gson();
-        String serialized = gson.toJson(user, User.class);
+        String serialized = gson.toJson(sessionPO, SessionPO.class);
         redisTemplate.opsForValue().set(RedisKey.USER_SESSION+userSessionId,serialized);
     }
 
-    public User getUserSession(String  userSessionId){
+    public SessionPO getUserSession(String  userSessionId){
         Object obj = redisTemplate.opsForValue().get(RedisKey.USER_SESSION+userSessionId);
         if (obj == null) return null;
         String jsonString = (String) obj;
         Gson gson = new Gson();
-        return gson.fromJson(jsonString, User.class);
+        return gson.fromJson(jsonString, SessionPO.class);
     }
 
     public void setUserProfile(Long userId, ProfilePO profile){

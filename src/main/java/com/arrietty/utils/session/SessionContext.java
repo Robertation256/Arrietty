@@ -1,6 +1,7 @@
 package com.arrietty.utils.session;
 
 import com.arrietty.entity.User;
+import com.arrietty.pojo.SessionPO;
 
 /**
  * @Author: Yuechuan Zhang
@@ -10,16 +11,16 @@ import com.arrietty.entity.User;
 public class SessionContext {
     private static ThreadLocal<SessionContext> threadLocal = new ThreadLocal<>();
     private String userSessionId;
-    private User userInfo;
+    private SessionPO userInfo;
 
-    private SessionContext(String userSessionId, User userInfo){
+    private SessionContext(String userSessionId, SessionPO userInfo){
         this.userSessionId = userSessionId;
         this.userInfo = userInfo;
     }
 
 
-    public static void initialize(String userSessionId, User userInfo){
-        SessionContext context = new SessionContext(userSessionId, userInfo);
+    public static void initialize(String userSessionId, SessionPO sessionPO){
+        SessionContext context = new SessionContext(userSessionId, sessionPO);
         threadLocal.set(context);
     }
 
@@ -33,9 +34,9 @@ public class SessionContext {
         return context.userInfo==null? null : context.userInfo.getId();
     }
 
-    public static User getUser(){
+    public static String getUserNetId(){
         SessionContext context = threadLocal.get();
-        return context.userInfo;
+        return context.userInfo==null? null : context.userInfo.getNetId();
     }
 
 }

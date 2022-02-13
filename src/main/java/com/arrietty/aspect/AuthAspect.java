@@ -5,6 +5,7 @@ import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.User;
 import com.arrietty.exception.LogicException;
+import com.arrietty.pojo.SessionPO;
 import com.arrietty.service.AuthServiceImpl;
 import com.arrietty.service.RedisServiceImpl;
 
@@ -67,10 +68,10 @@ public class AuthAspect {
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
-        User user = null;
+        SessionPO session = null;
 
         // user session expires or user has not yet logged in, redirect to Shibboleth
-        if(userSessionId==null || (user = redisService.getUserSession(userSessionId))==null){
+        if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
             httpServletResponse.setHeader("Location", authService.getSSOUrl());
             httpServletResponse.setStatus(302);
@@ -78,7 +79,7 @@ public class AuthAspect {
         }
 
         // otherwise initialize thread local with user session
-        SessionContext.initialize(userSessionId,user);
+        SessionContext.initialize(userSessionId,session);
         return (String)joinPoint.proceed();
 
     }
@@ -91,10 +92,10 @@ public class AuthAspect {
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
-        User user = null;
+        SessionPO session = null;
 
         // user session expires or user has not yet logged in, redirect to Shibboleth
-        if(userSessionId==null || (user = redisService.getUserSession(userSessionId))==null){
+        if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
             httpServletResponse.setHeader("Location", authService.getSSOUrl());
             httpServletResponse.setStatus(302);
@@ -103,9 +104,9 @@ public class AuthAspect {
         }
 
         // otherwise initialize thread local with user session
-        SessionContext.initialize(userSessionId,user);
+        SessionContext.initialize(userSessionId,session);
 
-        if(!user.getIsAdmin()){
+        if(!session.getIsAdmin()){
             throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
         }
         return (String)joinPoint.proceed();

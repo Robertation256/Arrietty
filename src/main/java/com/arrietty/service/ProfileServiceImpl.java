@@ -56,7 +56,7 @@ public class ProfileServiceImpl {
         }
 
         // update cache
-        target.setNetId(SessionContext.getUser().getNetId());
+        target.setNetId(SessionContext.getUserNetId());
         redisService.setUserProfile(target.getId(), target);
         return target;
     }

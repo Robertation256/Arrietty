@@ -3,10 +3,7 @@ package com.arrietty.service;
 
 import com.arrietty.dao.UserMapper;
 import com.arrietty.entity.User;
-import com.arrietty.pojo.AccessTokenResponsePO;
-import com.arrietty.pojo.SSOResponsePO;
-import com.arrietty.pojo.TokenResponsePO;
-import com.arrietty.pojo.UserInfoResponsePO;
+import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionIdGenerator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -76,16 +73,24 @@ public class AuthServiceImpl {
 
         User user = userMapper.selectByNetId(netId);
 
+
         //create new user account if it doesn't exit
         if(user==null){
             user = new User();
             user.setNetId(netId);
             userMapper.insert(user);
+            user = userMapper.selectByNetId(netId);
         }
 
         // insert user session
+        SessionPO sessionPO = new SessionPO();
+        sessionPO.setId(user.getId());
+        sessionPO.setNetId(user.getNetId());
+        sessionPO.setIsAdmin(user.getIsAdmin());
+        sessionPO.setLastLoginTime(user.getLastLoginTime());
+
         String sessionId = SessionIdGenerator.generate();
-        redisService.setUserSession(sessionId, user);
+        redisService.setUserSession(sessionId, sessionPO);
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
         Cookie sessionCookie = new Cookie("userSessionId", sessionId);
