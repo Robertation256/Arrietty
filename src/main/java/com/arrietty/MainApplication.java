@@ -1,6 +1,7 @@
 package com.arrietty;
 
-import com.arrietty.service.FileStorageService;
+
+import com.arrietty.service.ImageServiceImpl;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -16,10 +17,17 @@ import java.util.Map;
  */
 @MapperScan(basePackages = "com.arrietty.mapper")
 @SpringBootApplication
-public class MainApplication {
+public class MainApplication implements CommandLineRunner{
+
+    @Autowired
+    private ImageServiceImpl imageService;
 
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class,args);
     }
 
+    @Override
+    public void run(String... args) throws Exception {
+        imageService.init();
+    }
 }

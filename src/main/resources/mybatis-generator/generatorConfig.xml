@@ -36,7 +36,9 @@
         </commentGenerator>
 
         <!-- jdbc连接 -->
-        <jdbcConnection driverClass="${jdbc_driver}" connectionURL="${jdbc_url}" userId="${jdbc_user}" password="${jdbc_password}" />
+        <jdbcConnection driverClass="${jdbc_driver}" connectionURL="${jdbc_url}" userId="${jdbc_user}" password="${jdbc_password}" >
+            <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
         <!-- 类型转换 -->
         <javaTypeResolver>
             <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->
@@ -67,10 +69,14 @@
                enableUpdateByExample="true"
                enableDeleteByExample="true"
                enableSelectByExample="true"
-               selectByExampleQueryId="true">
+               selectByExampleQueryId="true"
+               enableSelectByPrimaryKey="true"
+               enableUpdateByPrimaryKey="true"
+               enableDeleteByPrimaryKey="true"
+        >
             <property name="useActualColumnNames" value="false" />
             <!-- 数据库表主键 -->
-            <generatedKey column="user_id" sqlStatement="Mysql" identity="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
         </table>
 
         <table tableName="image"
@@ -78,10 +84,14 @@
                enableUpdateByExample="true"
                enableDeleteByExample="true"
                enableSelectByExample="true"
-               selectByExampleQueryId="true">
+               selectByExampleQueryId="true"
+               enableSelectByPrimaryKey="true"
+               enableUpdateByPrimaryKey="true"
+               enableDeleteByPrimaryKey="true"
+               >
             <property name="useActualColumnNames" value="false" />
             <!-- 数据库表主键 -->
-            <generatedKey column="image_id" sqlStatement="Mysql" identity="true" />
+            <generatedKey column="id" sqlStatement="Mysql" identity="true" />
         </table>
 
 

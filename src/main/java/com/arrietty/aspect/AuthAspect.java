@@ -57,10 +57,10 @@ public class AuthAspect {
             return handleAdminAuth(joinPoint);
         }
 
-            return (String) joinPoint.proceed();
+            return  joinPoint.proceed();
         }
 
-    private String handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+    private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
@@ -80,11 +80,11 @@ public class AuthAspect {
 
         // otherwise initialize thread local with user session
         SessionContext.initialize(userSessionId,session);
-        return (String)joinPoint.proceed();
+        return joinPoint.proceed();
 
     }
 
-    private String handleAdminAuth(ProceedingJoinPoint joinPoint) throws Throwable{
+    private Object handleAdminAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
@@ -109,7 +109,8 @@ public class AuthAspect {
         if(!session.getIsAdmin()){
             throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
         }
-        return (String)joinPoint.proceed();
+
+        return joinPoint.proceed();
 
     }
 

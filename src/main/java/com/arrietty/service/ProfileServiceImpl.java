@@ -41,6 +41,7 @@ public class ProfileServiceImpl {
         return profile;
     }
 
+    // only update fields that are not null
     public ProfilePO updateUserProfile(ProfilePO profile){
         if(profile==null) return null;
 
@@ -50,15 +51,24 @@ public class ProfileServiceImpl {
         target.setMajor(profile.getMajor());
         target.setSchoolYear(profile.getSchoolYear());
         target.setBio(profile.getBio());
+        target.setAvatarImageId(profile.getAvatarImageId());
 
         if(!userMapper.updateProfile(target)){
             return null;
         }
 
         // update cache
-        target.setNetId(SessionContext.getUserNetId());
-        redisService.setUserProfile(target.getId(), target);
-        return target;
+        ProfilePO oldCache = redisService.getUserProfile(SessionContext.getUserId());
+        if (oldCache!=null){
+            oldCache.setUsername(profile.getUsername()==null? oldCache.getUsername():profile.getUsername());
+            oldCache.setMajor(profile.getMajor()==null? oldCache.getMajor():profile.getMajor());
+            oldCache.setSchoolYear(profile.getSchoolYear()==null?oldCache.getSchoolYear():profile.getSchoolYear());
+            oldCache.setBio(profile.getBio()==null?oldCache.getBio():profile.getBio());
+            oldCache.setAvatarImageId(profile.getAvatarImageId()==null?oldCache.getAvatarImageId():profile.getAvatarImageId());
+            redisService.setUserProfile(target.getId(), oldCache);
+        }
+
+        return getUserProfile(SessionContext.getUserId());
     }
 
 

@@ -49,3 +49,7 @@ auth:
   access-token-obtain-url: https://localhost:8001/app/rest/keycloak/token?token=%s
   user-info-obtain-url: https://localhost:8001/app/rest/keycloak/welcome
   client-id: test
+
+file:
+  base-image-directory: C:/Users/yz391/Pictures/arrietty
+  max-avatar-image-size: 1048576
