@@ -37,8 +37,6 @@ import java.util.UUID;
 @Service
 public class ImageServiceImpl {
 
-    private static final String TEMP_FILE = "tmp";
-
     @Value("${file.base-image-directory}")
     private String BASE_PATH;
 
@@ -51,7 +49,6 @@ public class ImageServiceImpl {
     @Autowired
     private ProfileServiceImpl profileService;
 
-    private File tempFile;
 
 
     public void init() {
@@ -81,7 +78,7 @@ public class ImageServiceImpl {
 
         try{
             final InputStream in = new FileInputStream(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+profilePO.getAvatarImageId().toString());
-            //TODO: 图片格式的匹配问题, 找不到返回default 图片
+            //TODO: 图片格式的匹配问题, 目前默认返回JPEG
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
             IOUtils.copy(in, response.getOutputStream());
         }
@@ -97,15 +94,16 @@ public class ImageServiceImpl {
 
     private void save(MultipartFile file) throws LogicException{
         String fileFormat = null;
+        // use thread name to create temp file, avoid multiple thread writing to the same file
+        File tempFile = new File(BASE_PATH+"/"+Thread.currentThread().getName()+"-tmp");
         try{
-            tempFile = new File(BASE_PATH+"/"+TEMP_FILE);
-            if(!tempFile.exists()){
-                tempFile.createNewFile();
-            }
+            tempFile.createNewFile();
         }
         catch (IOException e){
+            tempFile.delete();
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Open temp file failed");
         }
+
 
         try{
             fileFormat = file.getOriginalFilename().split("\\.")[1];
@@ -115,11 +113,14 @@ public class ImageServiceImpl {
             }
         }
         catch (IOException e){
+            tempFile.delete();
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File IO exception.");
         }
 
+
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
         if(profilePO==null){
+            tempFile.delete();
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Cannot find user profile.");
         };
 
@@ -134,6 +135,7 @@ public class ImageServiceImpl {
 
             imageMapper.insertAndGetPrimaryKey(image);
             if(image.getId()==null){
+                tempFile.delete();
                 throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Insert to DB failed.");
             }
             profilePO.setAvatarImageId(image.getId());
@@ -155,9 +157,11 @@ public class ImageServiceImpl {
         }
 
         File filePath = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+image.getId().toString());
+        //overwrite old file
         if(filePath.exists()){
             filePath.delete();
         }
+
         try{
             filePath.createNewFile();
             src = new FileInputStream(tempFile).getChannel();
@@ -169,6 +173,9 @@ public class ImageServiceImpl {
         }
         catch (IOException e){
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File system save failed");
+        }
+        finally {
+            tempFile.delete();
         }
     }
 //

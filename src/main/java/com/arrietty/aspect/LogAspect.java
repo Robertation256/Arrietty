@@ -1,5 +1,7 @@
 package com.arrietty.aspect;
 
+import com.arrietty.consts.ErrorCode;
+import com.arrietty.exception.LogicException;
 import com.arrietty.utils.response.Response;
 import com.google.gson.Gson;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -37,25 +39,42 @@ public class LogAspect {
     public void controllerLogPointCut(){}
 
     @Around("controllerLogPointCut()")
-    public Object controllerLog(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object controllerLog(ProceedingJoinPoint joinPoint) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
-        Object response = joinPoint.proceed();
+        Object response;
+        try{
+            response = joinPoint.proceed();
+            if(response instanceof String){
+                formattedLog(request,(String)response);
+                return response;
+            }
+            return response;
+        }
+        catch (LogicException e){
+            String json = new Gson().toJson(Response.buildFailedResponse(e.errorCode, e.errorMessage));
+            formattedLog(request,json);
+            return json;
+        }
+        // runtime error
+        catch (Throwable e){
+            logger.error(e.toString());
+        }
 
-        String s1 = String.format("%s - [%6s] [%15s] [%30s] - [%6s] ",
+        return new Gson().toJson(Response.buildFailedResponse(ErrorCode.INTERNAL_ERROR, "Internal error."));
+    }
+
+    private void formattedLog(HttpServletRequest request, String response){
+        String s = String.format("%s - [%s] [%s] [%s]\n[response] %s",
                 dtf.format(LocalDateTime.now()),
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString(),
-                response.toString()
-                );
+                response
+        );
 
-        logger.info(s1);
-        return response;
-
-
-
+        logger.info(s);
     }
 
 }
