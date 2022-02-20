@@ -6,8 +6,8 @@ public class ErrorCode {
 
 
     public static final int INVALID_REQUEST_BODY = 1000;    //request body is illegally formed
-    public static final int UNAUTHORIZED_USER_REQUEST = 10001; //Service denial for normal user accessing admin utilities
-
+    public static final int UNAUTHORIZED_USER_REQUEST = 1001; //Service denial for normal user accessing admin utilities
+    public static final int INVALID_URL_PARAM = 1002;       // url param is illegally formed
 
     //file storage error
     public static final int MAX_IMAGE_SIZE_EXCEEDED = 2000;      // max image size exceeded

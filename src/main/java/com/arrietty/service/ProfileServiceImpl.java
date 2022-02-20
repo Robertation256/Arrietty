@@ -26,7 +26,7 @@ public class ProfileServiceImpl {
 
         // cache miss, go fetch from db
         if ((profile=redisService.getUserProfile(userId))==null){
-            User user = userMapper.selectById(userId);
+            User user = userMapper.selectByPrimaryKey(userId);
             if(user==null) return null;
             profile = new ProfilePO();
             profile.setNetId(user.getNetId());

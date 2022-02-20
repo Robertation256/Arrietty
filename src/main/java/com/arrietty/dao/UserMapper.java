@@ -26,7 +26,7 @@ public interface UserMapper {
 
     User selectByNetId(String netId);
 
-    User selectById(Long id);
+    User selectByPrimaryKey(Long id);
 
     boolean updateProfile(ProfilePO profile);
 }
