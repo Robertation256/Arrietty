@@ -36,9 +36,9 @@ public class CourseServiceImpl {
     }
 
 
-    public void handleCourseEdit(String action, Course course) throws LogicException {
+    public Course handleCourseEdit(String action, Course course) throws LogicException {
         if("update".equals(action)){
-            handleCourseUpdate(course);
+            return handleCourseUpdate(course);
         }
         else if("delete".equals(action)){
             handleCourseDelete(course);
@@ -46,9 +46,11 @@ public class CourseServiceImpl {
         else {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid action type.");
         }
+
+        return null;
     }
 
-    private void handleCourseUpdate(Course course) throws LogicException{
+    private Course handleCourseUpdate(Course course) throws LogicException{
 
         if(course.getCourseCode()==null || course.getCourseName()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Course code or name cannot be empty.");
@@ -63,6 +65,7 @@ public class CourseServiceImpl {
                     throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Duplicate course exists.");
                 }
                 courseMapper.insert(course);
+                return course;
             }
         }
         //update
@@ -72,6 +75,8 @@ public class CourseServiceImpl {
                 throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Course does not exist.");
             }
         }
+
+        return null;
     }
 
     private void handleCourseDelete(Course course) throws LogicException{

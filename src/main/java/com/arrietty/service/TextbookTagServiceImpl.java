@@ -35,9 +35,9 @@ public class TextbookTagServiceImpl {
         }
     }
 
-    public void handleTextbookTagEdit(String action, TextbookTag textbookTag) throws LogicException {
+    public TextbookTag handleTextbookTagEdit(String action, TextbookTag textbookTag) throws LogicException {
         if("update".equals(action)){
-            handleTextbookTagUpdate(textbookTag);
+            return handleTextbookTagUpdate(textbookTag);
         }
         else if("delete".equals(action)){
             handleTextbookTagDelete(textbookTag);
@@ -45,9 +45,10 @@ public class TextbookTagServiceImpl {
         else {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid action type.");
         }
+        return null;
     }
 
-    private void handleTextbookTagUpdate(TextbookTag textbookTag) throws LogicException{
+    private TextbookTag handleTextbookTagUpdate(TextbookTag textbookTag) throws LogicException{
 
         if(textbookTag.getIsbn()==null || textbookTag.getTitle()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook ISBN or title cannot be empty.");
@@ -62,6 +63,7 @@ public class TextbookTagServiceImpl {
                     throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Duplicate textbook tag exists.");
                 }
                 textbookTagMapper.insert(textbookTag);
+                return textbookTag;
             }
         }
         //update
@@ -71,6 +73,7 @@ public class TextbookTagServiceImpl {
                 throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag does not exist.");
             }
         }
+        return null;
     }
 
     private void handleTextbookTagDelete(TextbookTag textbookTag) throws LogicException{

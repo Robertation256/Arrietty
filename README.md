@@ -40,7 +40,12 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body": 
+    "body": {
+            "id":1,	
+            "courseCode": "CSCI-SHU 360",
+            "subject": "Computer Science"
+        }
+    
 }
     
     
@@ -94,7 +99,16 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body": 
+    "body": {
+        "id":1, //不传值代表新增
+        "title": "Intro to Pyschology",	// not null
+        "isbn":"571-324234-B32",	// not null
+        "author": "John",
+        "publisher": "Centric",
+        "edition":"3rd edition",
+        "originalPrice": 123.05,
+        "courseId": [1,2]		
+    }
 }
     
     
@@ -138,7 +152,10 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body": 
+    "body": {
+        "id":1,
+        "name":"Furniture"		
+    }
 }
 
 

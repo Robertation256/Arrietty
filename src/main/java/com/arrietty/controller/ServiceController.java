@@ -122,8 +122,9 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/course")
     public String postCourse(@RequestParam("action") String action, @RequestBody Course course) throws LogicException{
-        courseService.handleCourseEdit(action, course);
-        return new Gson().toJson(Response.buildSuccessResponse());
+        Course ret = courseService.handleCourseEdit(action, course);
+        Response<Course> response = Response.buildSuccessResponse(Course.class, ret);
+        return new Gson().toJson(response);
     }
 
     @Auth(authMode = AuthModeEnum.ADMIN)
@@ -140,8 +141,9 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/textbook")
     public String postTextbookTag(@RequestParam("action") String action, @RequestBody TextbookTag textbookTag) throws LogicException{
-        textbookTagService.handleTextbookTagEdit(action, textbookTag);
-        return new Gson().toJson(Response.buildSuccessResponse());
+        TextbookTag ret = textbookTagService.handleTextbookTagEdit(action, textbookTag);
+        Response<TextbookTag> response = Response.buildSuccessResponse(TextbookTag.class, ret);
+        return new Gson().toJson(response);
     }
 
 
@@ -159,7 +161,8 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/otherTag")
     public String postOtherTag(@RequestParam("action") String action, @RequestBody OtherTag otherTag) throws LogicException{
-        otherTagService.handleOtherTagEdit(action, otherTag);
-        return new Gson().toJson(Response.buildSuccessResponse());
+        OtherTag ret = otherTagService.handleOtherTagEdit(action, otherTag);
+        Response<OtherTag> response = Response.buildSuccessResponse(OtherTag.class, ret);
+        return new Gson().toJson(response);
     }
 }

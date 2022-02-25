@@ -37,9 +37,9 @@ public class OtherTagServiceImpl {
     }
 
 
-    public void handleOtherTagEdit(String action, OtherTag otherTag) throws LogicException {
+    public OtherTag handleOtherTagEdit(String action, OtherTag otherTag) throws LogicException {
         if("update".equals(action)){
-            handleOtherTagUpdate(otherTag);
+            return handleOtherTagUpdate(otherTag);
         }
         else if("delete".equals(action)){
             handleOtherTagDelete(otherTag);
@@ -47,9 +47,10 @@ public class OtherTagServiceImpl {
         else {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid action type.");
         }
+        return null;
     }
 
-    private void handleOtherTagUpdate(OtherTag otherTag) throws LogicException{
+    private OtherTag handleOtherTagUpdate(OtherTag otherTag) throws LogicException{
 
         if(otherTag.getName()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Tag name cannot be empty.");
@@ -64,6 +65,7 @@ public class OtherTagServiceImpl {
                     throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Duplicate tag exists.");
                 }
                 otherTagMapper.insert(otherTag);
+                return otherTag;
             }
         }
         //update
@@ -73,6 +75,7 @@ public class OtherTagServiceImpl {
                 throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Tag does not exist.");
             }
         }
+        return null;
     }
 
     private void handleOtherTagDelete(OtherTag otherTag) throws LogicException{
