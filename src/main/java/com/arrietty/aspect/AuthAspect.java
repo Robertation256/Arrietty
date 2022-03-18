@@ -3,7 +3,6 @@ package com.arrietty.aspect;
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
-import com.arrietty.entity.User;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.SessionPO;
 import com.arrietty.service.AuthServiceImpl;

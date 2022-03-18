@@ -5,29 +5,23 @@ import com.arrietty.dao.ImageMapper;
 import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.ProfilePO;
-import com.arrietty.pojo.SessionPO;
 import com.arrietty.utils.session.SessionContext;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+
 
 /**
  * @Author: Yuechuan Zhang
@@ -42,6 +36,9 @@ public class ImageServiceImpl {
 
     @Value("${file.max-avatar-image-size}")
     private Integer MAX_AVATAR_SIZE;
+
+    @Value("${file.default-user-avatar-path}")
+    private String DEFAULT_AVATAR_PATH;
 
     @Autowired
     private ImageMapper imageMapper;
@@ -63,21 +60,23 @@ public class ImageServiceImpl {
         }
     }
 
-    public void updateAvatar(MultipartFile file) throws LogicException{
-        if(file==null || file.getSize()>MAX_AVATAR_SIZE){
-            throw  new LogicException(ErrorCode.MAX_IMAGE_SIZE_EXCEEDED, "Image size exceeded.");
-        }
-        save(file);
-    }
 
     public void getAvatar(HttpServletResponse response) throws LogicException {
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
+        boolean getDefaultAvatar = false;
+
         if(profilePO==null || profilePO.getAvatarImageId()==null){
-            return;
+            getDefaultAvatar=true;
         }
 
         try{
-            final InputStream in = new FileInputStream(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+profilePO.getAvatarImageId().toString());
+            final InputStream in;
+            if(getDefaultAvatar){
+                in = new FileInputStream(BASE_PATH+DEFAULT_AVATAR_PATH);
+            }
+            else{
+                in = new FileInputStream(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+profilePO.getAvatarImageId().toString());
+            }
             //TODO: 图片格式的匹配问题, 目前默认返回JPEG
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
             IOUtils.copy(in, response.getOutputStream());
@@ -91,43 +90,19 @@ public class ImageServiceImpl {
 
     }
 
-
-    private void save(MultipartFile file) throws LogicException{
-        String fileFormat = null;
-        // use thread name to create temp file, avoid multiple thread writing to the same file
-        File tempFile = new File(BASE_PATH+"/"+Thread.currentThread().getName()+"-tmp");
-        try{
-            tempFile.createNewFile();
-        }
-        catch (IOException e){
-            tempFile.delete();
-            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Open temp file failed");
-        }
-
-
-        try{
-            fileFormat = file.getOriginalFilename().split("\\.")[1];
-            file.transferTo(tempFile);
-            if(ImageIO.read(tempFile)==null){
-                throw new LogicException(ErrorCode.BAD_IMAGE_FORMAT, "Invalid image format.");
-            }
-        }
-        catch (IOException e){
-            tempFile.delete();
-            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File IO exception.");
-        }
-
+    @Transactional(rollbackFor = Exception.class)
+    public void updateAvatar(MultipartFile file) throws LogicException{
 
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
         if(profilePO==null){
-            tempFile.delete();
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Cannot find user profile.");
         };
 
+        File tempFile = checkFileFormat(file);
         // update image table, update user profile if needed
 
         Image image = new Image();
-        image.setImageType(fileFormat);
+        image.setImageType("avatar");
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
         // new avatar
@@ -147,7 +122,63 @@ public class ImageServiceImpl {
             imageMapper.updateByPrimaryKey(image);
         }
 
-        // copy from tmp file to user folder
+        save(tempFile, image.getId());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Long insertAdvertisementImage(MultipartFile file) throws LogicException {
+        File tempFile = checkFileFormat(file);
+
+        Image image = new Image();
+        image.setImageType("advertisement");
+        image.setImageSize((int)(file.getSize()/1024));
+        image.setUserId(SessionContext.getUserId());
+
+        imageMapper.insertAndGetPrimaryKey(image);
+        if(image.getId()==null){
+            tempFile.delete();
+            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Insert to DB failed.");
+        }
+
+        save(tempFile, image.getId());
+        return image.getId();
+    }
+    
+    @Transactional(rollbackFor = Exception.class)
+    public Long updateAdvertisementImage(MultipartFile file, Long imageId) throws LogicException {
+        File tempFile = checkFileFormat(file);
+        // update image table, update user profile if needed
+
+        Image image = new Image();
+        image.setId(imageId);
+        image.setImageType("advertisement");
+        image.setImageSize((int)(file.getSize()/1024));
+        image.setUserId(SessionContext.getUserId());
+
+        int count = imageMapper.updateByPrimaryKey(image);
+        if(count==0){
+            tempFile.delete();
+            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Update DB failed.");
+        }
+
+        save(tempFile, image.getId());
+        return image.getId();
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteImage(Long imageId) throws LogicException {
+
+        int count = imageMapper.deleteByPrimaryKey(imageId);
+        if(count==0){
+            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Image does not exist");
+        }
+
+        File file = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId.toString());
+        file.delete();
+    }
+
+    // copy from tmp file to user folder
+    private void save(File file, Long imageId) throws LogicException{
         FileChannel src = null;
         FileChannel dest = null;
 
@@ -156,7 +187,7 @@ public class ImageServiceImpl {
             fileFolder.mkdir();
         }
 
-        File filePath = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+image.getId().toString());
+        File filePath = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId.toString());
         //overwrite old file
         if(filePath.exists()){
             filePath.delete();
@@ -164,7 +195,7 @@ public class ImageServiceImpl {
 
         try{
             filePath.createNewFile();
-            src = new FileInputStream(tempFile).getChannel();
+            src = new FileInputStream(file).getChannel();
             dest = new FileOutputStream(filePath).getChannel();
             dest.transferFrom(src, 0, src.size());
             src.close();
@@ -175,32 +206,52 @@ public class ImageServiceImpl {
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File system save failed");
         }
         finally {
-            tempFile.delete();
+            file.delete();
         }
     }
-//
-//    @Override
-//    public Resource load(String externalImageId) {
-//        if (externalImageId == null || externalImageId.length()<32){
-//            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Bad image id");
-//        }
-//
-//        Image image = imageMapper.queryByExternalImageId(externalImageId);
-//        if (image == null){
-//            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Image not found");
-//        }
-//
-//        Path imagePath = Paths.get(BASE_PATH + image.getExternalImageId() + "." + image.getImageFormat());
-//        try {
-//            Resource resource = new UrlResource(imagePath.toUri());
-//            if (resource.exists() || resource.isReadable()){
-//                return resource;
-//            }
-//        }
-//        catch ( MalformedURLException e) {
-//            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Bad directory");
-//        }
-//        return null;
-//    }
+
+
+
+    public void deleteImageFiles(List<String> imageIds){
+        for(String imageId: imageIds){
+            try{
+                File file = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId);
+                file.delete();
+            }
+            catch (Exception e){
+                // TODO: log4j 日志
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+    private File checkFileFormat(MultipartFile file) throws LogicException{
+        if(file==null || file.getSize()>MAX_AVATAR_SIZE){
+            throw  new LogicException(ErrorCode.MAX_IMAGE_SIZE_EXCEEDED, "Image size exceeded.");
+        }
+        // use thread name to create temp file, avoid multiple thread writing to the same file
+        File tempFile = new File(BASE_PATH+"/"+Thread.currentThread().getName()+"-tmp");
+        try{
+            tempFile.createNewFile();
+        }
+        catch (IOException e){
+            tempFile.delete();
+            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Open temp file failed");
+        }
+
+        try{
+            file.transferTo(tempFile);
+            if(ImageIO.read(tempFile)==null){
+                throw new LogicException(ErrorCode.BAD_IMAGE_FORMAT, "Invalid image format.");
+            }
+        }
+        catch (IOException e){
+            tempFile.delete();
+            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File IO exception.");
+        }
+        return tempFile;
+    }
 
 }

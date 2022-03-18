@@ -21,4 +21,8 @@ public class ErrorCode {
     public static final int PROFILE_EDIT_ERROR = 3001;
 
 
+    //advertisement related error
+    public static final int ADVERTISEMENT_SAVE_ERROR = 3001;
+
+
 }

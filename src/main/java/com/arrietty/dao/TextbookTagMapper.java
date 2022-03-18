@@ -48,4 +48,6 @@ public interface TextbookTagMapper {
     int updateByPrimaryKey(TextbookTag record);
 
     TextbookTag selectByIsbn(String isbn);
+
+    List<Long> selectAllIds();
 }

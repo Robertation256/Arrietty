@@ -3,21 +3,34 @@ package com.arrietty.controller;
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.entity.Advertisement;
 import com.arrietty.entity.Course;
 import com.arrietty.entity.OtherTag;
 import com.arrietty.entity.TextbookTag;
 import com.arrietty.exception.LogicException;
+import com.arrietty.pojo.AdvertisementResponsePO;
+import com.arrietty.pojo.PostAdvertisementRequestPO;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.service.*;
 import com.arrietty.utils.response.Response;
 import com.google.gson.Gson;
+import org.elasticsearch.action.bulk.BulkRequest;
+import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -27,6 +40,8 @@ import java.util.List;
 
 @Controller
 public class ServiceController {
+    @Autowired
+    private RestHighLevelClient esClient;
 
     @Autowired
     private RedisServiceImpl redisServiceImpl;
@@ -45,6 +60,12 @@ public class ServiceController {
 
     @Autowired
     private OtherTagServiceImpl otherTagService;
+
+    @Autowired
+    private AdvertisementServiceImpl advertisementService;
+
+    @Autowired
+    private AmqpTemplate mqTemplate;
 
 
 
@@ -89,6 +110,7 @@ public class ServiceController {
 
         return new Gson().toJson(response);
     }
+
 
     // handles user avatar image update
     @Auth(authMode = AuthModeEnum.REGULAR)
@@ -164,5 +186,35 @@ public class ServiceController {
         OtherTag ret = otherTagService.handleOtherTagEdit(action, otherTag);
         Response<OtherTag> response = Response.buildSuccessResponse(OtherTag.class, ret);
         return new Gson().toJson(response);
+    }
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @PostMapping("/advertisement")
+    public String postAdvertisement(@RequestParam("action") String action, @ModelAttribute PostAdvertisementRequestPO requestPO) throws LogicException {
+        AdvertisementResponsePO advertisementResponsePO = advertisementService.handlePostAdvertisement(action, requestPO);
+        return new Gson().toJson(advertisementResponsePO);
+    }
+
+    @GetMapping("/test")
+    @ResponseBody
+    public String mqTest() throws Exception{
+
+
+        BulkRequest request = new BulkRequest();
+        Map<String,String> dataMap = new HashMap<>();
+        dataMap.put("content","hello world");
+        request.add(new IndexRequest("arrietty","test").id("666")
+                .opType("create").source(dataMap,XContentType.JSON));
+        BulkResponse bulkResponse =  esClient.bulk(request, RequestOptions.DEFAULT);
+
+
+
+
+
+
+        return bulkResponse.getItems()[0].toString();
+
+
     }
 }

@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @Author: Yuechuan Zhang
  * @Date: 2021/6/28 10:56
@@ -58,6 +61,22 @@ public class RedisServiceImpl {
         String jsonString = (String) obj;
         Gson gson = new Gson();
         return gson.fromJson(jsonString, ProfilePO.class);
+    }
+
+    public List<Long> getAllTextbookTagIds(){
+        Object obj = redisTemplate.opsForValue().get(RedisKey.ALL_TEXTBOOK_TAG_ID);
+        if (obj == null) return null;
+        String str = (String) obj;
+        String[] ids = str.split(",");
+        List<Long> ret = new ArrayList<>(ids.length);
+        for(String id:ids){
+            ret.add(Long.parseLong(id));
+        }
+        return ret;
+    }
+
+    public void setAllTextbookTagIds(String val){
+        redisTemplate.opsForValue().set(RedisKey.ALL_TEXTBOOK_TAG_ID,val);
     }
 
 

@@ -27,10 +27,18 @@ spring:
       max-idle: 8
       min-idle: 0
     timeout: 5000
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
 
 mybatis:
   mapper-locations: classpath:/mapper/*Mapper.xml
   type-aliases-package: com.arrietty.entity
+
+elasticsearch:
+  ip: localhost:9200
 
 
 
@@ -53,3 +61,4 @@ auth:
 file:
   base-image-directory: C:/Users/yz391/Pictures/arrietty
   max-avatar-image-size: 1048576
+  default-user-avatar-path: /common/default.jpg

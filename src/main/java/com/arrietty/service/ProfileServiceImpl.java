@@ -18,8 +18,10 @@ public class ProfileServiceImpl {
     private UserMapper userMapper;
 
     public ProfilePO getUserProfile(Long userId){
+
+        //userId 为空默认获取当前用户profile
         if (userId==null){
-            return null;
+            userId = SessionContext.getUserId();
         }
 
         ProfilePO profile;

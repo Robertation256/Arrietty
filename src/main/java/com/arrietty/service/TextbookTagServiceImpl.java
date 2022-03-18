@@ -11,14 +11,33 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TextbookTagServiceImpl {
     private static final String lock = "textbookTagWriteLock";
 
     @Autowired
+    private RedisServiceImpl redisService;
+
+    @Autowired
     private TextbookTagMapper textbookTagMapper;
-    
+
+    public List<Long> getAllTextbookTagIds(){
+        List<Long> ids = redisService.getAllTextbookTagIds();
+        if(ids!=null){
+            return ids;
+        }
+        ids = textbookTagMapper.selectAllIds();
+        List<String> strings = ids.stream().map(
+                Object::toString
+        ).collect(Collectors.toList());
+
+        redisService.setAllTextbookTagIds(String.join(",", strings));
+        return  ids;
+    }
+
+    //TODO: 加上缓存机制
     public List<TextbookTag> getTextbookTagById(Long id){
         // id is null, return all TextbookTags
         if(id==null){

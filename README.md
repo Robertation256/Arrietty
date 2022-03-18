@@ -163,3 +163,77 @@ response:
 
 ```
 
+
+
+## Advertisement表单增删改查
+
+### API
+
+```json
+url:/myAdvertisement
+method:get
+备注：获取当前请求用户发的所有ad
+request:null
+
+response:
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": [
+        {
+            "id":1,
+            "isTextbook": true,
+            "tagId": 12,
+            "imageIds":"1,12,4,55",
+            "price": 256,
+            "comment": "Nothing really..",
+            "numberOfTaps": 2,
+            "createTime": "dfsdfs"
+    
+        }
+    ]
+}
+
+
+url:/advertisement?action=<update/delete>
+method:post
+备注：update时id=null默认新增
+image 传递方法参见 https://stackoverflow.com/questions/49845355/spring-boot-controller-upload-multipart-and-json-to-dto
+
+update只允许修改images，price， comment
+images为全删全增
+
+request:
+{
+    "id":null,
+    "isTextbook": true,
+    "tagId": 12,
+    "images": 传递方法见备注,		
+    "price": 256,
+    "comment": "Nothing really..",
+}
+
+
+response:
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": {
+        "id":1,
+        "isTextbook": true,
+        "tagId": 12,
+        "imageIds":"1,12,4,55",
+        "price": 256,
+        "comment": "Nothing really..",
+        "numberOfTaps": 0,
+        "createTime": "dfsdfs"
+    }
+}
+```
+
+### 接口实现
+
