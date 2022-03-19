@@ -130,7 +130,7 @@ public class ServiceController {
 
 
 
-    @Auth(authMode = AuthModeEnum.ADMIN)
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/course")
     public String getCourse(@RequestParam("id") Long id) throws LogicException{
@@ -149,7 +149,7 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
-    @Auth(authMode = AuthModeEnum.ADMIN)
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/textbook")
     public String getTextbookTag(@RequestParam("id") Long id) throws LogicException{
@@ -169,7 +169,7 @@ public class ServiceController {
     }
 
 
-    @Auth(authMode = AuthModeEnum.ADMIN)
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/otherTag")
     public String getOtherTag(@RequestParam("id") Long id) throws LogicException{
