@@ -13,7 +13,7 @@ hs_err_pid*
 ##############################
 ## static
 ##############################
-src/main/resources/public/
+/src/main/resources/public/
 
 ##############################
 ## Maven
@@ -37,5 +37,5 @@ log/
 .DS_Store
 
 # Configuration
-src/main/resources/application-dev.yml
+/src/main/resources/application-dev.yml
 

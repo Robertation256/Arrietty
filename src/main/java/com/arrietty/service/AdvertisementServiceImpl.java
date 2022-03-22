@@ -85,6 +85,7 @@ public class AdvertisementServiceImpl {
 
         Advertisement advertisement = new Advertisement();
         advertisement.setUserId(SessionContext.getUserId());
+        advertisement.setAdTitle(requestPO.getAdTitle());
         advertisement.setIsTextbook(requestPO.getIsTextbook());
         advertisement.setTagId(requestPO.getTagId());
         advertisement.setImageIds(String.join( ",", imageIds));
@@ -109,6 +110,7 @@ public class AdvertisementServiceImpl {
 
         AdvertisementResponsePO responsePO = new AdvertisementResponsePO();
         responsePO.setId(advertisement.getId());
+        requestPO.setAdTitle(advertisement.getAdTitle());
         responsePO.setIsTextbook(advertisement.getIsTextbook());
         responsePO.setTagId(advertisement.getTagId());
         responsePO.setImageIds(String.join( ",", imageIds));
@@ -208,8 +210,12 @@ public class AdvertisementServiceImpl {
 
     private void checkAdvertisementFormat(PostAdvertisementRequestPO requestPO) throws LogicException{
         if(requestPO==null ||
+                requestPO.getAdTitle() == null ||
+                requestPO.getAdTitle().length()==0 ||
+                requestPO.getAdTitle().length()>255 ||
                 requestPO.getImages()==null ||
                 requestPO.getImages().size()>MAX_IMAGE_NUM ||
+                requestPO.getIsTextbook()==null ||
                 (requestPO.getIsTextbook() && requestPO.getTagId()==null) ||
                 requestPO.getPrice()==null ||
                 requestPO.getPrice().compareTo(MIN_PRICE)<0 ||

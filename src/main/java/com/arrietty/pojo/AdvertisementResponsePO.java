@@ -8,6 +8,7 @@ import java.util.Date;
 @Data
 public class AdvertisementResponsePO {
     private Long id;
+    private String adTitle;
     private Boolean isTextbook;
     private Long tagId;
     private String imageIds;

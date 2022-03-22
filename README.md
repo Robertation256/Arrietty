@@ -1,3 +1,78 @@
+### Advertisement搜索接口
+
+```json
+url:/search
+method: post
+
+request: 
+{
+    "adType": "textbook/other", // not null
+    "keyword": "calculus",	// not null
+    "priceOrder":"asc/desc", //为空则不排序
+    "minPrice": 0,	// 为空代表用户未采用这个filter
+    "maxPrice": 100,// 为空代表用户未采用这个filter
+    "tag": "furniture",// 为空代表用户未采用这个filter
+    "searchId": [
+        1614561419000,
+        "6FxZJXgBE6QbUWetnarH"
+      ]
+}
+
+
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": {
+        items:[
+            {
+                id: 1,
+                username:
+                userNetId:
+                userAvatartImageId:
+                adType:"textbook",
+                title:"",
+                isbn:"",
+                author:
+                publisher:
+                edition:
+                originalPrice:
+                relatedCourse: "CSCI-369,CSCI-101",
+                otherTag:
+                imageIds:
+                price:
+                comment:
+                createTime:
+            }
+        ],
+        "searchId": [
+            1614561419000,
+            "6FxZJXgBE6QbUWetnarH"
+          ]
+    }
+    
+}
+
+
+url: /lastModified
+method: get
+request: null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body":{
+        timestamp: 2022-01- //todo
+    }
+}
+```
+
+
+
 ## Admin标签输入界面
 
 ### API
@@ -184,6 +259,7 @@ response:
     "body": [
         {
             "id":1,
+            "adTitle": "I want to sell a book",
             "isTextbook": true,
             "tagId": 12,
             "imageIds":"1,12,4,55",
@@ -235,5 +311,19 @@ response:
 }
 ```
 
-### 接口实现
+## 图片接口
+
+```json
+url:/avatar
+method: get
+备注：获取当前用户头像
+
+url:/avatar
+method: post
+备注：修改当前用户头像
+
+url:/image?id=1
+method: get
+备注：获取id对应图像资源
+```
 

@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class PostAdvertisementRequestPO {
     private Long id;
+    private String adTitle;
     private Boolean isTextbook;
     private Long tagId;
     private List<MultipartFile> images;

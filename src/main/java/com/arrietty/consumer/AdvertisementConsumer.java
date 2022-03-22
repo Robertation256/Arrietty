@@ -61,6 +61,7 @@ public class AdvertisementConsumer {
 
         // 对数据做聚合
         ESAdvertisementPO esDocument = new ESAdvertisementPO();
+        esDocument.setAdTitle(advertisement.getAdTitle());
         esDocument.setIsTextbook(advertisement.getIsTextbook());
         esDocument.setImageIds(advertisement.getImageIds());
         esDocument.setComment(advertisement.getComment());
@@ -109,8 +110,6 @@ public class AdvertisementConsumer {
             //TODO: error log
             //e.printStackTrace();
         }
-
-
-
+        
     }
 }

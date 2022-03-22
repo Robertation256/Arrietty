@@ -7,6 +7,9 @@ import java.util.Date;
 
 @Data
 public class ESAdvertisementPO {
+    @SerializedName("ad_title")
+    private String adTitle;
+
     @SerializedName("is_textbook")
     private Boolean isTextbook;
 
