@@ -12,6 +12,7 @@ import com.arrietty.pojo.ESRelatedCoursePO;
 import com.arrietty.pojo.ESTextbookTagPO;
 import com.arrietty.service.CourseServiceImpl;
 import com.arrietty.service.OtherTagServiceImpl;
+import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.service.TextbookTagServiceImpl;
 import com.google.gson.Gson;
 import org.elasticsearch.action.index.IndexRequest;
@@ -47,6 +48,9 @@ public class AdvertisementConsumer {
 
     @Autowired
     private RestHighLevelClient esClient;
+
+    @Autowired
+    private RedisServiceImpl redisService;
 
     @RabbitHandler
     public void process(AdvertisementEvent event){
@@ -104,6 +108,7 @@ public class AdvertisementConsumer {
 
         try{
             IndexResponse indexResponse = esClient.index(indexRequest, RequestOptions.DEFAULT);
+            redisService.incrementVersionId("advertisement");
             System.out.println("[RESPONSE]: "+indexResponse.toString());
         }
         catch (IOException e){

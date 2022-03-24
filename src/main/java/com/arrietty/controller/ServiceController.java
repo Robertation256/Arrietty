@@ -216,7 +216,7 @@ public class ServiceController {
         if(id==null){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid target");
         }
-        
+
         return new Gson().toJson(Response.buildSuccessResponse(Integer.class, id));
     }
 
