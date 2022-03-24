@@ -4,13 +4,18 @@ import com.arrietty.consts.RedisKey;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.pojo.SessionPO;
+import com.arrietty.utils.session.SessionContext;
 import com.google.gson.Gson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author: Yuechuan Zhang
@@ -79,5 +84,38 @@ public class RedisServiceImpl {
         redisTemplate.opsForValue().set(RedisKey.ALL_TEXTBOOK_TAG_ID,val);
     }
 
+
+
+    public void addUserTappedAdId(Long adId){
+        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ SessionContext.getUserId().toString(),adId);
+    }
+
+    public Set<Long> getCurrentUserTappedAdIds(){
+        Set<Long> ret = redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ SessionContext.getUserId().toString());
+        if(ret==null){
+            return new HashSet<>();
+        }
+        return ret;
+    }
+
+    public Integer getVersionId(String target){
+        if("advertisement".equals(target)){
+            return (Integer) redisTemplate.opsForValue().get(RedisKey.AD_VERSION_ID);
+        }
+
+        return null;
+    }
+
+    public void incrementVersionId(String target){
+        long res = 0L;
+        if("advertisement".equals(target)){
+            res = redisTemplate.opsForValue().increment(RedisKey.AD_VERSION_ID);
+        }
+
+        // set version id back to zero when there is an overflow
+        if((int) res<0){
+            redisTemplate.opsForValue().set(RedisKey.AD_VERSION_ID,0);
+        }
+    }
 
 }

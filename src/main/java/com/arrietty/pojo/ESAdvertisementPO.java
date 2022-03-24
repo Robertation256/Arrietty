@@ -10,6 +10,9 @@ public class ESAdvertisementPO {
     @SerializedName("ad_title")
     private String adTitle;
 
+    @SerializedName("user_id")
+    private Long userId;
+
     @SerializedName("is_textbook")
     private Boolean isTextbook;
 

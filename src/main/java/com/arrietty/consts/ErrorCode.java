@@ -22,7 +22,10 @@ public class ErrorCode {
 
 
     //advertisement related error
-    public static final int ADVERTISEMENT_SAVE_ERROR = 3001;
+    public static final int ADVERTISEMENT_SAVE_ERROR = 4001;
+
+    //search related error
+    public static final int INVALID_SEARCH_PARAM = 5001;
 
 
 }

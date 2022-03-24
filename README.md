@@ -12,10 +12,7 @@ request:
     "minPrice": 0,	// 为空代表用户未采用这个filter
     "maxPrice": 100,// 为空代表用户未采用这个filter
     "tag": "furniture",// 为空代表用户未采用这个filter
-    "searchId": [
-        1614561419000,
-        "6FxZJXgBE6QbUWetnarH"
-      ]
+    "pageNum": 2
 }
 
 
@@ -25,32 +22,28 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body": {
-        items:[
-            {
-                id: 1,
-                username:
-                userNetId:
-                userAvatartImageId:
-                adType:"textbook",
-                title:"",
-                isbn:"",
-                author:
-                publisher:
-                edition:
-                originalPrice:
-                relatedCourse: "CSCI-369,CSCI-101",
-                otherTag:
-                imageIds:
-                price:
-                comment:
-                createTime:
-            }
-        ],
-        "searchId": [
-            1614561419000,
-            "6FxZJXgBE6QbUWetnarH"
-          ]
+    "body": [
+                {
+                    id: 1,
+                    username:
+                    userNetId:
+                    userAvatarImageId:
+                    adType:"textbook",
+                    adTitle: "",
+                    textbookTitle:"",
+                    isbn:"",
+                    author:
+                    publisher:
+                    edition:
+                    originalPrice:
+                    relatedCourse: "CSCI-369,CSCI-101",
+                    otherTag:
+                    imageIds:
+                    price:
+                    comment:
+                    createTime:
+                }
+        ]
     }
     
 }

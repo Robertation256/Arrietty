@@ -8,9 +8,7 @@ import com.arrietty.entity.Course;
 import com.arrietty.entity.OtherTag;
 import com.arrietty.entity.TextbookTag;
 import com.arrietty.exception.LogicException;
-import com.arrietty.pojo.AdvertisementResponsePO;
-import com.arrietty.pojo.PostAdvertisementRequestPO;
-import com.arrietty.pojo.ProfilePO;
+import com.arrietty.pojo.*;
 import com.arrietty.service.*;
 import com.arrietty.utils.response.Response;
 import com.google.gson.Gson;
@@ -27,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -66,6 +65,9 @@ public class ServiceController {
 
     @Autowired
     private AmqpTemplate mqTemplate;
+
+    @Autowired
+    private SearchServiceImpl searchService;
 
 
 
@@ -196,24 +198,56 @@ public class ServiceController {
         return new Gson().toJson(advertisementResponsePO);
     }
 
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @PostMapping("/search")
+    public String postSearch(@RequestBody PostSearchRequestPO requestPO) throws LogicException {
+        List<SearchResultItem> results = searchService.handleSearchRequest(requestPO);
+        return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, results));
+    }
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @PostMapping("/lastModified")
+    public String getLastModified(@RequestParam("target") String target ) throws LogicException {
+        Integer id = redisServiceImpl.getVersionId(target);
+
+        if(id==null){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid target");
+        }
+        
+        return new Gson().toJson(Response.buildSuccessResponse(Integer.class, id));
+    }
+
+
+
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
 
-
-        BulkRequest request = new BulkRequest();
-        Map<String,String> dataMap = new HashMap<>();
-        dataMap.put("content","hello world");
-        request.add(new IndexRequest("arrietty","test").id("666")
-                .opType("create").source(dataMap,XContentType.JSON));
-        BulkResponse bulkResponse =  esClient.bulk(request, RequestOptions.DEFAULT);
-
-
+        PostSearchRequestPO testPo = new PostSearchRequestPO();
+        testPo.setAdType("textbook");
+        testPo.setKeyword("test1");
+        testPo.setMinPrice(700);
+        testPo.setMaxPrice(800);
+        searchService.handleSearchRequest(testPo);
+        return "hii";
 
 
+//        BulkRequest request = new BulkRequest();
+//        Map<String,String> dataMap = new HashMap<>();
+//        dataMap.put("content","hello world");
+//        request.add(new IndexRequest("arrietty","test").id("666")
+//                .opType("create").source(dataMap,XContentType.JSON));
+//        BulkResponse bulkResponse =  esClient.bulk(request, RequestOptions.DEFAULT);
 
 
-        return bulkResponse.getItems()[0].toString();
+
+
+
+
+        //return bulkResponse.getItems()[0].toString();
 
 
     }

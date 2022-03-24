@@ -39,6 +39,7 @@ mybatis:
 
 elasticsearch:
   ip: localhost:9200
+  page-size: 10
 
 
 
