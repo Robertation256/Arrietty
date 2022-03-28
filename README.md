@@ -1,3 +1,58 @@
+### Elasticsearch mapping
+
+更新ES mapping instruction
+
+- 删除旧mapping： 
+
+​		method：delete
+
+​		url: localhost:9200/advertisement
+
+- 新增mapping：
+
+  method： put
+
+  url: localhost:9200/advertisement
+
+  body: 带上下面的数据
+
+```json
+{
+    "mappings": {
+        "properties": {
+            "ad_title": {"type": "text"},
+            "is_textbook": {"type":"boolean"},
+            "user_id": {"type": "long", "index": "false"},
+            "textbook_tag": {
+                "properties": {
+                    "title": {"type": "text"},
+                    "isbn": {"type": "keyword"},
+                    "author": {"type": "text", "index":false},
+                    "publisher": {"type": "text", "index":false},
+                    "edition": {"type": "text", "index":false},
+                    "original_price": {"type": "scaled_float", "scaling_factor": 100, "index":false},
+                    "related_course": {
+                        "properties": {
+                            "course_code": {"type": "keyword"},
+                            "course_name": {"type": "text"},
+                            "subject": {"type": "keyword"}
+                        }
+                    }
+                }
+            },  
+            "other_tag": {"type": "keyword"},
+            "image_ids": {"type":"text", "index": false},
+            "price": {"type": "scaled_float", "scaling_factor": 100},
+            "comment": {"type": "text", "index": false},
+            "create_time": {"type":"date"}
+             
+        }
+      }
+}
+```
+
+
+
 ### Advertisement搜索接口
 
 ```json
