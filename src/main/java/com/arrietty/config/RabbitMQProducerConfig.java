@@ -32,8 +32,23 @@ public class RabbitMQProducerConfig {
 
     //绑定  将队列和交换机绑定, 并设置用于匹配键：TestDirectRouting
     @Bean
-    Binding bindingDirect() {
+    Binding advertisementBindingDirect() {
         return BindingBuilder.bind(advertisementQueue()).to(advertisementDirectExchange()).with("AdvertisementDirectRouting");
+    }
+
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue("NotificationQueue",true);
+    }
+
+    @Bean
+    DirectExchange notificationDirectExchange() {
+        return new DirectExchange("NotificationDirectExchange",true,false);
+    }
+
+    @Bean
+    Binding notificationBindingDirect() {
+        return BindingBuilder.bind(notificationQueue()).to(notificationDirectExchange()).with("NotificationDirectRouting");
     }
 
     //使用jackson做序列化

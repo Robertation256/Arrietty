@@ -38,7 +38,7 @@ response:
                     originalPrice:
                     relatedCourse: "CSCI-369,CSCI-101",
                     otherTag:
-                    imageIds:
+                    imageIds: "12,13,14,15"
                     price:
                     comment:
                     createTime:
@@ -49,7 +49,7 @@ response:
 }
 
 
-url: /lastModified
+url: /lastModified?target=<advertisement:notification>
 method: get
 request: null
 response: 
@@ -59,7 +59,24 @@ response:
         "message": "Success"
     },
     "body":{
-        timestamp: 2022-01- //todo
+        versionId: 19992
+    }
+}
+
+url: /tap?id=1
+method: get
+request: null
+备注: id is advertisment id
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body":{
+        username: "yuechuan"
+        userNetId: "yz3919"
+        userAvatarImageId: 12
     }
 }
 ```
@@ -254,7 +271,7 @@ response:
             "id":1,
             "adTitle": "I want to sell a book",
             "isTextbook": true,
-            "tagId": 12,
+            "tagId": 12,	// 后端组装
             "imageIds":"1,12,4,55",
             "price": 256,
             "comment": "Nothing really..",

@@ -8,9 +8,7 @@ import com.arrietty.dao.ImageMapper;
 import com.arrietty.entity.Advertisement;
 import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
-import com.arrietty.pojo.AdvertisementEvent;
-import com.arrietty.pojo.AdvertisementResponsePO;
-import com.arrietty.pojo.PostAdvertisementRequestPO;
+import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,9 @@ public class AdvertisementServiceImpl {
 
     @Autowired
     private ImageServiceImpl imageService;
+
+    @Autowired
+    private ProfileServiceImpl profileService;
 
     @Autowired
     private TextbookTagServiceImpl textbookTagService;
@@ -67,6 +68,22 @@ public class AdvertisementServiceImpl {
         }
 
         throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid action type.");
+    }
+
+
+    public TapResponsePO getOwnerInfoById(Long id) throws LogicException {
+        Advertisement advertisement = advertisementMapper.selectByPrimaryKey(id);
+        if(advertisement==null){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Advertisement not found");
+        }
+        // TODO: add notification
+
+        ProfilePO profilePO = profileService.getUserProfile(advertisement.getUserId());
+        TapResponsePO tapResponsePO = new TapResponsePO();
+        tapResponsePO.setUsername(profilePO.getUsername());
+        tapResponsePO.setNetId(profilePO.getNetId());
+        tapResponsePO.setAvatarImageId(profilePO.getAvatarImageId());
+        return tapResponsePO;
     }
 
 
