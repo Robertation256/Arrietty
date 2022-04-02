@@ -151,7 +151,7 @@ response:
     },
     "body":{
         username: "yuechuan"
-        userNetId: "yz3919"
+        netId: "yz3919"
         userAvatarImageId: 12
     }
 }
