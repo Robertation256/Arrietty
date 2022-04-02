@@ -152,7 +152,7 @@ response:
     "body":{
         username: "yuechuan"
         netId: "yz3919"
-        userAvatarImageId: 12
+        avatarImageId: 12
     }
 }
 ```
