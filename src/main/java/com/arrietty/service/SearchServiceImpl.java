@@ -5,7 +5,6 @@ import com.arrietty.consts.ErrorCode;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,7 +28,9 @@ import java.util.Set;
 @Service
 public class SearchServiceImpl {
 
-    public static final ZoneId ZONE_ID = ZoneId.systemDefault();
+    private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     @Value("${elasticsearch.page-size}")
     private Integer PAGE_SIZE;
@@ -92,11 +94,8 @@ public class SearchServiceImpl {
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
             Set<Long> currentUserTappedAdIds = redisService.getCurrentUserTappedAdIds();
             SearchHit[] hits = response.getHits().getHits();
-            Gson gson = new GsonBuilder()
-                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-                    .create();
             for (SearchHit hit : hits) {
-                ESAdvertisementPO po = gson.fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
+                ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
                 if(currentUserTappedAdIds.contains((long) hit.docId())){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);
@@ -136,7 +135,7 @@ public class SearchServiceImpl {
         item.setPrice(po.getPrice());
         item.setComment(po.getComment());
 
-        LocalDate localDate = LocalDate.parse(po.getCreateTime());
+        LocalDate localDate = LocalDate.parse(po.getCreateTime(), fmt);
         item.setCreateTime(Date.from(localDate.atStartOfDay(ZONE_ID).toInstant()));
 
         if(po.getIsTextbook()!=null && po.getIsTextbook() && po.getTextbookTag()!=null){
