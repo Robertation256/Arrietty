@@ -5,6 +5,7 @@ import com.arrietty.consts.ErrorCode;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -91,8 +92,11 @@ public class SearchServiceImpl {
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
             Set<Long> currentUserTappedAdIds = redisService.getCurrentUserTappedAdIds();
             SearchHit[] hits = response.getHits().getHits();
+            Gson gson = new GsonBuilder()
+                    .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+                    .create();
             for (SearchHit hit : hits) {
-                ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
+                ESAdvertisementPO po = gson.fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
                 if(currentUserTappedAdIds.contains((long) hit.docId())){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);
