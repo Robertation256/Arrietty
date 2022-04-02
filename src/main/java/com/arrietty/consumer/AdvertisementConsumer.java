@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Component
 @RabbitListener(queues = "AdvertisementQueue")
@@ -93,11 +94,19 @@ public class AdvertisementConsumer {
             esRelatedCoursePO.setSubject(course.getSubject());
 
             esTextbookTagPO.setRelatedCourse(esRelatedCoursePO);
+            esDocument.setSuggest(textbookTag.getTitle());
             esDocument.setTextbookTag(esTextbookTagPO);
         }
         else {
-            OtherTag otherTag = otherTagService.getOtherTagById(advertisement.getTagId()).get(0);
-            esDocument.setOtherTag(otherTag.getName());
+            if (advertisement.getTagId()!=null){
+                List<OtherTag> otherTags = otherTagService.getOtherTagById(advertisement.getTagId());
+                if (otherTags.size()>0){
+                    esDocument.setOtherTag(otherTags.get(0).getName());
+                }
+            }
+
+            esDocument.setSuggest(advertisement.getAdTitle());
+
         }
 
         IndexRequest indexRequest = new IndexRequest("advertisement","_doc");

@@ -31,4 +31,7 @@ public class ESAdvertisementPO {
 
     @SerializedName("create_time")
     private String createTime;
+
+    @SerializedName("suggest")
+    private String suggest;
 }

@@ -200,6 +200,14 @@ public class ServiceController {
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
+    @PostMapping("/suggest")
+    public String postSuggest(@RequestParam("type") String type, @RequestParam("keyword") String keyword) throws LogicException {
+        List<String> result = searchService.handleKeywordSuggestion(type, keyword);
+        return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
+    }
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
     @PostMapping("/lastModified")
     public String getLastModified(@RequestParam("target") String target ) throws LogicException {
         Integer id = redisServiceImpl.getVersionId(target);
@@ -228,13 +236,17 @@ public class ServiceController {
     @ResponseBody
     public String mqTest() throws Exception{
 
-        PostSearchRequestPO testPo = new PostSearchRequestPO();
-        testPo.setAdType("textbook");
-        testPo.setKeyword("test1");
-        testPo.setMinPrice(700);
-        testPo.setMaxPrice(800);
-        searchService.handleSearchRequest(testPo);
+        List<String> result = searchService.handleKeywordSuggestion("other","a");
+        System.out.println(result);
         return "hii";
+
+//        PostSearchRequestPO testPo = new PostSearchRequestPO();
+//        testPo.setAdType("textbook");
+//        testPo.setKeyword("test1");
+//        testPo.setMinPrice(700);
+//        testPo.setMaxPrice(800);
+//        searchService.handleSearchRequest(testPo);
+//        return "hii";
 
 
 //        BulkRequest request = new BulkRequest();

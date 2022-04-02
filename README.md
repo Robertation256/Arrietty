@@ -56,6 +56,27 @@
 ### Advertisement搜索接口
 
 ```json
+url:/suggest?type=<textbook/other>&keyword=com
+method:post
+request: null
+备注：最多返回5条suggestion
+
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": ["computation theory", "commonsense 101", "comtemporary art"]
+    }
+    
+}
+
+
+
+
+
+
 url:/search
 method: post
 

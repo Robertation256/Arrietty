@@ -13,6 +13,11 @@ import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -103,7 +108,7 @@ public class SearchServiceImpl {
                 else {
                     searchResultItem = mapDocumentToSearchResultItem(po,false);
                 }
-
+                searchResultItem.setId(Long.parseLong(hit.getId()));
                 result.add(searchResultItem);
             }
         }
@@ -115,6 +120,52 @@ public class SearchServiceImpl {
         return result;
     }
 
+
+    public List<String> handleKeywordSuggestion(String type, String keyword) throws  LogicException {
+        if(keyword==null || keyword.length()==0){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Keyword is empty.");
+        }
+
+        BoolQueryBuilder queryFilter = QueryBuilders.boolQuery();
+        if("textbook".equals(type)){
+            queryFilter.filter(QueryBuilders.termQuery("is_textbook", true));
+        }
+        else if ("other".equals(type)){
+            queryFilter.filter(QueryBuilders.termQuery("is_textbook", false));
+        }
+        else {
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid type.");
+        }
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("advertisement").types("_doc");
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        SuggestBuilder suggestBuilder = new SuggestBuilder();
+        CompletionSuggestionBuilder completionSuggestionBuilder = new CompletionSuggestionBuilder("suggest").prefix(keyword).size(5);
+        suggestBuilder.addSuggestion("advertisement_suggest", completionSuggestionBuilder);
+        searchSourceBuilder.suggest(suggestBuilder);
+        searchSourceBuilder.query(queryFilter);
+        searchRequest.source(searchSourceBuilder);
+
+
+        List<String> result = new LinkedList<>();
+        try{
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
+            Suggest suggest = response.getSuggest();
+            CompletionSuggestion completionSuggestion = suggest.getSuggestion("advertisement_suggest");
+            for (CompletionSuggestion.Entry entry : completionSuggestion.getEntries()) {
+                for (CompletionSuggestion.Entry.Option option : entry) {
+                    String suggestText = option.getText().string();
+                    result.add(suggestText);
+                }
+            }
+        }
+        catch (Exception e){
+            // TODO: proper search error handling
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
     private void checkSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
         if(requestPO==null ||
