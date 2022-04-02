@@ -127,7 +127,7 @@ public class AdvertisementServiceImpl {
 
         AdvertisementResponsePO responsePO = new AdvertisementResponsePO();
         responsePO.setId(advertisement.getId());
-        requestPO.setAdTitle(advertisement.getAdTitle());
+        responsePO.setAdTitle(advertisement.getAdTitle());
         responsePO.setIsTextbook(advertisement.getIsTextbook());
         responsePO.setTagId(advertisement.getTagId());
         responsePO.setImageIds(String.join( ",", imageIds));
