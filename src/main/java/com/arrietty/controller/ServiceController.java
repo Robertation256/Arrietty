@@ -186,7 +186,7 @@ public class ServiceController {
     @PostMapping("/advertisement")
     public String postAdvertisement(@RequestParam("action") String action, @ModelAttribute PostAdvertisementRequestPO requestPO) throws LogicException {
         AdvertisementResponsePO advertisementResponsePO = advertisementService.handlePostAdvertisement(action, requestPO);
-        return new Gson().toJson(advertisementResponsePO);
+        return new Gson().toJson(Response.buildSuccessResponse(AdvertisementResponsePO.class, advertisementResponsePO));
     }
 
 
