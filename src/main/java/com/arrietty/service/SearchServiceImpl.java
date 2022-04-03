@@ -58,19 +58,18 @@ public class SearchServiceImpl {
         searchRequest.indices("advertisement").types("_doc");
 
         BoolQueryBuilder queryFilter = QueryBuilders.boolQuery();
+        queryFilter.filter(QueryBuilders.termQuery("is_textbook", "textbook".equals(requestPO.getAdType())));
 
-
-
-        if("textbook".equals(requestPO.getAdType())){
-//            queryFilter.filter(QueryBuilders.termQuery("is_textbook", true));
-            queryFilter.filter(QueryBuilders.matchPhraseQuery("textbook_tag.title", requestPO.getKeyword()));
+        // textbook match by textbook title, other item match by ad title
+        if(requestPO.getKeyword()!=null && requestPO.getKeyword().length()>0){
+            if("textbook".equals(requestPO.getAdType())){
+                queryFilter.filter(QueryBuilders.matchPhraseQuery("textbook_tag.title", requestPO.getKeyword()));
+            }
+            else {
+                queryFilter.filter(QueryBuilders.matchPhraseQuery("adTitle", requestPO.getKeyword()));
+            }
         }
-        else {
-            //  other item 默认匹配ad title? 细节待定
-//            queryFilter.filter(QueryBuilders.termQuery("is_textbook", false));
-            queryFilter.filter(QueryBuilders.matchPhraseQuery("adTitle", requestPO.getKeyword()));
-        }
-
+        
         if(requestPO.getMinPrice()!=null){
             queryFilter.filter(QueryBuilders.rangeQuery("price").gte(requestPO.getMinPrice()).lte(requestPO.getMaxPrice()));
         }
@@ -170,8 +169,6 @@ public class SearchServiceImpl {
     private void checkSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
         if(requestPO==null ||
             requestPO.getAdType()==null ||
-                requestPO.getKeyword()==null ||
-                requestPO.getKeyword().length()==0 ||
                 (requestPO.getMinPrice()==null)!=(requestPO.getMaxPrice()==null) ||
                 (requestPO.getMinPrice()!=null && requestPO.getMinPrice().compareTo(requestPO.getMaxPrice())>0)
         ){
