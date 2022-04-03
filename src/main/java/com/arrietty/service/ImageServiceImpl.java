@@ -1,5 +1,6 @@
 package com.arrietty.service;
 
+import com.arrietty.annotations.Log;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.ImageMapper;
 import com.arrietty.entity.Image;
@@ -57,6 +58,36 @@ public class ImageServiceImpl {
             catch (IOException e) {
                 throw new RuntimeException("Cannot create folder for images.");
             }
+        }
+    }
+
+
+    public void getImage(Long id, HttpServletResponse response) throws LogicException {
+        if (id==null){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid image id");
+        }
+        // image id 路径的缓存？？
+
+        Image image = imageMapper.selectByPrimaryKey(id);
+        if (image==null){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid image id");
+        }
+
+        String userNetId = profileService.getUserProfile(image.getUserId()).getNetId();
+
+        // TODO: 图片获取接口复用
+        try{
+            final InputStream in = new FileInputStream(BASE_PATH+"/"+userNetId+"/"+id.toString());
+
+            //TODO: 图片格式的匹配问题, 目前默认返回JPEG
+            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
+            IOUtils.copy(in, response.getOutputStream());
+        }
+        catch (FileNotFoundException e){
+            throw new LogicException(ErrorCode.IMAGE_NOT_FOUND, "Image not found.");
+        }
+        catch (IOException e){
+            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Image load failed.");
         }
     }
 

@@ -121,6 +121,12 @@ public class ServiceController {
         imageService.getAvatar(response);
     }
 
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @GetMapping("/image")
+    public void getImage(@RequestParam("id") Long id, HttpServletResponse response) throws LogicException{
+        imageService.getImage(id, response);
+    }
+
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)
