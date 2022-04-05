@@ -67,7 +67,7 @@ public class SearchServiceImpl {
                 queryFilter.filter(QueryBuilders.matchPhraseQuery("textbook_tag.title", requestPO.getKeyword()));
             }
             else {
-                queryFilter.filter(QueryBuilders.matchPhraseQuery("adTitle", requestPO.getKeyword()));
+                queryFilter.filter(QueryBuilders.matchPhraseQuery("ad_title", requestPO.getKeyword()));
             }
         }
         
