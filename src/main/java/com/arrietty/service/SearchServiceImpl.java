@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -183,8 +184,8 @@ public class SearchServiceImpl {
         item.setPrice(po.getPrice());
         item.setComment(po.getComment());
 
-        LocalDate localDate = LocalDate.parse(po.getCreateTime(), fmt);
-        item.setCreateTime(Date.from(localDate.atStartOfDay(ZONE_ID).toInstant()));
+        LocalDateTime localDateTme = LocalDateTime.parse(po.getCreateTime(), fmt);
+        item.setCreateTime(Date.from(localDateTme.atZone(ZONE_ID).toInstant()));
 
         if(po.getIsTextbook()!=null && po.getIsTextbook() && po.getTextbookTag()!=null){
             item.setAdType("textbook");

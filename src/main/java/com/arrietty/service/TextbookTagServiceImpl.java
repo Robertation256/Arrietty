@@ -24,11 +24,11 @@ public class TextbookTagServiceImpl {
     private TextbookTagMapper textbookTagMapper;
 
     public List<Long> getAllTextbookTagIds(){
-        List<Long> ids = redisService.getAllTextbookTagIds();
-        if(ids!=null){
-            return ids;
-        }
-        ids = textbookTagMapper.selectAllIds();
+//        List<Long> ids = redisService.getAllTextbookTagIds();
+//        if(ids!=null){
+//            return ids;
+//        }
+        List<Long> ids = textbookTagMapper.selectAllIds();
         List<String> strings = ids.stream().map(
                 Object::toString
         ).collect(Collectors.toList());
