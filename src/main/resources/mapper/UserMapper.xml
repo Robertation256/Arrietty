@@ -104,6 +104,9 @@
       <if test="bio != null">
         bio = #{bio},
       </if>
+      <if test="avatarImageId != null">
+        avatar_image_id = #{avatarImageId},
+      </if>
     </set>
     where id = #{id}
   </update>

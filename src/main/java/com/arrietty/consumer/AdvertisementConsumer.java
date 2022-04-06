@@ -73,7 +73,7 @@ public class AdvertisementConsumer {
         esDocument.setPrice(advertisement.getPrice());
 
         Instant instant = advertisement.getCreateTime().toInstant();
-        LocalDateTime ldt = instant.atOffset(ZoneOffset.UTC).toLocalDateTime();
+        LocalDateTime ldt = instant.atZone(ZoneOffset.systemDefault()).toLocalDateTime();
         esDocument.setCreateTime(ldt.format(fmt));
 
 
