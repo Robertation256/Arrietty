@@ -59,7 +59,7 @@
 url:/suggest?type=<textbook/other>&keyword=com
 method:post
 request: null
-备注：最多返回5条suggestion
+备注：最多返回10条suggestion
 
 response: 
 {
@@ -102,8 +102,8 @@ response:
                 {
                     id: 1,
                     username:
-                    userNetId:
-                    userAvatarImageId:
+                    netId:
+                    avatarImageId:
                     adType:"textbook",
                     adTitle: "",
                     textbookTitle:"",
@@ -411,5 +411,93 @@ method: post
 url:/image?id=1
 method: get
 备注：获取id对应图像资源
+```
+
+### Notification
+
+```json
+url: /notification
+method: get
+request: null
+response:
+response:
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": [
+        {
+            id: 12,
+            username: "Yuechuan Zhang",
+            netid: "yz3919",
+            adTitle: "I want to get rid of this book ASAP!",
+            createTime: xxx
+        }
+    ]
+}
+        
+url: /lastModified?target=notification
+method: get
+request: null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body":{
+        versionId: 19992
+    }
+}
+```
+
+### Favorite
+
+```json
+url: /favorite?adId=12&status=<on/off>
+method: get
+request: null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    }
+}
+
+
+url: /myFavorite
+method: get
+request: null
+response:
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": [
+        {
+                    id: 1,
+                    username:
+                    netId:
+                    avatarImageId:
+                    adType:"textbook",
+                    adTitle: "",
+                    textbookTitle:"",
+                    isbn:"",
+                    author:
+                    publisher:
+                    edition:
+                    originalPrice:
+                    relatedCourse: "CSCI-369,CSCI-101",
+                    otherTag:
+                    imageIds: "12,13,14,15"
+                    price:
+                    comment:
+                    createTime:
+                }
+    ]
+}
 ```
 

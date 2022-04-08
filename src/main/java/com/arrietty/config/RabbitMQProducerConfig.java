@@ -37,18 +37,18 @@ public class RabbitMQProducerConfig {
     }
 
     @Bean
-    public Queue notificationQueue() {
-        return new Queue("NotificationQueue",true);
+    public Queue tapQueue() {
+        return new Queue("TapQueue",true);
     }
 
     @Bean
-    DirectExchange notificationDirectExchange() {
-        return new DirectExchange("NotificationDirectExchange",true,false);
+    DirectExchange tapDirectExchange() {
+        return new DirectExchange("TapDirectExchange",true,false);
     }
 
     @Bean
-    Binding notificationBindingDirect() {
-        return BindingBuilder.bind(notificationQueue()).to(notificationDirectExchange()).with("NotificationDirectRouting");
+    Binding tapBindingDirect() {
+        return BindingBuilder.bind(tapQueue()).to(tapDirectExchange()).with("TapDirectRouting");
     }
 
     //使用jackson做序列化

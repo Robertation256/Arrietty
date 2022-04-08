@@ -4,6 +4,7 @@ package com.arrietty.service;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
+import com.arrietty.utils.session.SessionContext;
 import com.google.gson.Gson;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
@@ -17,12 +18,10 @@ import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
-import org.elasticsearch.search.suggest.term.TermSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -76,8 +75,13 @@ public class SearchServiceImpl {
         }
 
 
+
         if("other".equals(requestPO.getAdType()) && requestPO.getTag()!=null){
-            queryFilter.filter(QueryBuilders.termQuery("other_tag", requestPO.getTag()));
+            String[] tags = requestPO.getTag().split(",");
+            if(tags.length>10){
+                throw new LogicException(ErrorCode.INVALID_SEARCH_PARAM, "Tag length exceeds maximum size.");
+            }
+            queryFilter.filter(QueryBuilders.termQuery("other_tag", tags));
         }
 
 
@@ -97,7 +101,7 @@ public class SearchServiceImpl {
         searchRequest.source(searchSourceBuilder);
         try{
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
-            Set<Long> currentUserTappedAdIds = redisService.getCurrentUserTappedAdIds();
+            Set<Long> currentUserTappedAdIds = redisService.getUserTappedAdIds(SessionContext.getUserId());
             SearchHit[] hits = response.getHits().getHits();
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);

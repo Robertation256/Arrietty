@@ -85,13 +85,17 @@ public class RedisServiceImpl {
     }
 
 
+    public void addUserTappedAdId(Long userId, Long adId){
+        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(),adId);
 
-    public void addUserTappedAdId(Long adId){
-        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ SessionContext.getUserId().toString(),adId);
     }
 
-    public Set<Long> getCurrentUserTappedAdIds(){
-        Set<Long> ret = redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ SessionContext.getUserId().toString());
+    public void addUserTappedAdIds(Long userId, List<Long> adIds){
+        redisTemplate.opsForSet().union(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(),adIds);
+    }
+
+    public Set<Long> getUserTappedAdIds(Long userId){
+        Set<Long> ret = redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString());
         if(ret==null){
             return new HashSet<>();
         }

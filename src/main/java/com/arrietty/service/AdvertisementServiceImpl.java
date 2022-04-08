@@ -71,21 +71,6 @@ public class AdvertisementServiceImpl {
     }
 
 
-    public TapResponsePO getOwnerInfoById(Long id) throws LogicException {
-        Advertisement advertisement = advertisementMapper.selectByPrimaryKey(id);
-        if(advertisement==null){
-            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Advertisement not found");
-        }
-        // TODO: add notification
-
-        ProfilePO profilePO = profileService.getUserProfile(advertisement.getUserId());
-        TapResponsePO tapResponsePO = new TapResponsePO();
-        tapResponsePO.setUsername(profilePO.getUsername());
-        tapResponsePO.setNetId(profilePO.getNetId());
-        tapResponsePO.setAvatarImageId(profilePO.getAvatarImageId());
-        return tapResponsePO;
-    }
-
 
     
     private AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{

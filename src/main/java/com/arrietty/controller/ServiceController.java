@@ -60,6 +60,9 @@ public class ServiceController {
     @Autowired
     private SearchServiceImpl searchService;
 
+    @Autowired
+    private TapServiceImpl tapService;
+
 
 
     @Auth(authMode=AuthModeEnum.REGULAR)
@@ -229,8 +232,7 @@ public class ServiceController {
     @ResponseBody
     @GetMapping("/tap")
     public String getTap(@RequestParam("id") Long id ) throws LogicException {
-        TapResponsePO tapResponsePO = advertisementService.getOwnerInfoById(id);
-
+        TapResponsePO tapResponsePO = tapService.handleTap(id);
         return new Gson().toJson(Response.buildSuccessResponse(TapResponsePO.class, tapResponsePO));
     }
 
