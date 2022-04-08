@@ -81,10 +81,11 @@ public class SearchServiceImpl {
             if(tags.length>10){
                 throw new LogicException(ErrorCode.INVALID_SEARCH_PARAM, "Tag length exceeds maximum size.");
             }
+            BoolQueryBuilder tagFilter = QueryBuilders.boolQuery();
             for (String tag : tags){
-                queryFilter.should(QueryBuilders.termQuery("other_tag", tag));
+                tagFilter.should(QueryBuilders.termQuery("other_tag", tag));
             }
-
+            queryFilter.must(tagFilter);
         }
 
 

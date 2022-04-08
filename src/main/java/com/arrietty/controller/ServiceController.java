@@ -251,7 +251,7 @@ public class ServiceController {
 
         PostSearchRequestPO testPo = new PostSearchRequestPO();
         testPo.setAdType("other");
-        testPo.setTag("electronics,furniture");
+        testPo.setTag("electronics");
 
         List<SearchResultItem> ret = searchService.handleSearchRequest(testPo);
         System.out.println(ret);
