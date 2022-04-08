@@ -240,21 +240,22 @@ public class ServiceController {
 
 
 
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
 
-        List<String> result = searchService.handleKeywordSuggestion("other","a");
-        System.out.println(result);
-        return "hii";
-
-//        PostSearchRequestPO testPo = new PostSearchRequestPO();
-//        testPo.setAdType("textbook");
-//        testPo.setKeyword("test1");
-//        testPo.setMinPrice(700);
-//        testPo.setMaxPrice(800);
-//        searchService.handleSearchRequest(testPo);
+//        List<String> result = searchService.handleKeywordSuggestion("other","a");
+//        System.out.println(result);
 //        return "hii";
+
+        PostSearchRequestPO testPo = new PostSearchRequestPO();
+        testPo.setAdType("other");
+        testPo.setTag("electronics,furniture");
+
+        List<SearchResultItem> ret = searchService.handleSearchRequest(testPo);
+        System.out.println(ret);
+        return "hii";
 
 
 //        BulkRequest request = new BulkRequest();
