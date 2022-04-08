@@ -431,6 +431,7 @@ response:
             id: 12,
             username: "Yuechuan Zhang",
             netid: "yz3919",
+            avatarImageId: 12,
             adTitle: "I want to get rid of this book ASAP!",
             createTime: xxx
         }

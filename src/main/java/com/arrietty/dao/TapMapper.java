@@ -48,4 +48,6 @@ public interface TapMapper {
     int updateByPrimaryKey(Tap record);
 
     List<Long> selectTappedAdIdsBySenderId(Long senderId);
+
+    List<Tap> selectByReceiverId(Long receiverId);
 }

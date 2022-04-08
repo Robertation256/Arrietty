@@ -238,6 +238,16 @@ public class ServiceController {
 
 
 
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/notification")
+    public String getNotification() throws LogicException {
+        List<TapPO> result = tapService.getCurrentUserNotifications();
+        return new Gson().toJson(Response.buildSuccessResponse(TapPO.class, result));
+    }
+
+
+
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)

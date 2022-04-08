@@ -5,18 +5,17 @@ import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.AdvertisementMapper;
 import com.arrietty.dao.TapMapper;
 import com.arrietty.entity.Advertisement;
+import com.arrietty.entity.Tap;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.pojo.TapEvent;
+import com.arrietty.pojo.TapPO;
 import com.arrietty.pojo.TapResponsePO;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TapServiceImpl {
@@ -74,5 +73,26 @@ public class TapServiceImpl {
         }
 
         return ret;
+    }
+
+
+    public List<TapPO> getCurrentUserNotifications(){
+        List<Tap> taps = tapMapper.selectByReceiverId(SessionContext.getUserId());
+        List<TapPO> result = new ArrayList<>(taps.size());
+        for(Tap tap : taps){
+            TapPO tapPO = new TapPO();
+            tapPO.setId(tap.getId());
+            ProfilePO profilePO = profileService.getUserProfile(tap.getSenderId());
+            tapPO.setUsername(profilePO.getUsername());
+            tapPO.setNetId(profilePO.getNetId());
+            tapPO.setAvatarImageId(profilePO.getAvatarImageId());
+
+            //TODO: add caching for ad
+            Advertisement advertisement = advertisementMapper.selectByPrimaryKey(tap.getAdId());
+            tapPO.setAdTitle(advertisement.getAdTitle());
+            result.add(tapPO);
+        }
+
+        return result;
     }
 }
