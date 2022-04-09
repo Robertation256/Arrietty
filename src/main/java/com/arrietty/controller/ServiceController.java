@@ -5,6 +5,7 @@ import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.Course;
 import com.arrietty.entity.OtherTag;
+import com.arrietty.entity.Tap;
 import com.arrietty.entity.TextbookTag;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
@@ -258,13 +259,13 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-//    @Auth(authMode = AuthModeEnum.REGULAR)
-//    @ResponseBody
-//    @GetMapping("/favorite")
-//    public String getFavorite() throws LogicException {
-//        favoriteService.handleGetFavorite();
-//        return new Gson().toJson(Response.buildSuccessResponse());
-//    }
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/favorite")
+    public String getFavorite() throws LogicException {
+        List<SearchResultItem> result =  favoriteService.handleGetFavorite();
+        return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, result));
+    }
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)
@@ -276,13 +277,13 @@ public class ServiceController {
 //        System.out.println(result);
 //        return "hii";
 
-        PostSearchRequestPO testPo = new PostSearchRequestPO();
-        testPo.setAdType("other");
-        testPo.setTag("electronics");
-
-        List<SearchResultItem> ret = searchService.handleSearchRequest(testPo);
-        System.out.println(ret);
-        return "hii";
+//        PostSearchRequestPO testPo = new PostSearchRequestPO();
+//        testPo.setAdType("other");
+//        testPo.setTag("electronics");
+//
+//        List<SearchResultItem> ret = searchService.handleSearchRequest(testPo);
+//        System.out.println(ret);
+//        return "hii";
 
 
 //        BulkRequest request = new BulkRequest();
@@ -291,14 +292,12 @@ public class ServiceController {
 //        request.add(new IndexRequest("arrietty","test").id("666")
 //                .opType("create").source(dataMap,XContentType.JSON));
 //        BulkResponse bulkResponse =  esClient.bulk(request, RequestOptions.DEFAULT);
-
-
-
-
-
-
         //return bulkResponse.getItems()[0].toString();
 
 
+        List<TapPO> test = tapService.getCurrentUserNotifications();
+        System.out.println(test);
+
+        return "hii";
     }
 }

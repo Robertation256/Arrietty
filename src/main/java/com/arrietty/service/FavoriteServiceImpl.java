@@ -6,7 +6,10 @@ import com.arrietty.dao.AdvertisementMapper;
 import com.arrietty.dao.FavoriteMapper;
 import com.arrietty.entity.Advertisement;
 import com.arrietty.entity.Favorite;
+import com.arrietty.entity.OtherTag;
+import com.arrietty.entity.TextbookTag;
 import com.arrietty.exception.LogicException;
+import com.arrietty.pojo.ProfilePO;
 import com.arrietty.pojo.SearchResultItem;
 import com.arrietty.utils.session.SessionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FavoriteServiceImpl {
@@ -27,13 +31,27 @@ public class FavoriteServiceImpl {
     @Autowired
     private AdvertisementMapper advertisementMapper;
 
-//    public List<SearchResultItem> handleGetFavorite(){
-//        List<Favorite> favoriteList = favoriteMapper.selectByUserId(SessionContext.getUserId());
-//        List<SearchResultItem> result = new ArrayList<>(favoriteList.size());
-//
-//
-//
-//    }
+    @Autowired
+    private TextbookTagServiceImpl textbookTagService;
+
+    @Autowired
+    private OtherTagServiceImpl otherTagService;
+
+    @Autowired
+    private TapServiceImpl tapService;
+
+    @Autowired
+    private ProfileServiceImpl profileService;
+
+    public List<SearchResultItem> handleGetFavorite(){
+        List<Favorite> favoriteList = favoriteMapper.selectByUserId(SessionContext.getUserId());
+        List<SearchResultItem> result = new ArrayList<>(favoriteList.size());
+        for (Favorite favorite: favoriteList){
+            result.add(getSearchResultItem(favorite.getAdId()));
+        }
+
+        return result;
+    }
 
 
     public void handleMarkAction(String status, Long id) throws LogicException {
@@ -86,15 +104,39 @@ public class FavoriteServiceImpl {
         redisService.removeUserMarkedAdId(id);
     }
 
-//    private SearchResultItem getSearchResultItem(Long adId){
-//        Advertisement advertisement = advertisementMapper.selectByPrimaryKey(adId);
-//        SearchResultItem po = new SearchResultItem();
-//        po.setId(advertisement.getId());
-//        po.setImageIds(advertisement.getImageIds());
-//        po.setCreateTime(advertisement.getCreateTime());
-//
-//        if(advertisement.getIsTextbook()){
-//
-//        }
-//    }
+    private SearchResultItem getSearchResultItem(Long adId){
+        Advertisement advertisement = advertisementMapper.selectByPrimaryKey(adId);
+        SearchResultItem po = new SearchResultItem();
+        po.setId(advertisement.getId());
+        po.setImageIds(advertisement.getImageIds());
+        po.setCreateTime(advertisement.getCreateTime());
+        po.setPrice(advertisement.getPrice());
+        po.setComment(advertisement.getComment());
+        po.setAdTitle(advertisement.getAdTitle());
+
+        if(advertisement.getIsTextbook()){
+            TextbookTag textbookTag = textbookTagService.getTextbookTagById(advertisement.getTagId()).get(0);
+            po.setTextbookTitle(textbookTag.getTitle());
+            po.setOriginalPrice(textbookTag.getOriginalPrice());
+            po.setEdition(textbookTag.getEdition());
+            po.setAuthor(textbookTag.getAuthor());
+            po.setPublisher(textbookTag.getPublisher());
+            po.setAdType("textbook");
+        }
+        else{
+            OtherTag otherTag = otherTagService.getOtherTagById(advertisement.getTagId()).get(0);
+            po.setOtherTag(otherTag.getName());
+            po.setAdType("other");
+        }
+
+        Set<Long> tappedAdIds = tapService.getCurrentUserTappedAdIds();
+        if(tappedAdIds.contains(advertisement.getId())){
+            ProfilePO profilePO = profileService.getUserProfile(advertisement.getUserId());
+            po.setUsername(profilePO.getUsername());
+            po.setUserNetId(profilePO.getNetId());
+            po.setUserAvatarImageId(profilePO.getAvatarImageId());
+        }
+
+        return po;
+    }
 }

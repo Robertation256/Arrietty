@@ -102,8 +102,8 @@ response:
                 {
                     id: 1,
                     username:
-                    netId:
-                    avatarImageId:
+                    userNetId:
+                    userAvatarImageId:
                     adType:"textbook",
                     adTitle: "",
                     textbookTitle:"",
