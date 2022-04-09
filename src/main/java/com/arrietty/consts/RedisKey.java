@@ -10,6 +10,7 @@ public class RedisKey {
     public static final String CURRENT_USER_MARKED_AD_ID_LIST = "marked_ad_id_list:user_id=";
     public static final String AD_VERSION_ID = "ad_version_id";
 
-
+    // stores the json string of all bulletins
+    public static final String BULLETIN_CACHE = "bulletin_cache";
 
 }

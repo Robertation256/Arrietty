@@ -527,6 +527,49 @@ ES 增加 isMarked
 
 
 
+### Bulletin
 
+```json
+url: /bulletin
+method: get
+request: null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": {
+        "id":1,
+        "title": "Site Policy and User Agreement",
+        "content": "User must provide true and accruate ...",
+        "createTime": xxxx
+    }
+}
+
+url: /bulletin?action=<update/delete>
+method: post
+备注： 新增时无需传入id
+request: 
+{
+    id: 12,	// 新增时无需传入id
+    "title": "Site Policy and User Agreement",
+    "content": "User must provide true and accruate ...",
+}
+
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body": {
+        "id":1,
+        "title": "Site Policy and User Agreement",
+        "content": "User must provide true and accruate ...",
+        "createTime": xxxx
+    }
+}
+```
 
  

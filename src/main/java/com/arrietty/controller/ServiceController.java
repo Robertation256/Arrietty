@@ -3,10 +3,7 @@ package com.arrietty.controller;
 import com.arrietty.annotations.Auth;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
-import com.arrietty.entity.Course;
-import com.arrietty.entity.OtherTag;
-import com.arrietty.entity.Tap;
-import com.arrietty.entity.TextbookTag;
+import com.arrietty.entity.*;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.arrietty.service.*;
@@ -66,6 +63,9 @@ public class ServiceController {
 
     @Autowired
     private FavoriteServiceImpl favoriteService;
+
+    @Autowired
+    private BulletinServiceImpl bulletinService;
 
 
 
@@ -269,6 +269,26 @@ public class ServiceController {
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/bulletin")
+    public String getBulletin() throws LogicException {
+        List<Bulletin> bulletins = bulletinService.getBulletin();
+        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
+    }
+
+    @Auth(authMode = AuthModeEnum.ADMIN)
+    @ResponseBody
+    @PostMapping("/bulletin")
+    public String postBulletin(@RequestParam("action") String action, @RequestBody Bulletin bulletin) throws LogicException {
+        Bulletin result = bulletinService.handlePostBulletin(action, bulletin);
+        if(result==null){
+            return new Gson().toJson(Response.buildSuccessResponse());
+        }
+        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, result));
+    }
+
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
@@ -295,9 +315,12 @@ public class ServiceController {
         //return bulkResponse.getItems()[0].toString();
 
 
-        List<TapPO> test = tapService.getCurrentUserNotifications();
-        System.out.println(test);
+//        List<TapPO> test = tapService.getCurrentUserNotifications();
+//        System.out.println(test);
+//
+//        return "hii";
 
-        return "hii";
+        List<Bulletin> bulletins = bulletinService.getBulletin();
+        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
     }
 }

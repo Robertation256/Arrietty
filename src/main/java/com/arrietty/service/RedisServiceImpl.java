@@ -1,16 +1,19 @@
 package com.arrietty.service;
 
 import com.arrietty.consts.RedisKey;
+import com.arrietty.entity.Bulletin;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.pojo.SessionPO;
 import com.arrietty.utils.session.SessionContext;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class RedisServiceImpl {
+
+    private static final Type LIST_OF_BULLETIN_TYPE = new TypeToken<ArrayList<Bulletin>>() {}.getType();
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -132,6 +137,19 @@ public class RedisServiceImpl {
 
     public void removeUserMarkedAdId(Long adId){
         redisTemplate.opsForSet().remove(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    }
+
+    public List<Bulletin> getBulletin(){
+        String json = (String) redisTemplate.opsForValue().get(RedisKey.BULLETIN_CACHE);
+        if(json==null){
+            return null;
+        }
+        return new Gson().fromJson(json, LIST_OF_BULLETIN_TYPE);
+    }
+
+    public void setBulletin(List<Bulletin> bulletins){
+        String json = new Gson().toJson(bulletins);
+        redisTemplate.opsForValue().set(RedisKey.BULLETIN_CACHE, json);
     }
 
 }
