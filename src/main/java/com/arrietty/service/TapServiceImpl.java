@@ -49,6 +49,10 @@ public class TapServiceImpl {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Advertisement not found");
         }
 
+        if(advertisement.getUserId().equals(SessionContext.getUserId())){
+            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Cannot tap on your own advertisement");
+        }
+
         TapEvent tapEvent = new TapEvent();
         tapEvent.setSenderId(SessionContext.getUserId());
         tapEvent.setReceiverId(advertisement.getUserId());

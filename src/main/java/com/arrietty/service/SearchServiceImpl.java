@@ -49,6 +49,9 @@ public class SearchServiceImpl {
     @Autowired
     private ProfileServiceImpl profileService;
 
+    @Autowired
+    private AdvertisementServiceImpl advertisementService;
+
     public List<SearchResultItem> handleSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
         checkSearchRequest(requestPO);
 
@@ -110,7 +113,10 @@ public class SearchServiceImpl {
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
-                if(SessionContext.getUserId().equals((long) hit.docId()) || currentUserTappedAdIds.contains((long) hit.docId())){
+                //TODO: fix potential npe
+                if(currentUserTappedAdIds.contains((long) hit.docId()) ||
+                    advertisementService.getAdvertisementById((long) hit.docId()).getUserId().equals(SessionContext.getUserId())
+                ){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);
                 }
                 else {
