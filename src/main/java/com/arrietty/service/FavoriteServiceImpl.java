@@ -92,5 +92,9 @@ public class FavoriteServiceImpl {
 //        po.setId(advertisement.getId());
 //        po.setImageIds(advertisement.getImageIds());
 //        po.setCreateTime(advertisement.getCreateTime());
+//
+//        if(advertisement.getIsTextbook()){
+//
+//        }
 //    }
 }

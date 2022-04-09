@@ -57,7 +57,7 @@
     from favorite
   </select>
 
-  <select id="selectByUserId" resultMap="BaseResultMap">
+  <select id="selectByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select id, user_id, ad_id
     from favorite
     where user_id = #{userId,jdbcType=BIGINT}
