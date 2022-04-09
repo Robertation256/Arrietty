@@ -53,6 +53,17 @@ public class AdvertisementServiceImpl {
         return advertisementMapper.selectByPrimaryKey(id);
     }
 
+    public boolean isCurrentUserAd(Long adId){
+        Advertisement advertisement = getAdvertisementById(adId);
+        if(advertisement==null ||
+                advertisement.getUserId()==null ||
+                !advertisement.getUserId().equals(SessionContext.getUserId())
+        ){
+            return false;
+        }
+        return true;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public AdvertisementResponsePO handlePostAdvertisement(String action, PostAdvertisementRequestPO requestPO) throws LogicException {
         if("update".equals(action)){

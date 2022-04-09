@@ -114,8 +114,9 @@ public class SearchServiceImpl {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
                 //TODO: fix potential npe
-                if(currentUserTappedAdIds.contains((long) hit.docId()) ||
-                    advertisementService.getAdvertisementById((long) hit.docId()).getUserId().equals(SessionContext.getUserId())
+                Long adId = Long.parseLong(hit.getId());
+                if(currentUserTappedAdIds.contains(adId) ||
+                    advertisementService.isCurrentUserAd(adId)
                 ){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);
                 }

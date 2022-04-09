@@ -62,11 +62,17 @@ public class AuthServiceImpl {
     }
 
     public Boolean login(String token, String clientId){
-        if(clientId==null || !clientId.equals(CLIENT_ID)){
+//        if(clientId==null || !clientId.equals(CLIENT_ID)){
+//            return false;
+//        }
+
+//        String netId = getNetIdByToken(token);
+
+        if (clientId==null){
             return false;
         }
+        String netId = clientId;
 
-        String netId = getNetIdByToken(token);
         if(netId==null){
             return false;
         }
