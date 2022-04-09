@@ -122,4 +122,16 @@ public class RedisServiceImpl {
         }
     }
 
+    public boolean isMarkedByCurrentUser(Long adId){
+        return redisTemplate.opsForSet().isMember(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    }
+
+    public void addUserMarkedAdId(Long adId){
+        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    }
+
+    public void removeUserMarkedAdId(Long adId){
+        redisTemplate.opsForSet().remove(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    }
+
 }

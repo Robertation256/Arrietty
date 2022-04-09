@@ -456,7 +456,7 @@ response:
 ### Favorite
 
 ```json
-url: /favorite?adId=12&status=<on/off>
+url: /mark?adId=12&status=<on/off>
 method: get
 request: null
 response: 
@@ -468,7 +468,7 @@ response:
 }
 
 
-url: /myFavorite
+url: /favorite
 method: get
 request: null
 response:
@@ -502,3 +502,31 @@ response:
 }
 ```
 
+#### 实现
+
+favorite
+
+on
+
+- 检查 adId 是否存在
+- 插入数据库（重复抛出异常）
+- 修改redis 用户favorite 缓存
+
+off
+
+- 检查adId是否已被mark
+- 删除数据库数据，修改redis
+
+
+
+favorite
+
+- favorite 表拉取数据，advertisement service匹配
+
+ES 增加 isMarked
+
+
+
+
+
+ 

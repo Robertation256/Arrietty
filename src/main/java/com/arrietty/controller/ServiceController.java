@@ -63,6 +63,9 @@ public class ServiceController {
     @Autowired
     private TapServiceImpl tapService;
 
+    @Autowired
+    private FavoriteServiceImpl favoriteService;
+
 
 
     @Auth(authMode=AuthModeEnum.REGULAR)
@@ -247,7 +250,21 @@ public class ServiceController {
     }
 
 
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/mark")
+    public String getMark(@RequestParam("id") Long id, @RequestParam("status") String status) throws LogicException {
+        favoriteService.handleMarkAction(status, id);
+        return new Gson().toJson(Response.buildSuccessResponse());
+    }
 
+//    @Auth(authMode = AuthModeEnum.REGULAR)
+//    @ResponseBody
+//    @GetMapping("/favorite")
+//    public String getFavorite() throws LogicException {
+//        favoriteService.handleGetFavorite();
+//        return new Gson().toJson(Response.buildSuccessResponse());
+//    }
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)
