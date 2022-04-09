@@ -110,7 +110,7 @@ public class SearchServiceImpl {
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
-                if(currentUserTappedAdIds.contains((long) hit.docId())){
+                if(SessionContext.getUserId().equals((long) hit.docId()) || currentUserTappedAdIds.contains((long) hit.docId())){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);
                 }
                 else {
