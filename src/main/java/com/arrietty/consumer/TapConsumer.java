@@ -28,7 +28,7 @@ public class TapConsumer {
     public void process(TapEvent event){
         // 更新user tapped ad id list, redis list
 
-        redisService.addUserTappedAdId(event.getSenderId(), event.getAdvertisementId());
+        redisService.addUserTappedAdId(event.getSenderId(), event.getAdvertisementId().toString());
 
         //数据库持久化
         Tap tap = new Tap();

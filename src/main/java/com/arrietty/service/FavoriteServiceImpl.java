@@ -129,8 +129,8 @@ public class FavoriteServiceImpl {
             po.setAdType("other");
         }
 
-        Set<Long> tappedAdIds = tapService.getCurrentUserTappedAdIds();
-        if(tappedAdIds.contains(advertisement.getId())){
+        Set<String> tappedAdIds = tapService.getCurrentUserTappedAdIds();
+        if(tappedAdIds.contains(advertisement.getId().toString())){
             ProfilePO profilePO = profileService.getUserProfile(advertisement.getUserId());
             po.setUsername(profilePO.getUsername());
             po.setUserNetId(profilePO.getNetId());

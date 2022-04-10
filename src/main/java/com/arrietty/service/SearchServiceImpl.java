@@ -108,14 +108,16 @@ public class SearchServiceImpl {
         searchRequest.source(searchSourceBuilder);
         try{
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
-            Set<Long> currentUserTappedAdIds = redisService.getUserTappedAdIds(SessionContext.getUserId());
+            Set<String> currentUserTappedAdIds = redisService.getUserTappedAdIds(SessionContext.getUserId());
             SearchHit[] hits = response.getHits().getHits();
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
                 //TODO: fix potential npe
                 Long adId = Long.parseLong(hit.getId());
-                if(currentUserTappedAdIds.contains(adId) ||
+
+                // 自己的帖子和tap过的帖子默认显示用户信息
+                if(currentUserTappedAdIds.contains(hit.getId()) ||
                     advertisementService.isCurrentUserAd(adId)
                 ){
                     searchResultItem = mapDocumentToSearchResultItem(po,true);

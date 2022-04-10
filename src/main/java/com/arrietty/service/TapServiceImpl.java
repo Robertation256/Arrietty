@@ -39,8 +39,8 @@ public class TapServiceImpl {
 
 
     public TapResponsePO handleTap(Long id) throws LogicException {
-        Set<Long> tappedIds = getCurrentUserTappedAdIds();
-        if(tappedIds.contains(id)){
+        Set<String> tappedIds = getCurrentUserTappedAdIds();
+        if(tappedIds.contains(id.toString())){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "The advertisement is already tapped.");
         }
 
@@ -68,12 +68,15 @@ public class TapServiceImpl {
         return tapResponsePO;
     }
 
-    public Set<Long> getCurrentUserTappedAdIds(){
-        Set<Long> ret = redisService.getUserTappedAdIds(SessionContext.getUserId());
+    public Set<String> getCurrentUserTappedAdIds(){
+        Set<String> ret = redisService.getUserTappedAdIds(SessionContext.getUserId());
         if(ret==null){
             List<Long> adIds = tapMapper.selectTappedAdIdsBySenderId(SessionContext.getUserId());
-            ret = new HashSet<>(adIds);
-            redisService.addUserTappedAdIds(SessionContext.getUserId() ,adIds);
+            ret = new HashSet<>();
+            for(Long id: adIds){
+                ret.add(id.toString());
+            }
+            redisService.addUserTappedAdIds(SessionContext.getUserId() ,ret);
         }
 
         return ret;

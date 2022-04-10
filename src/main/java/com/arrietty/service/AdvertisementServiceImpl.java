@@ -179,9 +179,10 @@ public class AdvertisementServiceImpl {
             throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Update to DB failed.");
         }
 
-        //TODO 消息队列
-
-
+        AdvertisementEvent advertisementEvent = new AdvertisementEvent();
+        advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPDATE);
+        advertisementEvent.setAdvertisement(ad);
+        mqService.pushAdEvent(advertisementEvent);
 
         AdvertisementResponsePO responsePO = new AdvertisementResponsePO();
         responsePO.setId(ad.getId());

@@ -17,6 +17,7 @@ import com.arrietty.service.TextbookTagServiceImpl;
 import com.google.gson.Gson;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
@@ -59,6 +60,10 @@ public class AdvertisementConsumer {
         if(event.getEventType().equals(EventType.ADVERTISEMENT_UPLOAD)){
             handleAdvertisementUpload(event.getAdvertisement());
         }
+        else if (event.getEventType().equals(EventType.ADVERTISEMENT_UPDATE)){
+            handleAdvertisementUpdate(event.getAdvertisement());
+        }
+
     }
 
 
@@ -125,5 +130,21 @@ public class AdvertisementConsumer {
             //e.printStackTrace();
         }
         
+    }
+
+    private void handleAdvertisementUpdate(Advertisement advertisement){
+        ESAdvertisementPO esDocument = new ESAdvertisementPO();
+
+        esDocument.setImageIds(advertisement.getImageIds());
+        esDocument.setComment(advertisement.getComment());
+        esDocument.setPrice(advertisement.getPrice());
+
+        Instant instant = advertisement.getCreateTime().toInstant();
+        LocalDateTime ldt = instant.atZone(ZoneOffset.systemDefault()).toLocalDateTime();
+        esDocument.setCreateTime(ldt.format(fmt));
+
+        UpdateRequest updateRequest = new UpdateRequest("advertisement","_doc",advertisement.getId().toString());
+        
+
     }
 }
