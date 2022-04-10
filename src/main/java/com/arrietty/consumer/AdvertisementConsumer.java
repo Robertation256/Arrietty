@@ -71,6 +71,7 @@ public class AdvertisementConsumer {
 
         // 对数据做聚合
         ESAdvertisementPO esDocument = new ESAdvertisementPO();
+        esDocument.setUserId(advertisement.getUserId());
         esDocument.setAdTitle(advertisement.getAdTitle());
         esDocument.setIsTextbook(advertisement.getIsTextbook());
         esDocument.setImageIds(advertisement.getImageIds());
@@ -144,7 +145,7 @@ public class AdvertisementConsumer {
         esDocument.setCreateTime(ldt.format(fmt));
 
         UpdateRequest updateRequest = new UpdateRequest("advertisement","_doc",advertisement.getId().toString());
-        
+        updateRequest.doc(XContentType.JSON, new Gson().toJson(esDocument));
 
     }
 }
