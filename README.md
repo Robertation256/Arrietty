@@ -118,6 +118,7 @@ response:
                     price:
                     comment:
                     createTime:
+                    isMarked: true
                 }
         ]
     }
@@ -497,6 +498,7 @@ response:
                     price:
                     comment:
                     createTime:
+            		isMarked: true
                 }
     ]
 }
