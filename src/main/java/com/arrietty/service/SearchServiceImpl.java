@@ -2,6 +2,7 @@ package com.arrietty.service;
 
 
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.entity.Favorite;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionContext;
@@ -51,6 +52,10 @@ public class SearchServiceImpl {
 
     @Autowired
     private AdvertisementServiceImpl advertisementService;
+
+    @Autowired
+    private FavoriteServiceImpl favoriteService;
+
 
     public List<SearchResultItem> handleSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
         checkSearchRequest(requestPO);
@@ -109,6 +114,7 @@ public class SearchServiceImpl {
         try{
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
             Set<String> currentUserTappedAdIds = redisService.getUserTappedAdIds(SessionContext.getUserId());
+            Set<String> markedAdIds = favoriteService.getCurrentUserMarkedAdIds();
             SearchHit[] hits = response.getHits().getHits();
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
@@ -125,6 +131,14 @@ public class SearchServiceImpl {
                 else {
                     searchResultItem = mapDocumentToSearchResultItem(po,false);
                 }
+
+                if(markedAdIds.contains(hit.getId())){
+                    searchResultItem.setIsMarked(true);
+                }
+                else{
+                    searchResultItem.setIsMarked(false);
+                }
+
                 searchResultItem.setId(Long.parseLong(hit.getId()));
                 result.add(searchResultItem);
             }

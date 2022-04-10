@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -292,6 +293,12 @@ public class ServiceController {
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
+        PostAdvertisementRequestPO po = new PostAdvertisementRequestPO();
+        po.setId(12L);
+        po.setComment("change");
+        po.setPrice(new BigDecimal(556));
+        advertisementService.handlePostAdvertisement("update",po);
+        return "hii";
 
 //        List<String> result = searchService.handleKeywordSuggestion("other","a");
 //        System.out.println(result);
@@ -320,7 +327,7 @@ public class ServiceController {
 //
 //        return "hii";
 
-        List<Bulletin> bulletins = bulletinService.getBulletin();
-        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
+//        List<Bulletin> bulletins = bulletinService.getBulletin();
+//        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
     }
 }

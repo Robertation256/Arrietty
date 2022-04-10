@@ -25,4 +25,5 @@ public class SearchResultItem {
     private BigDecimal price;
     private String comment;
     private Date createTime;
+    private Boolean isMarked;
 }

@@ -15,6 +15,7 @@ import com.arrietty.service.OtherTagServiceImpl;
 import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.service.TextbookTagServiceImpl;
 import com.google.gson.Gson;
+import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -145,7 +146,15 @@ public class AdvertisementConsumer {
         esDocument.setCreateTime(ldt.format(fmt));
 
         UpdateRequest updateRequest = new UpdateRequest("advertisement","_doc",advertisement.getId().toString());
-        updateRequest.doc(XContentType.JSON, new Gson().toJson(esDocument));
+        updateRequest.doc(new Gson().toJson(esDocument), XContentType.JSON);
+        try{
+            esClient.update(updateRequest);
+        }
+        catch (IOException e){
+            //TODO: error handling by logging
+            System.out.println(e.getStackTrace());
+        }
+
 
     }
 }

@@ -139,7 +139,14 @@ public class AdvertisementServiceImpl {
 
 
     private AdvertisementResponsePO updateAdvertisement(PostAdvertisementRequestPO requestPO){
-        checkAdvertisementFormat(requestPO);
+        if(
+                requestPO.getPrice()!=null &&
+                        (requestPO.getPrice().compareTo(MIN_PRICE)<0 ||
+                                requestPO.getPrice().compareTo(MAX_PRICE)>0)
+
+        ){
+            throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
+        }
 
         Advertisement ad = getAdvertisementById(requestPO.getId());
 
@@ -149,15 +156,18 @@ public class AdvertisementServiceImpl {
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Advertisement does not exist.");
         }
 
-
-        List<String> imageIds = new ArrayList<>(requestPO.getImages().size());
-        for(MultipartFile imageFile: requestPO.getImages()){
-            // TODO: 单张insert 改为batch insert
-            Long imageId = imageService.insertAdvertisementImage(imageFile);
-            imageIds.add(imageId.toString());
+        // 新照片全增
+        List<String> imageIds = new ArrayList<>();
+        if(requestPO.getImages()!=null){
+            for(MultipartFile imageFile: requestPO.getImages()){
+                // TODO: 单张insert 改为batch insert
+                Long imageId = imageService.insertAdvertisementImage(imageFile);
+                imageIds.add(imageId.toString());
+            }
         }
 
-        //照片全删全增
+
+        //旧照片全删
         if(ad.getImageIds()!=null && ad.getImageIds().length()>0){
             String[] tmp = ad.getImageIds().split(",");
             for(String strId: tmp){

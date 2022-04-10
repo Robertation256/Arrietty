@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,13 +44,26 @@ public class FavoriteServiceImpl {
     @Autowired
     private ProfileServiceImpl profileService;
 
-    public List<SearchResultItem> handleGetFavorite(){
-        List<Favorite> favoriteList = favoriteMapper.selectByUserId(SessionContext.getUserId());
-        List<SearchResultItem> result = new ArrayList<>(favoriteList.size());
-        for (Favorite favorite: favoriteList){
-            result.add(getSearchResultItem(favorite.getAdId()));
+    public Set<String> getCurrentUserMarkedAdIds(){
+        Set<String> result = redisService.getCurrentUserMarkedAdIds();
+        if(result==null){
+            List<Favorite> favoriteList = favoriteMapper.selectByUserId(SessionContext.getUserId());
+            result = new HashSet<>();
+            for (Favorite favorite : favoriteList){
+                result.add(favorite.getAdId().toString());
+            }
+            redisService.addUserMarkedAdIds(result);
         }
+        return result;
+    }
 
+
+    public List<SearchResultItem> handleGetFavorite(){
+        Set<String> markedAdIds = getCurrentUserMarkedAdIds();
+        List<SearchResultItem> result = new ArrayList<>(markedAdIds.size());
+        for (String id: markedAdIds){
+            result.add(getSearchResultItem(Long.parseLong(id)));
+        }
         return result;
     }
 
@@ -67,8 +81,6 @@ public class FavoriteServiceImpl {
         else {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid status.");
         }
-
-
     }
 
     private void handleMark(Long id) throws LogicException{
@@ -81,7 +93,7 @@ public class FavoriteServiceImpl {
         favorite.setUserId(SessionContext.getUserId());
         favorite.setAdId(id);
 
-        if(redisService.isMarkedByCurrentUser(id)){
+        if(redisService.isMarkedByCurrentUser(id.toString())){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "This advertisement has already been marked");
         }
 
@@ -92,16 +104,16 @@ public class FavoriteServiceImpl {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Duplicate mark or advertisement does not exist");
         }
 
-        redisService.addUserMarkedAdId(id);
+        redisService.addUserMarkedAdId(id.toString());
     }
 
     private void handleUnMark(Long id){
-        if(!redisService.isMarkedByCurrentUser(id)){
+        if(!redisService.isMarkedByCurrentUser(id.toString())){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "This advertisement is not marked");
         }
 
         favoriteMapper.deleteByUserIdAndAdId(SessionContext.getUserId(), id);
-        redisService.removeUserMarkedAdId(id);
+        redisService.removeUserMarkedAdId(id.toString());
     }
 
     private SearchResultItem getSearchResultItem(Long adId){
@@ -113,6 +125,7 @@ public class FavoriteServiceImpl {
         po.setPrice(advertisement.getPrice());
         po.setComment(advertisement.getComment());
         po.setAdTitle(advertisement.getAdTitle());
+        po.setIsMarked(true);
 
         if(advertisement.getIsTextbook()){
             TextbookTag textbookTag = textbookTagService.getTextbookTagById(advertisement.getTagId()).get(0);
