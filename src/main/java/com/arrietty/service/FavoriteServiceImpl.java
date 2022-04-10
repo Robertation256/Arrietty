@@ -126,6 +126,7 @@ public class FavoriteServiceImpl {
         po.setComment(advertisement.getComment());
         po.setAdTitle(advertisement.getAdTitle());
         po.setIsMarked(true);
+        po.setNumberOfTaps(tapService.getNumberOfTaps(adId));
 
         if(advertisement.getIsTextbook()){
             TextbookTag textbookTag = textbookTagService.getTextbookTagById(advertisement.getTagId()).get(0);

@@ -50,4 +50,6 @@ public interface TapMapper {
     List<Long> selectTappedAdIdsBySenderId(Long senderId);
 
     List<Tap> selectByReceiverId(Long receiverId);
+
+    Integer getNumberOfTapsByAdId(Long adId);
 }

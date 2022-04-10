@@ -2,6 +2,7 @@ package com.arrietty.service;
 
 
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.consts.RedisKey;
 import com.arrietty.dao.AdvertisementMapper;
 import com.arrietty.dao.TapMapper;
 import com.arrietty.entity.Advertisement;
@@ -19,6 +20,8 @@ import java.util.*;
 
 @Service
 public class TapServiceImpl {
+
+    private static  final  String TAP_LOCK = "tap_lock";
 
     @Autowired
     private ProfileServiceImpl profileService;
@@ -101,5 +104,27 @@ public class TapServiceImpl {
         }
 
         return result;
+    }
+
+    public void incrementNumberOfTaps(Long adId){
+        synchronized (TAP_LOCK){
+            if(redisService.incrementNumberOfTaps(adId)==null){
+                int tapNum = tapMapper.getNumberOfTapsByAdId(adId);
+                redisService.setNumberOfTaps(adId, tapNum+1);
+            }
+        }
+
+    }
+
+    public Integer getNumberOfTaps(Long adId){
+        synchronized (TAP_LOCK){
+            Integer result = redisService.getNumberOfTaps(adId);
+            if(result == null){
+                result = tapMapper.getNumberOfTapsByAdId(adId);
+                redisService.setNumberOfTaps(adId, result);
+            }
+            return result;
+        }
+
     }
 }

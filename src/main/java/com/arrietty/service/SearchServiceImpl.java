@@ -56,6 +56,9 @@ public class SearchServiceImpl {
     @Autowired
     private FavoriteServiceImpl favoriteService;
 
+    @Autowired
+    private TapServiceImpl tapService;
+
 
     public List<SearchResultItem> handleSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
         checkSearchRequest(requestPO);
@@ -139,7 +142,8 @@ public class SearchServiceImpl {
                     searchResultItem.setIsMarked(false);
                 }
 
-                searchResultItem.setId(Long.parseLong(hit.getId()));
+                searchResultItem.setNumberOfTaps(tapService.getNumberOfTaps(adId));
+                searchResultItem.setId(adId);
                 result.add(searchResultItem);
             }
         }

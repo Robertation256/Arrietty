@@ -118,7 +118,8 @@ response:
                     price:
                     comment:
                     createTime:
-                    isMarked: true
+                    isMarked: true，
+                    numberOfTaps: 12
                 }
         ]
     }
@@ -498,7 +499,8 @@ response:
                     price:
                     comment:
                     createTime:
-            		isMarked: true
+            		isMarked: true,
+         			numberOfTaps: 12
                 }
     ]
 }

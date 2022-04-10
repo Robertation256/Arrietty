@@ -24,11 +24,16 @@ public class TapConsumer {
     @Autowired
     private RedisServiceImpl redisService;
 
+    @Autowired
+    private TapServiceImpl tapService;
+
     @RabbitHandler
     public void process(TapEvent event){
         // 更新user tapped ad id list, redis list
 
         redisService.addUserTappedAdId(event.getSenderId(), event.getAdvertisementId().toString());
+
+        tapService.incrementNumberOfTaps(event.getAdvertisementId());
 
         //数据库持久化
         Tap tap = new Tap();

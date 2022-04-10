@@ -82,4 +82,8 @@
     from tap
     where receiver_id = #{receiverId,jdbcType=BIGINT}
   </select>
+
+  <select id="getNumberOfTapsByAdId" resultType="java.lang.Integer">
+    select count(*) from tap where ad_id = #{adId, ,jdbcType=BIGINT}
+  </select>
 </mapper>

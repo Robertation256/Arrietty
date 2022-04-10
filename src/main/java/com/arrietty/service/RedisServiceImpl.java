@@ -107,6 +107,20 @@ public class RedisServiceImpl {
         return ret;
     }
 
+    public Long incrementNumberOfTaps(Long adId){
+        return redisTemplate.opsForValue().increment(RedisKey.NUMBER_OF_TAPS+adId.toString(), 1L);
+    }
+
+    public void setNumberOfTaps(Long adId, Integer num){
+        redisTemplate.opsForValue().set(RedisKey.NUMBER_OF_TAPS+adId.toString(), num);
+    }
+
+    public Integer getNumberOfTaps(Long adId){
+        return (Integer) redisTemplate.opsForValue().get(RedisKey.NUMBER_OF_TAPS);
+    }
+
+
+
     public Integer getVersionId(String target){
         if("advertisement".equals(target)){
             return (Integer) redisTemplate.opsForValue().get(RedisKey.AD_VERSION_ID);

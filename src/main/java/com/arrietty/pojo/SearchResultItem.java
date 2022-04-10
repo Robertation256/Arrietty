@@ -26,4 +26,5 @@ public class SearchResultItem {
     private String comment;
     private Date createTime;
     private Boolean isMarked;
+    private Integer numberOfTaps;
 }
