@@ -457,7 +457,7 @@ response:
 ### Favorite
 
 ```json
-url: /mark?adId=12&status=<on/off>
+url: /mark?id=12&status=<on/off>
 method: get
 request: null
 response: 

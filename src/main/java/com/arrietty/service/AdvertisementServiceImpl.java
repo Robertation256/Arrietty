@@ -228,7 +228,11 @@ public class AdvertisementServiceImpl {
         }
 
         advertisementMapper.deleteByPrimaryKey(requestPO.getId());
-        // TODO 消息队列
+
+        AdvertisementEvent event = new AdvertisementEvent();
+        event.setEventType(EventType.ADVERTISEMENT_DELETE);
+        event.setAdvertisement(ad);
+        mqService.pushAdEvent(event);
 
     }
 

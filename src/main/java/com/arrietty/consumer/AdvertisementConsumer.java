@@ -16,6 +16,7 @@ import com.arrietty.service.RedisServiceImpl;
 import com.arrietty.service.TextbookTagServiceImpl;
 import com.google.gson.Gson;
 import org.elasticsearch.action.DocWriteRequest;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -63,6 +64,9 @@ public class AdvertisementConsumer {
         }
         else if (event.getEventType().equals(EventType.ADVERTISEMENT_UPDATE)){
             handleAdvertisementUpdate(event.getAdvertisement());
+        }
+        else if(event.getEventType().equals(EventType.ADVERTISEMENT_DELETE)){
+            handleAdvertisementDelete(event.getAdvertisement());
         }
 
     }
@@ -154,7 +158,17 @@ public class AdvertisementConsumer {
             //TODO: error handling by logging
             System.out.println(e.getStackTrace());
         }
+    }
 
+    private void handleAdvertisementDelete(Advertisement advertisement){
+        DeleteRequest deleteRequest = new DeleteRequest("advertisement","_doc",advertisement.getId().toString());
+        try{
+            esClient.delete(deleteRequest);
+        }
+        catch (IOException e){
+            //TODO: error handling by logging
+            System.out.println(e.getStackTrace());
+        }
 
     }
 }

@@ -295,9 +295,7 @@ public class ServiceController {
     public String mqTest() throws Exception{
         PostAdvertisementRequestPO po = new PostAdvertisementRequestPO();
         po.setId(12L);
-        po.setComment("change");
-        po.setPrice(new BigDecimal(556));
-        advertisementService.handlePostAdvertisement("update",po);
+        advertisementService.handlePostAdvertisement("delete",po);
         return "hii";
 
 //        List<String> result = searchService.handleKeywordSuggestion("other","a");
