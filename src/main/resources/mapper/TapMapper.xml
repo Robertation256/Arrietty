@@ -81,6 +81,7 @@
     select id, sender_id, receiver_id, ad_id, create_time
     from tap
     where receiver_id = #{receiverId,jdbcType=BIGINT}
+    order by id desc
   </select>
 
   <select id="getNumberOfTapsByAdId" resultType="java.lang.Integer">
