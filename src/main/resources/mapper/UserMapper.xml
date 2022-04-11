@@ -111,6 +111,16 @@
     where id = #{id}
   </update>
 
+  <select id="getTotalUserCount" resultType="java.lang.Integer">
+    select count(*)
+    from user
+  </select>
 
+  <select id="getLoginUserCount" parameterType="java.util.Date" resultType="java.lang.Integer">
+    select count(*)
+    from user
+    where last_login_time &gt;= #{start,jdbcType=TIMESTAMP}
+    and last_login_time &lt; #{end,jdbcType=TIMESTAMP}
+  </select>
 
 </mapper>

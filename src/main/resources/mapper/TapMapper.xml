@@ -84,6 +84,6 @@
   </select>
 
   <select id="getNumberOfTapsByAdId" resultType="java.lang.Integer">
-    select count(*) from tap where ad_id = #{adId, ,jdbcType=BIGINT}
+    select count(*) from tap where ad_id = #{adId,jdbcType=BIGINT}
   </select>
 </mapper>

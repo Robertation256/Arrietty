@@ -4,6 +4,7 @@ import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -52,4 +53,8 @@ public interface UserMapper {
     User selectByNetId(String netId);
 
     boolean updateProfile(ProfilePO profilePO);
+
+    Integer getTotalUserCount();
+
+    Integer getLoginUserCount(Date start, Date end);
 }
