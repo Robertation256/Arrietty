@@ -47,6 +47,8 @@ public class BulletinServiceImpl {
 
             if (bulletin.getId()==null){
                 synchronized (BULLETIN_LOCK){
+                    Date date = new Date();
+                    bulletin.setCreateTime(date);
                     bulletinMapper.insert(bulletin);
                     List<Bulletin> bulletins = redisService.getBulletin();
                     bulletins.add(bulletin);
