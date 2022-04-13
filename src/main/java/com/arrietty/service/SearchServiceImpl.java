@@ -81,7 +81,7 @@ public class SearchServiceImpl {
                 SearchResultItem searchResultItem = mapDocumentToSearchResultItem(po,false);
                 Long adId = Long.parseLong(hit.getId());
                 searchResultItem.setNumberOfTaps(tapService.getNumberOfTaps(adId));
-
+                searchResultItem.setId(adId);
                 result.add(searchResultItem);
             }
         }
