@@ -8,6 +8,7 @@ import com.arrietty.exception.LogicException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -48,11 +49,14 @@ public class BulletinServiceImpl {
                 synchronized (BULLETIN_LOCK){
                     bulletinMapper.insert(bulletin);
                     List<Bulletin> bulletins = redisService.getBulletin();
+                    bulletins.add(bulletin);
                     redisService.setBulletin(bulletins);
                 }
             }
             else {
                 synchronized (BULLETIN_LOCK){
+                    Date date = new Date();
+                    bulletin.setCreateTime(date);
                     if(bulletinMapper.updateByPrimaryKey(bulletin)==0){
                         throw new LogicException(ErrorCode.INVALID_URL_PARAM, "This bulletin does not exist");
                     }
