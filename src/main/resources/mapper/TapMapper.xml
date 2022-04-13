@@ -87,4 +87,12 @@
   <select id="getNumberOfTapsByAdId" resultType="java.lang.Integer">
     select count(*) from tap where ad_id = #{adId,jdbcType=BIGINT}
   </select>
+
+  <select id="getDailyUserTapNum" parameterType="java.util.Date" resultType="java.lang.Integer">
+    select count(*) from tap
+    where create_time &gt;= #{start,jdbcType=TIMESTAMP}
+    and create_time &lt;= #{end,jdbcType=TIMESTAMP}
+  </select>
+
+
 </mapper>

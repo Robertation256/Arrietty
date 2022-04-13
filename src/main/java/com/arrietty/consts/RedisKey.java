@@ -16,4 +16,14 @@ public class RedisKey {
     // stores the json string of all bulletins
     public static final String BULLETIN_CACHE = "bulletin_cache";
 
+
+    // admin statistics
+    public static final String USER_AD_UPLOAD_NUM = "user_ad_upload_num";
+    public static final String USER_AD_UPDATE_NUM = "user_ad_update_num";
+    public static final String USER_AD_DELETE_NUM = "user_ad_delete_num";
+
+    public static final String USER_MARK_NUM = "user_mark_num";
+    public static final String USER_UNMARK_NUM = "user_unmark_num";
+
+    public static final String USER_SEARCH_NUM = "user_search_num";
 }

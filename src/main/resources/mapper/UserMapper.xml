@@ -120,7 +120,7 @@
     select count(*)
     from user
     where last_login_time &gt;= #{start,jdbcType=TIMESTAMP}
-    and last_login_time &lt; #{end,jdbcType=TIMESTAMP}
+    and last_login_time &lt;= #{end,jdbcType=TIMESTAMP}
   </select>
 
 </mapper>

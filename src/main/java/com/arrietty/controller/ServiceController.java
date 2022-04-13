@@ -203,6 +203,16 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(AdvertisementResponsePO.class, advertisementResponsePO));
     }
 
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/myAdvertisement")
+    public String getMyAdvertisement() throws LogicException {
+        List<SearchResultItem> result = searchService.getMyAdvertisement();
+        return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, result));
+    }
+
+
+
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -293,9 +303,11 @@ public class ServiceController {
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
-        PostAdvertisementRequestPO po = new PostAdvertisementRequestPO();
-        po.setId(12L);
-        advertisementService.handlePostAdvertisement("delete",po);
+//        PostAdvertisementRequestPO po = new PostAdvertisementRequestPO();
+//        po.setId(12L);
+//        advertisementService.handlePostAdvertisement("delete",po);
+
+        System.out.println(searchService.getMyAdvertisement());
         return "hii";
 
 //        List<String> result = searchService.handleKeywordSuggestion("other","a");

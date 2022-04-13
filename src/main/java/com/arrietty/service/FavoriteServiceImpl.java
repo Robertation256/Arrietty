@@ -89,14 +89,13 @@ public class FavoriteServiceImpl {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Advertisement does not exist");
         }
 
-        Favorite favorite = new Favorite();
-        favorite.setUserId(SessionContext.getUserId());
-        favorite.setAdId(id);
-
         if(redisService.isMarkedByCurrentUser(id.toString())){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "This advertisement has already been marked");
         }
 
+        Favorite favorite = new Favorite();
+        favorite.setUserId(SessionContext.getUserId());
+        favorite.setAdId(id);
         try{
             favoriteMapper.insert(favorite);
         }
@@ -104,6 +103,7 @@ public class FavoriteServiceImpl {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Duplicate mark or advertisement does not exist");
         }
 
+        redisService.incrementUserMarkNum();
         redisService.addUserMarkedAdId(id.toString());
     }
 
@@ -114,6 +114,7 @@ public class FavoriteServiceImpl {
 
         favoriteMapper.deleteByUserIdAndAdId(SessionContext.getUserId(), id);
         redisService.removeUserMarkedAdId(id.toString());
+        redisService.incrementUserUnmarkNum();
     }
 
     private SearchResultItem getSearchResultItem(Long adId){

@@ -73,6 +73,7 @@ public class AdvertisementConsumer {
 
 
     private void handleAdvertisementUpload(Advertisement advertisement){
+        redisService.incrementUserAdUploadNum();
 
         // 对数据做聚合
         ESAdvertisementPO esDocument = new ESAdvertisementPO();
@@ -139,8 +140,9 @@ public class AdvertisementConsumer {
     }
 
     private void handleAdvertisementUpdate(Advertisement advertisement){
-        ESAdvertisementPO esDocument = new ESAdvertisementPO();
+        redisService.incrementUserAdUpdateNum();
 
+        ESAdvertisementPO esDocument = new ESAdvertisementPO();
         esDocument.setImageIds(advertisement.getImageIds());
         esDocument.setComment(advertisement.getComment());
         esDocument.setPrice(advertisement.getPrice());
@@ -161,6 +163,8 @@ public class AdvertisementConsumer {
     }
 
     private void handleAdvertisementDelete(Advertisement advertisement){
+        redisService.incrementUserAdDeleteNum();
+
         DeleteRequest deleteRequest = new DeleteRequest("advertisement","_doc",advertisement.getId().toString());
         try{
             esClient.delete(deleteRequest);

@@ -33,6 +33,25 @@ public class RedisServiceImpl {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    public void init(){
+        // 重启清空redis
+        Set<String> keys = redisTemplate.keys("*");
+        redisTemplate.delete(keys);
+
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_UPLOAD_NUM, 0);
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_UPDATE_NUM, 0);
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_DELETE_NUM, 0);
+        redisTemplate.opsForValue().set(RedisKey.USER_MARK_NUM, 0);
+        redisTemplate.opsForValue().set(RedisKey.USER_UNMARK_NUM, 0);
+        redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
+
+        redisTemplate.opsForValue().set(RedisKey.AD_VERSION_ID, 0);
+
+        
+    }
+
+
+
     public void set(String key, Object value){
         redisTemplate.opsForValue().set(key, value);
     }
@@ -172,6 +191,67 @@ public class RedisServiceImpl {
     public void setBulletin(List<Bulletin> bulletins){
         String json = new Gson().toJson(bulletins);
         redisTemplate.opsForValue().set(RedisKey.BULLETIN_CACHE, json);
+    }
+
+
+    public void incrementUserAdUploadNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_AD_UPLOAD_NUM,1);
+    }
+
+    public int getUserAdUploadNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_AD_UPLOAD_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_UPLOAD_NUM, 0);
+        return result==null?0:result;
+    }
+
+    public void incrementUserAdUpdateNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_AD_UPDATE_NUM,1);
+    }
+
+    public int getUserAdUpdateNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_AD_UPDATE_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_UPDATE_NUM, 0);
+        return result==null?0:result;
+    }
+
+    public void incrementUserAdDeleteNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_AD_DELETE_NUM,1);
+    }
+
+    public int getUserAdDeleteNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_AD_DELETE_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_AD_DELETE_NUM, 0);
+        return result==null?0:result;
+    }
+
+    public void incrementUserMarkNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_MARK_NUM,1);
+    }
+
+    public int getUsermarkNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_MARK_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_MARK_NUM, 0);
+        return result==null?0:result;
+    }
+
+    public void incrementUserUnmarkNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_UNMARK_NUM,1);
+    }
+
+    public int getUserUnmarkNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_UNMARK_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_UNMARK_NUM, 0);
+        return result==null?0:result;
+    }
+
+    public void incrementSearchRequestNum(){
+        redisTemplate.opsForValue().increment(RedisKey.USER_SEARCH_NUM,1);
+    }
+
+    public int getSearchRequestNum(){
+        Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_SEARCH_NUM);
+        redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
+        return result==null?0:result;
     }
 
 }

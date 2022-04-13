@@ -3,6 +3,7 @@ package com.arrietty.dao;
 import com.arrietty.entity.Tap;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 @Mapper
@@ -52,4 +53,6 @@ public interface TapMapper {
     List<Tap> selectByReceiverId(Long receiverId);
 
     Integer getNumberOfTapsByAdId(Long adId);
+
+    Integer getDailyUserTapNum(Date start, Date end);
 }

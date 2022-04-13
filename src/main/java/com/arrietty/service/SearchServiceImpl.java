@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -58,6 +59,39 @@ public class SearchServiceImpl {
 
     @Autowired
     private TapServiceImpl tapService;
+
+    public List<SearchResultItem> getMyAdvertisement() throws LogicException {
+        List<SearchResultItem> result = new LinkedList<>();
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("advertisement").types("_doc");
+
+        BoolQueryBuilder queryFilter = QueryBuilders.boolQuery();
+        queryFilter.filter(QueryBuilders.termQuery("user_id", SessionContext.getUserId().toString()));
+
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        searchSourceBuilder.query(queryFilter);
+        searchRequest.source(searchSourceBuilder);
+
+        try{
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchHit[] hits = response.getHits().getHits();
+            for (SearchHit hit : hits) {
+                ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
+                SearchResultItem searchResultItem = mapDocumentToSearchResultItem(po,false);
+                Long adId = Long.parseLong(hit.getId());
+                searchResultItem.setNumberOfTaps(tapService.getNumberOfTaps(adId));
+
+                result.add(searchResultItem);
+            }
+        }
+        catch (IOException e){
+            //TODO error handling
+            e.printStackTrace();
+        }
+
+        return result;
+    }
 
 
     public List<SearchResultItem> handleSearchRequest(PostSearchRequestPO requestPO) throws LogicException {
@@ -152,6 +186,7 @@ public class SearchServiceImpl {
             e.printStackTrace();
         }
 
+        redisService.incrementSearchRequestNum();
         return result;
     }
 

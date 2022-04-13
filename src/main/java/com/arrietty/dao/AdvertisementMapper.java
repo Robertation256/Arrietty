@@ -47,4 +47,6 @@ public interface AdvertisementMapper {
      * @mbg.generated
      */
     int updateByPrimaryKey(Advertisement record);
+
+    Integer getTotalAdNum();
 }
