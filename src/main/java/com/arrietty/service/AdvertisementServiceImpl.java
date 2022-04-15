@@ -140,7 +140,7 @@ public class AdvertisementServiceImpl {
 
     private AdvertisementResponsePO updateAdvertisement(PostAdvertisementRequestPO requestPO){
         if(
-                requestPO.getPrice()!=null &&
+                requestPO.getPrice()==null ||
                         (requestPO.getPrice().compareTo(MIN_PRICE)<0 ||
                                 requestPO.getPrice().compareTo(MAX_PRICE)>0)
 
@@ -183,6 +183,7 @@ public class AdvertisementServiceImpl {
         ad.setImageIds(String.join(",", imageIds));
         ad.setPrice(requestPO.getPrice());
         ad.setComment(requestPO.getComment());
+
 
         int count = advertisementMapper.updateByPrimaryKey(ad);
         if(count==0){

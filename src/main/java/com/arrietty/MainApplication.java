@@ -2,6 +2,7 @@ package com.arrietty;
 
 
 import com.arrietty.service.ImageServiceImpl;
+import com.arrietty.service.RedisServiceImpl;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -25,6 +26,9 @@ public class MainApplication implements CommandLineRunner{
     @Autowired
     private ImageServiceImpl imageService;
 
+    @Autowired
+    private RedisServiceImpl redisService;
+
     public static void main(String[] args) {
         SpringApplication.run(MainApplication.class,args);
     }
@@ -32,5 +36,6 @@ public class MainApplication implements CommandLineRunner{
     @Override
     public void run(String... args) throws Exception {
         imageService.init();
+        redisService.init();
     }
 }

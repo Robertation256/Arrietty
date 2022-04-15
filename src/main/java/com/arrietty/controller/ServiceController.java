@@ -77,6 +77,13 @@ public class ServiceController {
         return new ModelAndView("index.html");
     }
 
+    @Auth(authMode=AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/admin")
+    public ModelAndView userAdmin(){
+        return new ModelAndView("index.html");
+    }
+
 
     // 修改用户本人profile
     @Auth(authMode=AuthModeEnum.REGULAR)
