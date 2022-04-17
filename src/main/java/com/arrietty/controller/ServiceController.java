@@ -240,7 +240,7 @@ public class ServiceController {
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
-    @PostMapping("/lastModified")
+    @GetMapping("/lastModified")
     public String getLastModified() throws LogicException {
         Date result = advertisementService.getLastModified();
         return new Gson().toJson(Response.buildSuccessResponse(Date.class, result));
