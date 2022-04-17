@@ -146,11 +146,15 @@ public class RedisServiceImpl {
     }
 
     public Boolean getUserHasNewNotification(Long userId){
-        return (Boolean) redisTemplate.opsForValue().get(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString());
+        String result = (String) redisTemplate.opsForValue().get(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString());
+        if(result!=null){
+            return result.equals("true");
+        }
+        return null;
     }
 
     public void setUserHasNewNotification(Long userId, boolean hasNew){
-        redisTemplate.opsForValue().set(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString(), hasNew);
+        redisTemplate.opsForValue().set(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString(), hasNew?"true":"false");
     }
 
 
