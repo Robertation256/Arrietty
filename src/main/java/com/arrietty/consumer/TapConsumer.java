@@ -41,6 +41,8 @@ public class TapConsumer {
         tap.setSenderId(event.getSenderId());
         tap.setAdId(event.getAdvertisementId());
         tap.setCreateTime(event.getCreateTime());
+        tap.setIsRead(false);
         tapMapper.insert(tap);
+        redisService.setUserHasNewNotification(event.getReceiverId(),true);
     }
 }

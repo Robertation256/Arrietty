@@ -11,7 +11,12 @@ public class RedisKey {
     public static final String NUMBER_OF_TAPS = "number_of_taps:ad_id=";
 
     public static final String CURRENT_USER_MARKED_AD_ID_LIST = "marked_ad_id_list:user_id=";
-    public static final String AD_VERSION_ID = "ad_version_id";
+
+    // last modified timestamp
+    public static final String AD_TIMESTAMP = "ad_timestamp";
+
+    // user has unread notification
+    public static final String USER_NOTIFICATION_HAS_NEW = "user_notification_has_new:user_id=";
 
     // stores the json string of all bulletins
     public static final String BULLETIN_CACHE = "bulletin_cache";

@@ -38,6 +38,17 @@ public class TapServiceImpl {
     @Autowired
     private RedisServiceImpl redisService;
 
+    // return whether a use has unread notification
+    public Boolean hasNew(){
+        Long userId = SessionContext.getUserId();
+        Boolean result = redisService.getUserHasNewNotification(userId);
+        if(result==null){
+            result = tapMapper.getUserHasNewNotification(userId);
+            redisService.setUserHasNewNotification(userId, true);
+        }
+        return result;
+    }
+
 
 
 
@@ -87,7 +98,8 @@ public class TapServiceImpl {
 
 
     public List<TapPO> getCurrentUserNotifications(){
-        List<Tap> taps = tapMapper.selectByReceiverId(SessionContext.getUserId());
+        Long userId = SessionContext.getUserId();
+        List<Tap> taps = tapMapper.selectByReceiverId(userId);
         List<TapPO> result = new ArrayList<>(taps.size());
         for(Tap tap : taps){
             TapPO tapPO = new TapPO();
@@ -102,6 +114,8 @@ public class TapServiceImpl {
             tapPO.setAdTitle(advertisement.getAdTitle());
             result.add(tapPO);
         }
+        tapMapper.setUserNotificationAllRead(userId);
+        redisService.setUserHasNewNotification(userId, false);
 
         return result;
     }

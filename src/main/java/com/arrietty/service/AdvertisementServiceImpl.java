@@ -47,6 +47,9 @@ public class AdvertisementServiceImpl {
     @Autowired
     private MQServiceImpl mqService;
 
+    @Autowired
+    private RedisServiceImpl redisService;
+
 
     public Advertisement getAdvertisementById(Long id){
         //TODO caching?
@@ -62,6 +65,15 @@ public class AdvertisementServiceImpl {
             return false;
         }
         return true;
+    }
+
+    public Date getLastModified(){
+        Date result = redisService.getAdvertisementTimestamp();
+        if(result==null){
+            result = advertisementMapper.getLatestAdCreateTime();
+            redisService.setAdvertisementTimestamp(result);
+        }
+        return result;
     }
 
     @Transactional(rollbackFor = Exception.class)

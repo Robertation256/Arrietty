@@ -127,7 +127,7 @@ response:
 }
 
 
-url: /lastModified?target=<advertisement:notification>
+url: /lastModified
 method: get
 request: null
 response: 
@@ -136,9 +136,7 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body":{
-        versionId: 19992
-    }
+    "body":"April 03 2000"
 }
 
 url: /tap?id=1
@@ -440,7 +438,7 @@ response:
     ]
 }
         
-url: /lastModified?target=notification
+url: /hasNew
 method: get
 request: null
 response: 
@@ -449,9 +447,7 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body":{
-        versionId: 19992
-    }
+    "body":true
 }
 ```
 

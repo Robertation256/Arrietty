@@ -55,4 +55,8 @@ public interface TapMapper {
     Integer getNumberOfTapsByAdId(Long adId);
 
     Integer getDailyUserTapNum(Date start, Date end);
+
+    Boolean getUserHasNewNotification(Long userId);
+
+    int setUserNotificationAllRead(Long userId);
 }

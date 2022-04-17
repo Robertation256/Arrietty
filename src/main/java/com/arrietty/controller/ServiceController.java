@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 
 
@@ -240,14 +241,9 @@ public class ServiceController {
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/lastModified")
-    public String getLastModified(@RequestParam("target") String target ) throws LogicException {
-        Integer id = redisServiceImpl.getVersionId(target);
-
-        if(id==null){
-            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid target");
-        }
-
-        return new Gson().toJson(Response.buildSuccessResponse(Integer.class, id));
+    public String getLastModified() throws LogicException {
+        Date result = advertisementService.getLastModified();
+        return new Gson().toJson(Response.buildSuccessResponse(Date.class, result));
     }
 
     @Auth(authMode = AuthModeEnum.REGULAR)
@@ -259,13 +255,20 @@ public class ServiceController {
     }
 
 
-
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/notification")
     public String getNotification() throws LogicException {
         List<TapPO> result = tapService.getCurrentUserNotifications();
         return new Gson().toJson(Response.buildSuccessResponse(TapPO.class, result));
+    }
+
+    @Auth(authMode = AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/hasNew")
+    public String getHasNew() throws LogicException {
+        Boolean result = tapService.hasNew();
+        return new Gson().toJson(Response.buildSuccessResponse(Boolean.class, result));
     }
 
 

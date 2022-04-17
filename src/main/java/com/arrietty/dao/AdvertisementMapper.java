@@ -3,6 +3,7 @@ package com.arrietty.dao;
 import com.arrietty.entity.Advertisement;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -49,4 +50,6 @@ public interface AdvertisementMapper {
     int updateByPrimaryKey(Advertisement record);
 
     Integer getTotalAdNum();
+
+    Date getLatestAdCreateTime();
 }

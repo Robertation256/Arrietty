@@ -87,4 +87,9 @@
     select count(*)
     from advertisement
   </select>
+
+  <select id="getLatestAdCreateTime" resultType="java.util.Date">
+    select max(create_time)
+    from advertisement
+  </select>
 </mapper>

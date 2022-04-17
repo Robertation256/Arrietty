@@ -14,10 +14,7 @@ import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -44,9 +41,6 @@ public class RedisServiceImpl {
         redisTemplate.opsForValue().set(RedisKey.USER_MARK_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_UNMARK_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
-
-        redisTemplate.opsForValue().set(RedisKey.AD_VERSION_ID, 0);
-
         
     }
 
@@ -139,26 +133,27 @@ public class RedisServiceImpl {
     }
 
 
-
-    public Integer getVersionId(String target){
-        if("advertisement".equals(target)){
-            return (Integer) redisTemplate.opsForValue().get(RedisKey.AD_VERSION_ID);
+    public Date getAdvertisementTimestamp(){
+        String json = (String) redisTemplate.opsForValue().get(RedisKey.AD_TIMESTAMP);
+        if(json!=null){
+            return new Gson().fromJson(json, Date.class);
         }
-
         return null;
     }
 
-    public void incrementVersionId(String target){
-        long res = 0L;
-        if("advertisement".equals(target)){
-            res = redisTemplate.opsForValue().increment(RedisKey.AD_VERSION_ID);
-        }
-
-        // set version id back to zero when there is an overflow
-        if((int) res<0){
-            redisTemplate.opsForValue().set(RedisKey.AD_VERSION_ID,0);
-        }
+    public void setAdvertisementTimestamp(Date timestamp){
+        redisTemplate.opsForValue().set(RedisKey.AD_TIMESTAMP, new Gson().toJson(timestamp));
     }
+
+    public Boolean getUserHasNewNotification(Long userId){
+        return (Boolean) redisTemplate.opsForValue().get(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString());
+    }
+
+    public void setUserHasNewNotification(Long userId, boolean hasNew){
+        redisTemplate.opsForValue().set(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString(), hasNew);
+    }
+
+
 
     public Set<String> getCurrentUserMarkedAdIds(){
         return redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString());

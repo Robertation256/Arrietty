@@ -33,6 +33,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -129,7 +130,7 @@ public class AdvertisementConsumer {
 
         try{
             IndexResponse indexResponse = esClient.index(indexRequest, RequestOptions.DEFAULT);
-            redisService.incrementVersionId("advertisement");
+            redisService.setAdvertisementTimestamp(new Date());
             System.out.println("[RESPONSE]: "+indexResponse.toString());
         }
         catch (IOException e){
