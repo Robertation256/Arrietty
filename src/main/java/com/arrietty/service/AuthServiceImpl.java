@@ -1,6 +1,7 @@
 package com.arrietty.service;
 
 
+import com.arrietty.consts.AccessControl;
 import com.arrietty.dao.UserMapper;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.*;
@@ -88,11 +89,12 @@ public class AuthServiceImpl {
             user = userMapper.selectByNetId(netId);
         }
 
+
         // insert user session
         SessionPO sessionPO = new SessionPO();
         sessionPO.setId(user.getId());
         sessionPO.setNetId(user.getNetId());
-        sessionPO.setIsAdmin(user.getIsAdmin());
+        sessionPO.setAccessControl(user.getAccessControl());
         sessionPO.setLastLoginTime(user.getLastLoginTime());
 
         String sessionId = SessionIdGenerator.generate();

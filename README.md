@@ -539,12 +539,14 @@ response:
         "status": "Ok",
         "message": "Success"
     },
-    "body": {
-        "id":1,
-        "title": "Site Policy and User Agreement",
-        "content": "User must provide true and accruate ...",
-        "createTime": xxxx
-    }
+    "body": [
+            {
+            "id":1,
+            "title": "Site Policy and User Agreement",
+            "content": "User must provide true and accruate ...",
+            "createTime": xxxx
+        }
+    ]
 }
 
 url: /bulletin?action=<update/delete>
@@ -572,4 +574,30 @@ response:
 }
 ```
 
- 
+### Manage Blacklist
+
+```json
+url: /updateBlacklist?action=<add/delete>&netId=yz3919
+method: post
+request: null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    }
+}
+
+url:/blacklist
+method:get
+request:null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body":["yz3919","hhj1981"]
+}
+```
+

@@ -1,6 +1,7 @@
 package com.arrietty.service;
 
 import com.arrietty.consts.RedisKey;
+import com.arrietty.dao.UserMapper;
 import com.arrietty.entity.Bulletin;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
@@ -30,10 +31,20 @@ public class RedisServiceImpl {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private UserMapper userMapper;
+
     public void init(){
         // 重启清空redis
         Set<String> keys = redisTemplate.keys("*");
         redisTemplate.delete(keys);
+
+        // initialize blacklisted user net id list
+        List<String> blockNetIds = userMapper.selectBlacklistedUserNetIds();
+        for(String netId: blockNetIds){
+            redisTemplate.opsForSet().add(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+        }
+
 
         redisTemplate.opsForValue().set(RedisKey.USER_AD_UPLOAD_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_AD_UPDATE_NUM, 0);
@@ -42,6 +53,10 @@ public class RedisServiceImpl {
         redisTemplate.opsForValue().set(RedisKey.USER_UNMARK_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
         
+    }
+
+    public void adDeleteCleanUp(Long adId){
+        redisTemplate.delete(RedisKey.NUMBER_OF_TAPS+adId.toString());
     }
 
 
@@ -251,6 +266,23 @@ public class RedisServiceImpl {
         Integer result = (Integer) redisTemplate.opsForValue().get(RedisKey.USER_SEARCH_NUM);
         redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
         return result==null?0:result;
+    }
+
+    public void addBlacklistedUserNetId(String netId){
+        redisTemplate.opsForSet().add(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+    }
+
+    public void removeBlacklistedUserNetId(String netId){
+        redisTemplate.opsForSet().remove(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+    }
+
+    public boolean isNetIdBlacklisted(String netId){
+        Boolean result = redisTemplate.opsForSet().isMember(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+        return Boolean.TRUE.equals(result);
+    }
+
+    public Set<String> getBlacklistedUserNetIds(){
+        return redisTemplate.opsForSet().members(RedisKey.BLACKLISTED_USER_NET_ID_SET);
     }
 
 }

@@ -57,4 +57,8 @@ public interface UserMapper {
     Integer getTotalUserCount();
 
     Integer getLoginUserCount(Date start, Date end);
+
+    List<String> selectBlacklistedUserNetIds();
+
+    int updateAccessControl(User record);
 }

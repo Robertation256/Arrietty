@@ -105,7 +105,7 @@ public class AuthAspect {
         // otherwise initialize thread local with user session
         SessionContext.initialize(userSessionId,session);
 
-        if( session.getIsAdmin()==null ||  !session.getIsAdmin()){
+        if(!session.isAdmin()){
             throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
         }
 

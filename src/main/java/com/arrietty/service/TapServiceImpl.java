@@ -44,7 +44,7 @@ public class TapServiceImpl {
         Boolean result = redisService.getUserHasNewNotification(userId);
         if(result==null){
             result = tapMapper.getUserHasNewNotification(userId);
-            redisService.setUserHasNewNotification(userId, true);
+            redisService.setUserHasNewNotification(userId, result);
         }
         return result;
     }

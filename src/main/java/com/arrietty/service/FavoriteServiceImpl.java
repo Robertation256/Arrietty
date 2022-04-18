@@ -62,7 +62,10 @@ public class FavoriteServiceImpl {
         Set<String> markedAdIds = getCurrentUserMarkedAdIds();
         List<SearchResultItem> result = new ArrayList<>(markedAdIds.size());
         for (String id: markedAdIds){
-            result.add(getSearchResultItem(Long.parseLong(id)));
+            SearchResultItem item = getSearchResultItem(Long.parseLong(id));
+            if(item!=null){
+                result.add(getSearchResultItem(Long.parseLong(id)));
+            }
         }
         return result;
     }
@@ -119,6 +122,10 @@ public class FavoriteServiceImpl {
 
     private SearchResultItem getSearchResultItem(Long adId){
         Advertisement advertisement = advertisementMapper.selectByPrimaryKey(adId);
+        // ad may have been deleted
+        if(advertisement==null){
+            return null;
+        }
         SearchResultItem po = new SearchResultItem();
         po.setId(advertisement.getId());
         po.setImageIds(advertisement.getImageIds());

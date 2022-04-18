@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -68,6 +67,9 @@ public class ServiceController {
 
     @Autowired
     private BulletinServiceImpl bulletinService;
+
+    @Autowired
+    private BlacklistServiceImpl blacklistService;
 
 
 
@@ -307,6 +309,24 @@ public class ServiceController {
         }
         return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, result));
     }
+
+    @Auth(authMode = AuthModeEnum.ADMIN)
+    @ResponseBody
+    @GetMapping("/blacklist")
+    public String getBlacklist() throws LogicException {
+        List<String> result = blacklistService.getBlacklistedUserNetIds();
+        return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
+    }
+
+    @Auth(authMode = AuthModeEnum.ADMIN)
+    @ResponseBody
+    @PostMapping("/updateBlacklist")
+    public String updateBlacklist(@RequestParam("action") String action, @RequestParam("netId") String netId) throws LogicException {
+        blacklistService.updateBlacklist(action,netId);
+        return new Gson().toJson(Response.buildSuccessResponse());
+    }
+
+
 
 
     @Auth(authMode = AuthModeEnum.REGULAR)

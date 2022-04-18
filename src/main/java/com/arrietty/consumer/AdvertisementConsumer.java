@@ -175,5 +175,6 @@ public class AdvertisementConsumer {
             System.out.println(e.getStackTrace());
         }
 
+        redisService.adDeleteCleanUp(advertisement.getId());
     }
 }
