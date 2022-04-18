@@ -45,6 +45,7 @@ public class BlacklistServiceImpl {
                 user.setAccessControl(AccessControl.BLACKLISTED);
                 userMapper.updateAccessControl(user);
                 redisService.addBlacklistedUserNetId(user.getNetId());
+                redisService.removeUserSession(user.getId());
             }
 
         }

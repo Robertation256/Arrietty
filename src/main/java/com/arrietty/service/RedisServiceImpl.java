@@ -84,6 +84,10 @@ public class RedisServiceImpl {
         return gson.fromJson(jsonString, SessionPO.class);
     }
 
+    public void removeUserSession(Long userId){
+        redisTemplate.delete(RedisKey.USER_SESSION+userId.toString());
+    }
+
     public void setUserProfile(Long userId, ProfilePO profile){
         if (userId==null) return;
 

@@ -40,6 +40,9 @@ public class AuthServiceImpl {
     @Value("${auth.client-id}")
     private String CLIENT_ID;
 
+    @Value("${auth.disable-auto-create-new-user}")
+    private String DISABLE_AUTO_CREATE_NEW_USER;
+
     @Autowired
     private UserMapper userMapper;
 
@@ -62,27 +65,30 @@ public class AuthServiceImpl {
         return response.getResult().getUrl();
     }
 
-    public Boolean login(String token, String clientId){
+    public Boolean login(String token, String netId){
 //        if(clientId==null || !clientId.equals(CLIENT_ID)){
 //            return false;
 //        }
 
 //        String netId = getNetIdByToken(token);
 
-        if (clientId==null){
+        if (netId==null){
             return false;
         }
-        String netId = clientId;
 
-        if(netId==null){
+        // this user is blacklisted revoke session injection
+        if(redisService.isNetIdBlacklisted(netId)){
             return false;
         }
 
         User user = userMapper.selectByNetId(netId);
-
-
         //create new user account if it doesn't exit
         if(user==null){
+            // only allow existing user login, switch on for internal testing purpose
+            if("true".equals(DISABLE_AUTO_CREATE_NEW_USER)){
+                return false;
+            }
+
             user = new User();
             user.setNetId(netId);
             userMapper.insert(user);
