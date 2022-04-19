@@ -11,7 +11,7 @@ public class SessionPO {
     private Long id;
     private String netId;
     private String accessControl;
-    private Date lastLoginTime;
+
 
 
     public boolean isAdmin(){

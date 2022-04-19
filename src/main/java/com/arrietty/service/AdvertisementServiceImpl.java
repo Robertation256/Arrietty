@@ -265,10 +265,10 @@ public class AdvertisementServiceImpl {
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
         }
 
-        List<Long> allTextbookTagIds = textbookTagService.getAllTextbookTagIds();
+
         if (
                 requestPO.getIsTextbook() &&
-                        !allTextbookTagIds.contains(requestPO.getTagId())
+                        !redisService.existsTextbookTagId(requestPO.getTagId())
         ){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Tag id does not exist.");
         }

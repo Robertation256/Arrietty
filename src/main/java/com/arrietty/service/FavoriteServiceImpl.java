@@ -45,14 +45,15 @@ public class FavoriteServiceImpl {
     private ProfileServiceImpl profileService;
 
     public Set<String> getCurrentUserMarkedAdIds(){
-        Set<String> result = redisService.getCurrentUserMarkedAdIds();
+        Long userId = SessionContext.getUserId();
+        Set<String> result = redisService.getUserMarkedAdIds(userId);
         if(result==null){
             List<Favorite> favoriteList = favoriteMapper.selectByUserId(SessionContext.getUserId());
             result = new HashSet<>();
             for (Favorite favorite : favoriteList){
                 result.add(favorite.getAdId().toString());
+                redisService.addUserMarkedAdId(userId, favorite.getAdId().toString());
             }
-            redisService.addUserMarkedAdIds(result);
         }
         return result;
     }
@@ -107,7 +108,7 @@ public class FavoriteServiceImpl {
         }
 
         redisService.incrementUserMarkNum();
-        redisService.addUserMarkedAdId(id.toString());
+        redisService.addUserMarkedAdId(SessionContext.getUserId(), id.toString());
     }
 
     private void handleUnMark(Long id){
@@ -116,7 +117,7 @@ public class FavoriteServiceImpl {
         }
 
         favoriteMapper.deleteByUserIdAndAdId(SessionContext.getUserId(), id);
-        redisService.removeUserMarkedAdId(id.toString());
+        redisService.removeUserMarkedAdId(SessionContext.getUserId(), id.toString());
         redisService.incrementUserUnmarkNum();
     }
 

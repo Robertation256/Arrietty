@@ -1,8 +1,10 @@
 package com.arrietty.service;
 
 import com.arrietty.consts.RedisKey;
-import com.arrietty.dao.UserMapper;
+import com.arrietty.dao.*;
 import com.arrietty.entity.Bulletin;
+import com.arrietty.entity.Favorite;
+import com.arrietty.entity.TextbookTag;
 import com.arrietty.entity.User;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.pojo.SessionPO;
@@ -10,13 +12,12 @@ import com.arrietty.utils.session.SessionContext;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.support.atomic.RedisAtomicInteger;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @Author: Yuechuan Zhang
@@ -34,25 +35,116 @@ public class RedisServiceImpl {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private TextbookTagMapper textbookTagMapper;
+
+    @Autowired
+    private AdvertisementMapper advertisementMapper;
+
+    @Autowired
+    private BulletinMapper bulletinMapper;
+
+    @Autowired
+    private FavoriteMapper favoriteMapper;
+
+
+    @Autowired
+    private TapMapper tapMapper;
+
     public void init(){
         // 重启清空redis
         Set<String> keys = redisTemplate.keys("*");
         redisTemplate.delete(keys);
 
-        // initialize blacklisted user net id list
-        List<String> blockNetIds = userMapper.selectBlacklistedUserNetIds();
-        for(String netId: blockNetIds){
-            redisTemplate.opsForSet().add(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+        // initialize valid textbook tag ids
+        List<Long> textbookTagIds = textbookTagMapper.selectAllIds();
+        if(textbookTagIds!=null){
+            for(Long textbookId : textbookTagIds){
+                addToValidTextbookTagIdSet(textbookId);
+            }
         }
 
 
+        // initialize advertisement timestamp
+        getAdvertisementTimestamp();
+
+
+        // initialize blacklisted user net id list
+        List<String> blockNetIds = userMapper.selectBlacklistedUserNetIds();
+        if(blockNetIds!=null){
+            for(String netId: blockNetIds){
+                redisTemplate.opsForSet().add(RedisKey.BLACKLISTED_USER_NET_ID_SET, netId);
+            }
+        }
+
+
+        // initialize ad timestamp
+        Date timestamp = advertisementMapper.getLatestAdCreateTime();
+        if (timestamp==null){
+            timestamp = new Date();
+        }
+        setAdvertisementTimestamp(timestamp);
+
+        // initialize bulletin cache
+        List<Bulletin> bulletins = bulletinMapper.selectAll();
+        setBulletin(bulletins);
+
+        // initialize admin stats
         redisTemplate.opsForValue().set(RedisKey.USER_AD_UPLOAD_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_AD_UPDATE_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_AD_DELETE_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_MARK_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_UNMARK_NUM, 0);
         redisTemplate.opsForValue().set(RedisKey.USER_SEARCH_NUM, 0);
+
+
+        // initialize blacklist
+        List<String> blacklistedNetIds = userMapper.selectBlacklistedUserNetIds();
+        if(blacklistedNetIds!=null){
+            for (String blacklistedNetId: blacklistedNetIds){
+                addBlacklistedUserNetId(blacklistedNetId);
+            }
+        }
+
         
+    }
+
+    public void loadUserCache(User user){
+
+        Long userId = user.getId();
+
+        // load user profile
+        ProfilePO profile = new ProfilePO();
+        profile.setNetId(user.getNetId());
+        profile.setUsername(user.getUsername());
+        profile.setSchoolYear(user.getSchoolYear());
+        profile.setMajor(user.getMajor());
+        profile.setBio(user.getBio());
+        profile.setAvatarImageId(user.getAvatarImageId());
+        setUserProfile(userId, profile);
+
+
+        // load tapped ad ids
+        List<Long> adIds = tapMapper.selectTappedAdIdsBySenderId(userId);
+        if(adIds!=null){
+            for(Long id: adIds){
+                addUserTappedAdId(userId, id.toString());
+            }
+        }
+
+
+        // load marked ad ids
+        List<Favorite> favoriteList = favoriteMapper.selectByUserId(userId);
+        if(favoriteList!=null){
+            for (Favorite favorite : favoriteList){
+                addUserMarkedAdId(userId, favorite.getAdId().toString());
+            }
+        }
+
+
+        // load user has new notification flag
+        Boolean result = tapMapper.getUserHasNewNotification(userId);
+        setUserHasNewNotification(userId, result);
     }
 
     public void adDeleteCleanUp(Long adId){
@@ -105,20 +197,18 @@ public class RedisServiceImpl {
         return gson.fromJson(jsonString, ProfilePO.class);
     }
 
-    public List<Long> getAllTextbookTagIds(){
-        Object obj = redisTemplate.opsForValue().get(RedisKey.ALL_TEXTBOOK_TAG_ID);
-        if (obj == null) return null;
-        String str = (String) obj;
-        String[] ids = str.split(",");
-        List<Long> ret = new ArrayList<>(ids.length);
-        for(String id:ids){
-            ret.add(Long.parseLong(id));
-        }
-        return ret;
+    public boolean existsTextbookTagId(Long textbookTagId){
+        if(textbookTagId==null) return false;
+        Boolean result = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, textbookTagId.toString());
+        return Boolean.TRUE.equals(result);
     }
 
-    public void setAllTextbookTagIds(String val){
-        redisTemplate.opsForValue().set(RedisKey.ALL_TEXTBOOK_TAG_ID,val);
+    public void addToValidTextbookTagIdSet(Long textbookId){
+        redisTemplate.opsForSet().add(RedisKey.VALID_TEXTBOOK_TAG_ID_SET,textbookId.toString());
+    }
+
+    public void removeFromValidTextbookTagIdSet(Long textbookId){
+        redisTemplate.opsForSet().remove(RedisKey.VALID_TEXTBOOK_TAG_ID_SET,textbookId.toString());
     }
 
 
@@ -128,7 +218,9 @@ public class RedisServiceImpl {
     }
 
     public void addUserTappedAdIds(Long userId, Set<String> adIds){
-        redisTemplate.opsForSet().union(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(),adIds);
+        for(String id: adIds){
+            addUserTappedAdId(userId, id);
+        }
     }
 
     public Set<String> getUserTappedAdIds(Long userId){
@@ -178,24 +270,26 @@ public class RedisServiceImpl {
 
 
 
-    public Set<String> getCurrentUserMarkedAdIds(){
-        return redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString());
+    public Set<String> getUserMarkedAdIds(Long userId){
+        return redisTemplate.opsForSet().members(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+userId.toString());
     }
 
     public boolean isMarkedByCurrentUser(String adId){
         return redisTemplate.opsForSet().isMember(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
     }
 
-    public void addUserMarkedAdId(String adId){
-        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    public void addUserMarkedAdId(Long userId, String adId){
+        redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+userId.toString(), adId);
     }
 
-    public void addUserMarkedAdIds(Set<String> adIds){
-        redisTemplate.opsForSet().union(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adIds);
+    public void addUserMarkedAdIds(Long userId, Set<String> adIds){
+        for(String id: adIds){
+            addUserMarkedAdId(userId, id);
+        }
     }
 
-    public void removeUserMarkedAdId(String adId){
-        redisTemplate.opsForSet().remove(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+SessionContext.getUserId().toString(), adId);
+    public void removeUserMarkedAdId(Long userId, String adId){
+        redisTemplate.opsForSet().remove(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+userId.toString(), adId);
     }
 
     public List<Bulletin> getBulletin(){

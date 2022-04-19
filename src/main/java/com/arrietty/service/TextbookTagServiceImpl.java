@@ -23,19 +23,6 @@ public class TextbookTagServiceImpl {
     @Autowired
     private TextbookTagMapper textbookTagMapper;
 
-    public List<Long> getAllTextbookTagIds(){
-//        List<Long> ids = redisService.getAllTextbookTagIds();
-//        if(ids!=null){
-//            return ids;
-//        }
-        List<Long> ids = textbookTagMapper.selectAllIds();
-        List<String> strings = ids.stream().map(
-                Object::toString
-        ).collect(Collectors.toList());
-
-        redisService.setAllTextbookTagIds(String.join(",", strings));
-        return  ids;
-    }
 
     //TODO: 加上缓存机制, getTextbookTagById 和 getAllTags 区分
     public List<TextbookTag> getTextbookTagById(Long id){
@@ -82,15 +69,19 @@ public class TextbookTagServiceImpl {
                     throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Duplicate textbook tag exists.");
                 }
                 textbookTagMapper.insert(textbookTag);
+                redisService.addToValidTextbookTagIdSet(textbookTag.getId());
                 return textbookTag;
             }
         }
         //update
         else{
-            int recordUpdatedAmount = textbookTagMapper.updateByPrimaryKey(textbookTag);
-            if(recordUpdatedAmount==0){
-                throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag does not exist.");
+            synchronized (lock){
+                if(!redisService.existsTextbookTagId(textbookTag.getId())){
+                    throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag does not exist.");
+                }
+                textbookTagMapper.updateByPrimaryKey(textbookTag);
             }
+
         }
         return null;
     }
@@ -99,10 +90,15 @@ public class TextbookTagServiceImpl {
         if(textbookTag.getId()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag id is empty.");
         }
-        int recordDeletedAmount = textbookTagMapper.deleteByPrimaryKey(textbookTag.getId());
-        if(recordDeletedAmount==0){
-            throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag does not exist.");
+
+        synchronized (lock){
+            if(!redisService.existsTextbookTagId(textbookTag.getId())){
+                throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Textbook tag does not exist.");
+            }
+            textbookTagMapper.deleteByPrimaryKey(textbookTag.getId());
+            redisService.removeFromValidTextbookTagIdSet(textbookTag.getId());
         }
+
     }
 
 

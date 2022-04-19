@@ -22,6 +22,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Type;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,8 +92,12 @@ public class AuthServiceImpl {
 
             user = new User();
             user.setNetId(netId);
+            user.setAccessControl(AccessControl.REGULAR);
             userMapper.insert(user);
-            user = userMapper.selectByNetId(netId);
+        }
+        else {
+            user.setLastLoginTime(new Date());
+            userMapper.updateByPrimaryKey(user);
         }
 
 
@@ -101,10 +106,14 @@ public class AuthServiceImpl {
         sessionPO.setId(user.getId());
         sessionPO.setNetId(user.getNetId());
         sessionPO.setAccessControl(user.getAccessControl());
-        sessionPO.setLastLoginTime(user.getLastLoginTime());
+
 
         String sessionId = SessionIdGenerator.generate();
         redisService.setUserSession(sessionId, sessionPO);
+
+        // load user info cache
+        redisService.loadUserCache(user);
+
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
         Cookie sessionCookie = new Cookie("userSessionId", sessionId);

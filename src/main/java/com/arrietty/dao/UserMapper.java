@@ -61,4 +61,5 @@ public interface UserMapper {
     List<String> selectBlacklistedUserNetIds();
 
     int updateAccessControl(User record);
+
 }
