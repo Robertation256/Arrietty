@@ -1,6 +1,7 @@
 package com.arrietty.service;
 
 import com.arrietty.consts.RedisKey;
+import com.arrietty.consts.RedisKeyTimeout;
 import com.arrietty.dao.*;
 import com.arrietty.entity.Bulletin;
 import com.arrietty.entity.Favorite;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: Yuechuan Zhang
@@ -145,6 +147,18 @@ public class RedisServiceImpl {
         // load user has new notification flag
         Boolean result = tapMapper.getUserHasNewNotification(userId);
         setUserHasNewNotification(userId, result);
+
+        //set expiration time
+        extendUserCache(userId);
+    }
+
+
+    public void extendUserCache(Long userId){
+        redisTemplate.expire(RedisKey.USER_PROFILE+userId.toString(), RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
+        redisTemplate.expire(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+userId.toString(), RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
+        redisTemplate.expire(RedisKey.CURRENT_USER_MARKED_AD_ID_LIST+userId.toString(), RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
+        redisTemplate.expire(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString(), RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
+
     }
 
     public void adDeleteCleanUp(Long adId){
@@ -162,10 +176,14 @@ public class RedisServiceImpl {
         return redisTemplate.opsForValue().get(key);
     }
 
+    public void extendUserSession(String userSessionId){
+        redisTemplate.expire(RedisKey.USER_SESSION+userSessionId, RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
+    }
+
     public void setUserSession(String userSessionId, SessionPO sessionPO){
         Gson gson = new Gson();
         String serialized = gson.toJson(sessionPO, SessionPO.class);
-        redisTemplate.opsForValue().set(RedisKey.USER_SESSION+userSessionId,serialized);
+        redisTemplate.opsForValue().set(RedisKey.USER_SESSION+userSessionId,serialized, RedisKeyTimeout.USER_CACHE_TIMEOUT, TimeUnit.MINUTES);
     }
 
     public SessionPO getUserSession(String  userSessionId){

@@ -79,6 +79,11 @@ public class AuthAspect {
 
         // otherwise initialize thread local with user session
         SessionContext.initialize(userSessionId,session);
+
+        // extend user session and cache expiration timeout
+        redisService.extendUserSession(userSessionId);
+        redisService.extendUserCache(session.getId());
+
         return joinPoint.proceed();
 
     }
@@ -102,12 +107,16 @@ public class AuthAspect {
 
         }
 
-        // otherwise initialize thread local with user session
-        SessionContext.initialize(userSessionId,session);
-
         if(!session.isAdmin()){
             throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
         }
+
+        // otherwise initialize thread local with user session
+        SessionContext.initialize(userSessionId,session);
+
+        // extend user session and cache expiration timeout
+        redisService.extendUserSession(userSessionId);
+        redisService.extendUserCache(session.getId());
 
         return joinPoint.proceed();
 

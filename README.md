@@ -1,10 +1,28 @@
-### Elasticsearch mapping
+# Redis
+
+extend by 15 min upon each API request
+
+
+
+# volatile-lfu
+
+
+
+
+
+
+
+
+
+
+
+# Elasticsearch 结构
 
 更新ES mapping instruction
 
 - 删除旧mapping： 
 
-​		method：delete
+​		method: delete
 
 ​		url: localhost:9200/advertisement
 
@@ -52,6 +70,10 @@
 ```
 
 
+
+
+
+# 接口格式
 
 ### Advertisement搜索接口
 
