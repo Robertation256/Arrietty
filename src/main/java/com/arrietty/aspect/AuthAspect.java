@@ -15,6 +15,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,8 @@ import javax.servlet.http.HttpServletResponse;
 @Component
 @Order(0)
 public class AuthAspect {
+
+    public static final Logger logger = LoggerFactory.getLogger(AuthAspect.class);
 
     @Autowired
     private RedisServiceImpl redisService;
@@ -61,9 +65,12 @@ public class AuthAspect {
 
     private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes==null){
+            logger.warn("RequestAttributes is null.");
+            return null;
+        }
+
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-
-
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
@@ -72,8 +79,13 @@ public class AuthAspect {
         // user session expires or user has not yet logged in, redirect to Shibboleth
         if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+            if(httpServletResponse==null){
+                logger.warn("HttpServletResponse is null.");
+                return null;
+            }
             httpServletResponse.setHeader("Location", authService.getSSOUrl());
             httpServletResponse.setStatus(302);
+            logger.info("Redirect to Shibboleth SSO");
             return null;
         }
 
@@ -90,9 +102,12 @@ public class AuthAspect {
 
     private Object handleAdminAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes==null){
+            logger.warn("RequestAttributes is null.");
+            return null;
+        }
+
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-
-
         HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
         String userSessionId = requestWrapper.getCookieValue("userSessionId");
 
@@ -101,6 +116,10 @@ public class AuthAspect {
         // user session expires or user has not yet logged in, redirect to Shibboleth
         if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+            if(httpServletResponse==null){
+                logger.warn("HttpServletResponse is null.");
+                return null;
+            }
             httpServletResponse.setHeader("Location", authService.getSSOUrl());
             httpServletResponse.setStatus(302);
             return null;
@@ -108,7 +127,8 @@ public class AuthAspect {
         }
 
         if(!session.isAdmin()){
-            throw new LogicException(ErrorCode.UNAUTHORIZED_USER_REQUEST, "Illegal Access");
+            logger.info(String.format("[netId: %s] Unauthorized request on admin API.", session.getNetId()));
+            return null;
         }
 
         // otherwise initialize thread local with user session

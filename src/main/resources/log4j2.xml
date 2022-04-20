@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    status="warn" 日志框架本身的输出日志级别，可以修改为debug
+    monitorInterval="1800" 自动加载配置文件的间隔时间，不低于 1800秒；生产环境中修改配置文件，是热更新，无需重启应用
+ -->
+<Configuration status="WARN" monitorInterval="1800">
+    <!--
+      全局属性配置
+       使用时通过:${name}
+       -->
+    <properties>
+        <property name="LOG_HOME">C:/Users/yz391/Desktop/log</property>
+        <property name="SERVICE_LOG_FILE_NAME">service-log</property>
+    </properties>
+
+    <!-- 日志处理 -->
+    <Appenders>
+        <!-- 控制台输出 appender，SYSTEM_OUT输出黑色，SYSTEM_ERR输出红色 -->
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="[%d{yyyy-MM-dd HH:mm:ss}] [%t] [%-5level] [%logger{36}] - %msg%n" />
+        </Console>
+
+        <RollingRandomAccessFile name="service-log"
+                                 fileName="${LOG_HOME}/${SERVICE_LOG_FILE_NAME}-${date:yyyy-MM-dd}.log"
+                                 filePattern="${LOG_HOME}/${SERVICE_LOG_FILE_NAME}-%d{yyyy-MM-dd}-%i.log">
+            <PatternLayout
+                    pattern="%date{yyyy-MM-dd HH:mm:ss.SSS} %level [%thread][%file:%line] - %msg%n"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="20 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${LOG_HOME}" maxDepth="1">
+                    <IfFileName glob="${SERVICE_LOG_FILE_NAME}-*.log" />
+                    <IfLastModified age="30d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+
+        </RollingRandomAccessFile>
+
+    </Appenders>
+    <!-- logger 定义 -->
+    <Loggers>
+        <Logger name="org.springframework" level="info">
+            <AppenderRef ref="console" />
+        </Logger>
+
+        <logger name="org.mybatis" level="info">
+            <AppenderRef ref="console"/>
+        </logger>
+
+        <Root level="info">
+            <AppenderRef ref="service-log" />
+            <AppenderRef ref="console" />
+        </Root>
+    </Loggers>
+</Configuration>

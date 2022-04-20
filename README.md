@@ -2,11 +2,15 @@
 
 extend by 15 min upon each API request
 
+内存超限替换策略：volatile-lfu
 
 
-# volatile-lfu
 
+# 日志
 
+采用log4j2
+
+默认保留40个日志文件，每天新增一个
 
 
 
@@ -620,6 +624,37 @@ response:
         "message": "Success"
     },
     "body":["yz3919","hhj1981"]
+}
+```
+
+### Admin Statistics
+
+```json
+url:/adminStatistics
+method:get
+request:null
+response: 
+{
+    "responseStatus": {
+        "status": "Ok",
+        "message": "Success"
+    },
+    "body":[
+        {
+            "id":1,
+            "totalUserNum":12,
+            "loginUserNum":5,
+            "adUploadNum":20,
+            "adEditNum":11,
+            "adDeleteNum":0,
+            "totalAdNum":50,
+            "tapRequestNum":14,
+            "markRequestNum":12,
+            "unmarkRequestNum":11,
+            "searchRequestNum":40,
+            "date":"April 03 2022"
+        }
+    ]
 }
 ```
 

@@ -8,6 +8,8 @@ import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionIdGenerator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -28,6 +30,8 @@ import java.util.Map;
 
 @Service
 public class AuthServiceImpl {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Value("${auth.token-obtain-url}")
     private String TOKEN_OBTAIN_URL;
@@ -63,6 +67,10 @@ public class AuthServiceImpl {
 
         Type type = new TypeToken<SSOResponsePO<TokenResponsePO>>(){}.getType();
         SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, type);
+        if(response==null || response.getResult()==null){
+            logger.warn(String.format("Invalid response format in obtaining SSO url: %s", rawResponse));
+            return null;
+        }
         return response.getResult().getUrl();
     }
 

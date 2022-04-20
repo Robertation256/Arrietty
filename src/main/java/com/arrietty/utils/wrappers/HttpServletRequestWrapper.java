@@ -13,7 +13,7 @@ import java.util.Map;
 // 取出cookie 而已
 public class HttpServletRequestWrapper {
 
-    private Map<String, String> cookieMap;
+    private final Map<String, String> cookieMap;
     private HttpServletRequest rawServletRequest;
 
     public HttpServletRequestWrapper(HttpServletRequest request){
