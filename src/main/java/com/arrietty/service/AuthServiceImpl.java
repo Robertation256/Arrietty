@@ -87,6 +87,18 @@ public class AuthServiceImpl {
 
         // this user is blacklisted revoke session injection
         if(redisService.isNetIdBlacklisted(netId)){
+            logger.info(String.format("[netId: %s] Login failed due to blacklist.", netId));
+            return false;
+        }
+
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes==null){
+            logger.warn(String.format("[netId: %s] RequestAttributes is null.",netId));
+            return false;
+        }
+        HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
+        if(response==null){
+            logger.warn(String.format("[netId: %s] HttpServletResponse is null.",netId));
             return false;
         }
 
@@ -102,6 +114,7 @@ public class AuthServiceImpl {
             user.setNetId(netId);
             user.setAccessControl(AccessControl.REGULAR);
             userMapper.insert(user);
+            logger.info(String.format("[netId: %s] New user account created.", netId));
         }
         else {
             user.setLastLoginTime(new Date());
@@ -118,17 +131,16 @@ public class AuthServiceImpl {
 
         String sessionId = SessionIdGenerator.generate();
         redisService.setUserSession(sessionId, sessionPO);
+        logger.info(String.format("[netId: %s] User login succeeds.",netId));
 
         // load user info cache
         redisService.loadUserCache(user);
+        logger.debug(String.format("[netId: %s] User cache loaded", netId));
 
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        HttpServletResponse response = ((ServletRequestAttributes) requestAttributes).getResponse();
         Cookie sessionCookie = new Cookie("userSessionId", sessionId);
         response.addCookie(sessionCookie);
 
         return true;
-
     }
 
     private String getNetIdByToken(String token){

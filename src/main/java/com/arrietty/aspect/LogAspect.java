@@ -39,6 +39,10 @@ public class LogAspect {
     @Around("controllerLogPointCut()")
     public Object controllerLog(ProceedingJoinPoint joinPoint) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if(requestAttributes==null){
+            logger.warn("RequestAttributes is null.");
+            return null;
+        }
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
 
         Object response;
@@ -57,15 +61,14 @@ public class LogAspect {
         }
         // runtime error
         catch (Throwable e){
-            logger.error(e.toString());
+            logger.warn("[Warning] "+e.toString());
         }
 
         return new Gson().toJson(Response.buildFailedResponse(ErrorCode.INTERNAL_ERROR, "Internal error."));
     }
 
     private void formattedLog(HttpServletRequest request, String response){
-        String s = String.format("%s - [%s] [%s] [%s]\n[response] %s",
-                dtf.format(LocalDateTime.now()),
+        String s = String.format("[method: %s] [url: %s] [url_param: %s] [response: %s]",
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString(),

@@ -60,6 +60,7 @@ public class AuthAspect {
             return handleAdminAuth(joinPoint);
         }
 
+        // no auth required
             return  joinPoint.proceed();
         }
 
@@ -83,7 +84,12 @@ public class AuthAspect {
                 logger.warn("HttpServletResponse is null.");
                 return null;
             }
-            httpServletResponse.setHeader("Location", authService.getSSOUrl());
+            String redirectUrl = authService.getSSOUrl();
+            if(redirectUrl==null){
+                //TODO: add a real error page
+                redirectUrl = "/error";
+            }
+            httpServletResponse.setHeader("Location", redirectUrl);
             httpServletResponse.setStatus(302);
             logger.info("Redirect to Shibboleth SSO");
             return null;
@@ -120,7 +126,13 @@ public class AuthAspect {
                 logger.warn("HttpServletResponse is null.");
                 return null;
             }
-            httpServletResponse.setHeader("Location", authService.getSSOUrl());
+
+            String redirectUrl = authService.getSSOUrl();
+            if(redirectUrl==null){
+                //TODO: add a real error page
+                redirectUrl = "/error";
+            }
+            httpServletResponse.setHeader("Location", redirectUrl);
             httpServletResponse.setStatus(302);
             return null;
 
