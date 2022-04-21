@@ -113,7 +113,6 @@
             <artifactId>spring-boot-starter-log4j2</artifactId>
         </dependency>
 
-
     </dependencies>
 <!--    only used when auto generating mappers-->
     <build>

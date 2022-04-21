@@ -9,6 +9,10 @@ server:
     trust-store: classpath:ssl/trustKeys.p12
     trust-store-password: robert
     trust-store-type: PKCS12
+  error:
+    path: /error
+    whitelabel:
+      enabled: false
 
 spring:
   datasource:
@@ -32,6 +36,7 @@ spring:
     port: 5672
     username: guest
     password: guest
+
 
 mybatis:
   mapper-locations: classpath:/mapper/*Mapper.xml
