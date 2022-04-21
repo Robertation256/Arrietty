@@ -72,7 +72,6 @@ public class ServiceController {
     private AdminServiceImpl adminService;
 
 
-
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/home")
@@ -81,6 +80,27 @@ public class ServiceController {
     }
 
     @Auth(authMode=AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/myPosts")
+    public ModelAndView userPosts(){
+        return new ModelAndView("index.html");
+    }
+
+    @Auth(authMode=AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/favorite")
+    public ModelAndView userFavorite(){
+        return new ModelAndView("index.html");
+    }
+
+    @Auth(authMode=AuthModeEnum.REGULAR)
+    @ResponseBody
+    @GetMapping("/notification")
+    public ModelAndView userNotification(){
+        return new ModelAndView("index.html");
+    }
+
+    @Auth(authMode=AuthModeEnum.ADMIN)
     @ResponseBody
     @GetMapping("/admin")
     public ModelAndView userAdmin(){
@@ -259,7 +279,7 @@ public class ServiceController {
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
-    @GetMapping("/notification")
+    @GetMapping("/getNotification")
     public String getNotification() throws LogicException {
         List<TapPO> result = tapService.getCurrentUserNotifications();
         return new Gson().toJson(Response.buildSuccessResponse(TapPO.class, result));
@@ -284,7 +304,7 @@ public class ServiceController {
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
-    @GetMapping("/favorite")
+    @GetMapping("/getFavorite")
     public String getFavorite() throws LogicException {
         List<SearchResultItem> result =  favoriteService.handleGetFavorite();
         return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, result));

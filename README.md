@@ -442,7 +442,7 @@ method: get
 ### Notification
 
 ```json
-url: /notification
+url: /getNotification
 method: get
 request: null
 response:
@@ -492,7 +492,7 @@ response:
 }
 
 
-url: /favorite
+url: /getFavorite
 method: get
 request: null
 response:
