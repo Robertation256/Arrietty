@@ -49,14 +49,14 @@ public class LogAspect {
         try{
             response = joinPoint.proceed();
             if(response instanceof String){
-                formattedLog(request,(String)response);
+                formattedLog(request, joinPoint, (String)response);
                 return response;
             }
             return response;
         }
         catch (LogicException e){
             String json = new Gson().toJson(Response.buildFailedResponse(e.errorCode, e.errorMessage));
-            formattedLog(request,json);
+            formattedLog(request, joinPoint, json);
             return json;
         }
         // runtime error
@@ -67,11 +67,12 @@ public class LogAspect {
         return new Gson().toJson(Response.buildFailedResponse(ErrorCode.INTERNAL_ERROR, "Internal error."));
     }
 
-    private void formattedLog(HttpServletRequest request, String response){
-        String s = String.format("[method: %s] [url: %s] [url_param: %s] [response: %s]",
+    private void formattedLog(HttpServletRequest request,ProceedingJoinPoint joinPoint,  String response){
+        String s = String.format("[method: %s] [url: %s] [url_param: %s] [body: %s] [response: %s]",
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString(),
+                new Gson().toJson(joinPoint.getArgs()),
                 response
         );
 
