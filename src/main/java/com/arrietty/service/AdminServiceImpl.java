@@ -3,7 +3,10 @@ package com.arrietty.service;
 
 import com.arrietty.consts.AccessControl;
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.cron.AdminStatisticsTask;
+import com.arrietty.dao.AdminDailyStatisticsMapper;
 import com.arrietty.dao.UserMapper;
+import com.arrietty.entity.AdminDailyStatistics;
 import com.arrietty.entity.User;
 import com.arrietty.exception.LogicException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class BlacklistServiceImpl {
+public class AdminServiceImpl {
 
     private static final String UPDATE_LOCK = "black_list_update_lock";
 
@@ -22,7 +25,15 @@ public class BlacklistServiceImpl {
     private UserMapper userMapper;
 
     @Autowired
+    private AdminDailyStatisticsMapper adminDailyStatisticsMapper;
+
+    @Autowired
     private RedisServiceImpl redisService;
+
+    public List<AdminDailyStatistics> getAdminStatistics(){
+        return adminDailyStatisticsMapper.getWeeklyStatistics();
+    }
+
 
     public List<String> getBlacklistedUserNetIds(){
         Set<String> result = redisService.getBlacklistedUserNetIds();

@@ -108,10 +108,10 @@ public class SearchServiceImpl {
         // textbook match by textbook title, other item match by ad title
         if(requestPO.getKeyword()!=null && requestPO.getKeyword().length()>0){
             if("textbook".equals(requestPO.getAdType())){
-                queryFilter.filter(QueryBuilders.matchPhraseQuery("textbook_tag.title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.matchQuery("textbook_tag.title", requestPO.getKeyword()));
             }
             else {
-                queryFilter.filter(QueryBuilders.matchPhraseQuery("ad_title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.matchQuery("ad_title", requestPO.getKeyword()));
             }
         }
         
@@ -130,7 +130,7 @@ public class SearchServiceImpl {
             for (String tag : tags){
                 tagFilter.should(QueryBuilders.termQuery("other_tag", tag));
             }
-            queryFilter.must(tagFilter);
+            queryFilter.filter(tagFilter);
         }
 
 

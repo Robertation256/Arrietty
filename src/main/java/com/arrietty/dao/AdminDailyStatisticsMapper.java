@@ -46,4 +46,7 @@ public interface AdminDailyStatisticsMapper {
      * @mbg.generated
      */
     int updateByPrimaryKey(AdminDailyStatistics record);
+
+    // pull the statistics of last seven days
+    List<AdminDailyStatistics> getWeeklyStatistics();
 }

@@ -69,7 +69,7 @@ public class ServiceController {
     private BulletinServiceImpl bulletinService;
 
     @Autowired
-    private BlacklistServiceImpl blacklistService;
+    private AdminServiceImpl adminService;
 
 
 
@@ -314,7 +314,7 @@ public class ServiceController {
     @ResponseBody
     @GetMapping("/blacklist")
     public String getBlacklist() throws LogicException {
-        List<String> result = blacklistService.getBlacklistedUserNetIds();
+        List<String> result = adminService.getBlacklistedUserNetIds();
         return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
     }
 
@@ -322,12 +322,18 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/updateBlacklist")
     public String updateBlacklist(@RequestParam("action") String action, @RequestParam("netId") String netId) throws LogicException {
-        blacklistService.updateBlacklist(action,netId);
+        adminService.updateBlacklist(action,netId);
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-
-
+    @Auth(authMode = AuthModeEnum.ADMIN)
+    @ResponseBody
+    @GetMapping("/adminStatistics")
+    public String getAdminStatistics(){
+        List<AdminDailyStatistics> result = adminService.getAdminStatistics();
+        return new Gson().toJson(Response.buildSuccessResponse(AdminDailyStatistics.class, result));
+    }
+    
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/test")

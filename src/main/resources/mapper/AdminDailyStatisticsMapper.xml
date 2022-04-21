@@ -84,4 +84,13 @@
     `date`
     from admin_daily_statistics
   </select>
+  <select id="getWeeklyStatistics" resultMap="BaseResultMap">
+    select id, total_user_num, login_user_num, ad_upload_num, ad_edit_num, ad_delete_num,
+    total_ad_num, tap_request_num, mark_request_num, unmark_request_num, search_request_num,
+    `date`
+    from admin_daily_statistics
+    order by id desc
+    limit 7
+  </select>
+
 </mapper>
