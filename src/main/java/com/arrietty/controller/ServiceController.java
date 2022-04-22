@@ -71,37 +71,37 @@ public class ServiceController {
     @Autowired
     private AdminServiceImpl adminService;
 
+    @Auth(authMode=AuthModeEnum.REGULAR)
+    @GetMapping("/")
+    public ModelAndView root(){
+        return new ModelAndView("index.html");
+    }
 
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @ResponseBody
     @GetMapping("/home")
     public ModelAndView userHome(){
         return new ModelAndView("index.html");
     }
 
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @ResponseBody
     @GetMapping("/myPosts")
     public ModelAndView userPosts(){
         return new ModelAndView("index.html");
     }
 
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @ResponseBody
     @GetMapping("/favorite")
     public ModelAndView userFavorite(){
         return new ModelAndView("index.html");
     }
 
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @ResponseBody
     @GetMapping("/notification")
     public ModelAndView userNotification(){
         return new ModelAndView("index.html");
     }
 
     @Auth(authMode=AuthModeEnum.ADMIN)
-    @ResponseBody
     @GetMapping("/admin")
     public ModelAndView userAdmin(){
         return new ModelAndView("index.html");
