@@ -108,10 +108,10 @@ public class SearchServiceImpl {
         // textbook match by textbook title, other item match by ad title
         if(requestPO.getKeyword()!=null && requestPO.getKeyword().length()>0){
             if("textbook".equals(requestPO.getAdType())){
-                queryFilter.must(QueryBuilders.matchQuery("textbook_tag.title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.fuzzyQuery("textbook_tag.title", requestPO.getKeyword()));
             }
             else {
-                queryFilter.must(QueryBuilders.matchQuery("ad_title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.fuzzyQuery("ad_title", requestPO.getKeyword()));
             }
         }
         
