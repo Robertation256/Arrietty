@@ -36,8 +36,7 @@ public class AuthController {
         }
 
         // login failed redirect to 401 page
-        response.setStatus(401);
-        response.setHeader("Location", "https://localhost:8000/error");
+        response.setHeader("Location", "https://localhost:8000/401");
         return "login failed";
     }
 
