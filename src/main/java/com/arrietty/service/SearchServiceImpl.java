@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -19,6 +20,7 @@ import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.completion.FuzzyOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -108,10 +110,10 @@ public class SearchServiceImpl {
         // textbook match by textbook title, other item match by ad title
         if(requestPO.getKeyword()!=null && requestPO.getKeyword().length()>0){
             if("textbook".equals(requestPO.getAdType())){
-                queryFilter.must(QueryBuilders.fuzzyQuery("textbook_tag.title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.matchQuery("textbook_tag.title", requestPO.getKeyword()).fuzziness(Fuzziness.AUTO).prefixLength(3));
             }
             else {
-                queryFilter.must(QueryBuilders.fuzzyQuery("ad_title", requestPO.getKeyword()));
+                queryFilter.must(QueryBuilders.matchQuery("ad_title", requestPO.getKeyword()).fuzziness(Fuzziness.AUTO).prefixLength(3));
             }
         }
         
