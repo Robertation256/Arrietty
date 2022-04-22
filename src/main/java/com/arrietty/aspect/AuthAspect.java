@@ -1,9 +1,9 @@
 package com.arrietty.aspect;
 
 import com.arrietty.annotations.Auth;
+import com.arrietty.annotations.RedirectPolicy;
 import com.arrietty.consts.AuthModeEnum;
-import com.arrietty.consts.ErrorCode;
-import com.arrietty.exception.LogicException;
+import com.arrietty.consts.RedirectPolicyEnum;
 import com.arrietty.pojo.SessionPO;
 import com.arrietty.service.AuthServiceImpl;
 import com.arrietty.service.RedisServiceImpl;
@@ -26,7 +26,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import java.lang.reflect.Method;
 
 
 /**
@@ -49,22 +49,11 @@ public class AuthAspect {
 
     @Around("@annotation(com.arrietty.annotations.Auth)")
     public Object authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
-        AuthModeEnum authMode = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Auth.class).authMode();
+        Method method = ((MethodSignature)joinPoint.getSignature()).getMethod();
+        AuthModeEnum authMode = method.getAnnotation(Auth.class).authMode();
+        RedirectPolicyEnum redirectPolicy = method.getAnnotation(RedirectPolicy.class).redirectPolicy();
 
-        // regular user auth
-        if (authMode.equals(AuthModeEnum.REGULAR)){
-            return handleRegularAuth(joinPoint);
-        }
-        // admin auth
-        else if (authMode.equals(AuthModeEnum.ADMIN)){
-            return handleAdminAuth(joinPoint);
-        }
 
-        // no auth required
-            return  joinPoint.proceed();
-        }
-
-    private Object handleRegularAuth(ProceedingJoinPoint joinPoint) throws Throwable{
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if(requestAttributes==null){
             logger.warn("RequestAttributes is null.");
@@ -77,82 +66,46 @@ public class AuthAspect {
 
         SessionPO session = null;
 
-        // user session expires or user has not yet logged in, redirect to Shibboleth
+        // user session expires or user has not yet logged in
         if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
             if(httpServletResponse==null){
                 logger.warn("HttpServletResponse is null.");
                 return null;
             }
-            String redirectUrl = authService.getSSOUrl();
-            if(redirectUrl==null){
-                //TODO: add a real error page
-                redirectUrl = "/error";
-            }
-            httpServletResponse.setHeader("Location", redirectUrl);
             httpServletResponse.setStatus(302);
-            logger.info("Redirect to Shibboleth SSO");
-            return null;
-        }
 
-        // otherwise initialize thread local with user session
-        SessionContext.initialize(userSessionId,session);
-
-        // extend user session and cache expiration timeout
-        redisService.extendUserSession(userSessionId);
-        redisService.extendUserCache(session.getId());
-
-        return joinPoint.proceed();
-
-    }
-
-    private Object handleAdminAuth(ProceedingJoinPoint joinPoint) throws Throwable{
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if(requestAttributes==null){
-            logger.warn("RequestAttributes is null.");
-            return null;
-        }
-
-        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-        HttpServletRequestWrapper requestWrapper = new HttpServletRequestWrapper(request);
-        String userSessionId = requestWrapper.getCookieValue("userSessionId");
-
-        SessionPO session = null;
-
-        // user session expires or user has not yet logged in, redirect to Shibboleth
-        if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
-            HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
-            if(httpServletResponse==null){
-                logger.warn("HttpServletResponse is null.");
-                return null;
+            //redirect to Shibboleth if redirect policy is turned on
+            if(RedirectPolicyEnum.REDIRECT.equals(redirectPolicy)){
+                String redirectUrl = authService.getSSOUrl();
+                if(redirectUrl==null){
+                    //TODO: add a real error page
+                    redirectUrl = "/error";
+                }
+                httpServletResponse.setHeader("Location", redirectUrl);
+                logger.info("Redirect to Shibboleth SSO");
             }
-
-            String redirectUrl = authService.getSSOUrl();
-            if(redirectUrl==null){
-                //TODO: add a real error page
-                redirectUrl = "/error";
+            //redirect to 401 if non-login user visits an API annotated by NO_REDIRECT
+            else {
+                httpServletResponse.setHeader("Location", "/401");
+                logger.info("Redirect to 401 page");
             }
-            httpServletResponse.setHeader("Location", redirectUrl);
-            httpServletResponse.setStatus(302);
             return null;
-
         }
 
-        if(!session.isAdmin()){
+        // admin api access control
+        if (authMode.equals(AuthModeEnum.ADMIN) && !session.isAdmin()){
             logger.info(String.format("[netId: %s] Unauthorized request on admin API.", session.getNetId()));
             return null;
         }
 
         // otherwise initialize thread local with user session
         SessionContext.initialize(userSessionId,session);
-
         // extend user session and cache expiration timeout
         redisService.extendUserSession(userSessionId);
         redisService.extendUserCache(session.getId());
 
-        return joinPoint.proceed();
-
+        return  joinPoint.proceed();
     }
-
 
 }

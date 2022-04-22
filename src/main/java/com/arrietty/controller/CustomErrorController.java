@@ -36,6 +36,11 @@ public class CustomErrorController implements ErrorController {
         return new ModelAndView("401.html");
     }
 
+    @RequestMapping("/500")
+    public ModelAndView get500(Model model){
+        return new ModelAndView("500.html");
+    }
+
     @Override
     public String getErrorPath() {
         return "/error";
