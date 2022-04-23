@@ -76,10 +76,11 @@ public class AdvertisementServiceImpl {
         return result;
     }
 
-    @Transactional(rollbackFor = Exception.class)
+
     public AdvertisementResponsePO handlePostAdvertisement(String action, PostAdvertisementRequestPO requestPO) throws LogicException {
         if("update".equals(action)){
             if(requestPO.getId()==null){
+                checkAdvertisementFormat(requestPO);
                 return insertAdvertisement(requestPO);
             }
             return updateAdvertisement(requestPO);
@@ -95,10 +96,8 @@ public class AdvertisementServiceImpl {
 
 
 
-    
-    private AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{
-        checkAdvertisementFormat(requestPO);
-
+    @Transactional(rollbackFor = Exception.class)
+    public AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{
         List<String> imageIds = new ArrayList<>(requestPO.getImages().size());
         for(MultipartFile imageFile: requestPO.getImages()){
             // TODO: 单张insert 改为batch insert
@@ -149,8 +148,8 @@ public class AdvertisementServiceImpl {
 
 
 
-
-    private AdvertisementResponsePO updateAdvertisement(PostAdvertisementRequestPO requestPO){
+    @Transactional(rollbackFor = Exception.class)
+    public AdvertisementResponsePO updateAdvertisement(PostAdvertisementRequestPO requestPO){
         if(
                 requestPO.getPrice()==null ||
                         (requestPO.getPrice().compareTo(MIN_PRICE)<0 ||
@@ -221,7 +220,8 @@ public class AdvertisementServiceImpl {
 
     }
 
-    private void deleteAdvertisement(PostAdvertisementRequestPO requestPO) throws  LogicException {
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteAdvertisement(PostAdvertisementRequestPO requestPO) throws  LogicException {
         if(requestPO.getId()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
         }
@@ -248,6 +248,7 @@ public class AdvertisementServiceImpl {
         mqService.pushAdEvent(event);
 
     }
+
 
     private void checkAdvertisementFormat(PostAdvertisementRequestPO requestPO) throws LogicException{
         if(requestPO==null ||

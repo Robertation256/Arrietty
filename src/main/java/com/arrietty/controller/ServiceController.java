@@ -2,10 +2,7 @@ package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
 import com.arrietty.annotations.RateLimit;
-import com.arrietty.consts.AuthModeEnum;
-import com.arrietty.consts.ErrorCode;
-import com.arrietty.consts.RateLimitPolicy;
-import com.arrietty.consts.RedirectPolicyEnum;
+import com.arrietty.consts.*;
 import com.arrietty.entity.*;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
@@ -15,6 +12,7 @@ import com.google.gson.Gson;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +20,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
-
+import java.util.Set;
 
 
 /**
@@ -396,7 +394,10 @@ public class ServiceController {
         List<AdminDailyStatistics> result = adminService.getAdminStatistics();
         return new Gson().toJson(Response.buildSuccessResponse(AdminDailyStatistics.class, result));
     }
-    
+
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/test")
@@ -407,6 +408,12 @@ public class ServiceController {
 //        advertisementService.handlePostAdvertisement("delete",po);
 
 //        System.out.println(searchService.getMyAdvertisement());
+
+
+        Set<String> result = redisTemplate.opsForSet().members(RedisKey.VALID_TEXTBOOK_TAG_ID_SET);
+        Long l = 11L;
+        Boolean bool1 = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, l.toString());
+        Boolean bool2 = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, l);
         return "hii";
 
 //        List<String> result = searchService.handleKeywordSuggestion("other","a");
