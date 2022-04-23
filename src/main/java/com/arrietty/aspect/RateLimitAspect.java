@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -53,7 +54,7 @@ public class RateLimitAspect {
                 logger.warn("HttpServletResponse is null.");
                 return null;
             }
-            httpServletResponse.setStatus(401);
+            httpServletResponse.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
             // log upon exceeding the threshold
             if(requestNum==RATE_LIMIT+1){
                 logger.warn(String.format("[Rate limit exceeded] [ip: %s] [url: %s]", ip, request.getRequestURL()));
