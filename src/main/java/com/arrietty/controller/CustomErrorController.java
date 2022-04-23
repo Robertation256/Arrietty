@@ -26,9 +26,17 @@ public class CustomErrorController implements ErrorController {
             else if(statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
                 return new ModelAndView("500.html");
             }
+            else if (statusCode==HttpStatus.UNAUTHORIZED.value()){
+                return new ModelAndView("401.html");
+            }
         }
 
         return new ModelAndView("500.html");
+    }
+
+    @RequestMapping("/404")
+    public ModelAndView get404(Model model){
+        return new ModelAndView("404.html");
     }
 
     @RequestMapping("/401")

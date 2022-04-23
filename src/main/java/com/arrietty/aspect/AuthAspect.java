@@ -1,7 +1,6 @@
 package com.arrietty.aspect;
 
 import com.arrietty.annotations.Auth;
-import com.arrietty.annotations.RedirectPolicy;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.RedirectPolicyEnum;
 import com.arrietty.pojo.SessionPO;
@@ -36,7 +35,7 @@ import java.lang.reflect.Method;
 
 @Aspect
 @Component
-@Order(0)
+@Order(1)
 public class AuthAspect {
 
     public static final Logger logger = LoggerFactory.getLogger(AuthAspect.class);
@@ -49,9 +48,9 @@ public class AuthAspect {
 
     @Around("@annotation(com.arrietty.annotations.Auth)")
     public Object authenticateRequest(ProceedingJoinPoint joinPoint) throws Throwable {
-        Method method = ((MethodSignature)joinPoint.getSignature()).getMethod();
-        AuthModeEnum authMode = method.getAnnotation(Auth.class).authMode();
-        RedirectPolicyEnum redirectPolicy = method.getAnnotation(RedirectPolicy.class).redirectPolicy();
+        Auth annotation = ((MethodSignature)joinPoint.getSignature()).getMethod().getAnnotation(Auth.class);
+        AuthModeEnum authMode = annotation.authMode();
+        RedirectPolicyEnum redirectPolicy = annotation.redirectPolicy();
 
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
@@ -87,8 +86,7 @@ public class AuthAspect {
             }
             //redirect to 401 if non-login user visits an API annotated by NO_REDIRECT
             else {
-                httpServletResponse.setHeader("Location", "/401");
-                logger.info("Redirect to 401 page");
+                httpServletResponse.setHeader("Location", "/404");
             }
             return null;
         }

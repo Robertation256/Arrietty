@@ -1,6 +1,7 @@
 package com.arrietty.annotations;
 
 import com.arrietty.consts.AuthModeEnum;
+import com.arrietty.consts.RedirectPolicyEnum;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -16,5 +17,6 @@ import java.lang.annotation.Target;
 public @interface Auth {
 
     AuthModeEnum authMode() default AuthModeEnum.REGULAR;
+    RedirectPolicyEnum redirectPolicy() default RedirectPolicyEnum.NO_REDIRECT;
 
 }

@@ -14,10 +14,15 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Type;
+import java.sql.Time;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -109,6 +114,23 @@ public class RedisServiceImpl {
         }
 
         
+    }
+
+    public long incrementRequestNum(String ip){
+        Long timestamp = Instant.now().getEpochSecond()/60;
+        String key = String.format("rate_limit:ip=%s:timestamp=%d",ip, timestamp);
+        List<Object> txResults = (List<Object>) redisTemplate.execute(new SessionCallback<List<Object>>() {
+            public List<Object> execute(RedisOperations operations) throws DataAccessException {
+                operations.multi();
+                Long requestNum = operations.opsForValue().increment(key);
+                if(requestNum==null || requestNum.equals(1L)){
+                    operations.expire(key,1, TimeUnit.MINUTES);
+                }
+                // This will contain the results of all ops in the transaction
+                return operations.exec();
+            }
+        });
+        return (long) txResults.get(0);
     }
 
     public void loadUserCache(User user){

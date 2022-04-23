@@ -1,9 +1,10 @@
 package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
-import com.arrietty.annotations.RedirectPolicy;
+import com.arrietty.annotations.RateLimit;
 import com.arrietty.consts.AuthModeEnum;
 import com.arrietty.consts.ErrorCode;
+import com.arrietty.consts.RateLimitPolicy;
 import com.arrietty.consts.RedirectPolicyEnum;
 import com.arrietty.entity.*;
 import com.arrietty.exception.LogicException;
@@ -73,43 +74,44 @@ public class ServiceController {
     @Autowired
     private AdminServiceImpl adminService;
 
-    @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/")
     public ModelAndView root(){
         return new ModelAndView("index.html");
     }
 
-    @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/home")
     public ModelAndView userHome(){
         return new ModelAndView("index.html");
     }
 
-    @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/myPosts")
     public ModelAndView userPosts(){
         return new ModelAndView("index.html");
     }
 
-    @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/favorite")
     public ModelAndView userFavorite(){
         return new ModelAndView("index.html");
     }
 
-    @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/notification")
     public ModelAndView userNotification(){
         return new ModelAndView("index.html");
     }
 
-    @Auth(authMode=AuthModeEnum.ADMIN)
-    @RedirectPolicy(redirectPolicy=RedirectPolicyEnum.REDIRECT)
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+    @Auth(authMode=AuthModeEnum.ADMIN, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/admin")
     public ModelAndView userAdmin(){
         return new ModelAndView("index.html");
@@ -117,8 +119,8 @@ public class ServiceController {
 
 
     // 修改用户本人profile
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/profile")
     public String postProfile(@RequestBody ProfilePO profilePO){
@@ -135,8 +137,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/profile")
     public String getProfile(@RequestParam("userId") Long userId){
@@ -153,9 +155,10 @@ public class ServiceController {
     }
 
 
+
     // handles user avatar image update
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/avatar")
     public String updateAvatar(@RequestParam("file") MultipartFile uploadedFile) throws LogicException {
@@ -164,24 +167,23 @@ public class ServiceController {
     }
 
     //return user avatar image
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @GetMapping("/avatar")
     public void getAvatar(HttpServletResponse response) throws LogicException{
         imageService.getAvatar(response);
     }
 
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
+    @RateLimit(rateLimit = RateLimitPolicy.STANDARD)
     @GetMapping("/image")
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response) throws LogicException{
         imageService.getImage(id, response);
     }
 
 
-
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/course")
     public String getCourse(@RequestParam("id") Long id) throws LogicException{
@@ -191,8 +193,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/course")
     public String postCourse(@RequestParam("action") String action, @RequestBody Course course) throws LogicException{
@@ -201,8 +203,8 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/textbook")
     public String getTextbookTag(@RequestParam("id") Long id) throws LogicException{
@@ -212,8 +214,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/textbook")
     public String postTextbookTag(@RequestParam("action") String action, @RequestBody TextbookTag textbookTag) throws LogicException{
@@ -223,8 +225,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/otherTag")
     public String getOtherTag(@RequestParam("id") Long id) throws LogicException{
@@ -234,8 +236,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/otherTag")
     public String postOtherTag(@RequestParam("action") String action, @RequestBody OtherTag otherTag) throws LogicException{
@@ -244,8 +246,8 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/advertisement")
     public String postAdvertisement(@RequestParam("action") String action, @ModelAttribute PostAdvertisementRequestPO requestPO) throws LogicException {
@@ -253,8 +255,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(AdvertisementResponsePO.class, advertisementResponsePO));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/myAdvertisement")
     public String getMyAdvertisement() throws LogicException {
@@ -265,8 +268,8 @@ public class ServiceController {
 
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/search")
     public String postSearch(@RequestBody PostSearchRequestPO requestPO) throws LogicException {
@@ -274,8 +277,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, results));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/suggest")
     public String postSuggest(@RequestParam("type") String type, @RequestParam("keyword") String keyword) throws LogicException {
@@ -283,8 +287,8 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
     }
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/lastModified")
     public String getLastModified() throws LogicException {
@@ -292,8 +296,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(Date.class, result));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/tap")
     public String getTap(@RequestParam("id") Long id ) throws LogicException {
@@ -302,8 +307,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/getNotification")
     public String getNotification() throws LogicException {
@@ -311,8 +316,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(TapPO.class, result));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/hasNew")
     public String getHasNew() throws LogicException {
@@ -321,8 +327,8 @@ public class ServiceController {
     }
 
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/mark")
     public String getMark(@RequestParam("id") Long id, @RequestParam("status") String status) throws LogicException {
@@ -330,8 +336,8 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/getFavorite")
     public String getFavorite() throws LogicException {
@@ -339,9 +345,8 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, result));
     }
 
-
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/bulletin")
     public String getBulletin() throws LogicException {
@@ -349,8 +354,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/bulletin")
     public String postBulletin(@RequestParam("action") String action, @RequestBody Bulletin bulletin) throws LogicException {
@@ -361,8 +367,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, result));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/blacklist")
     public String getBlacklist() throws LogicException {
@@ -370,8 +377,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @PostMapping("/updateBlacklist")
     public String updateBlacklist(@RequestParam("action") String action, @RequestParam("netId") String netId) throws LogicException {
@@ -379,8 +387,9 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
+
+    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
-    @RedirectPolicy
     @ResponseBody
     @GetMapping("/adminStatistics")
     public String getAdminStatistics(){
@@ -397,7 +406,7 @@ public class ServiceController {
 //        po.setId(12L);
 //        advertisementService.handlePostAdvertisement("delete",po);
 
-        System.out.println(searchService.getMyAdvertisement());
+//        System.out.println(searchService.getMyAdvertisement());
         return "hii";
 
 //        List<String> result = searchService.handleKeywordSuggestion("other","a");
