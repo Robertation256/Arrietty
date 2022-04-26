@@ -3,6 +3,7 @@ package com.arrietty.aspect;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.exception.LogicException;
 import com.arrietty.utils.response.Response;
+import com.arrietty.utils.session.SessionContext;
 import com.google.gson.Gson;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -17,7 +18,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -67,7 +67,8 @@ public class LogAspect {
     }
 
     private void formattedLog(HttpServletRequest request,ProceedingJoinPoint joinPoint,  String response){
-        String s = String.format("[method: %s] [url: %s] [url_param: %s] [body: %s] [response: %s]",
+        String s = String.format("[netId: %s][method: %s] [url: %s] [url_param: %s] [body: %s] [response: %s]",
+                SessionContext.getUserNetId(),
                 request.getMethod(),
                 request.getRequestURL(),
                 request.getQueryString(),

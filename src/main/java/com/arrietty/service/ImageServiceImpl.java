@@ -3,6 +3,7 @@ package com.arrietty.service;
 import com.arrietty.annotations.Log;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.ImageMapper;
+import com.arrietty.dao.UserMapper;
 import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.ProfilePO;
@@ -50,6 +51,9 @@ public class ImageServiceImpl {
 
     @Autowired
     private ProfileServiceImpl profileService;
+
+    @Autowired
+    private UserMapper userMapper;
 
 
 
@@ -149,7 +153,7 @@ public class ImageServiceImpl {
                 throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Insert to DB failed.");
             }
             profilePO.setAvatarImageId(image.getId());
-            profileService.updateUserProfile(profilePO);
+            userMapper.updateProfile(profilePO);
 
         }
         else{

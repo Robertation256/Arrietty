@@ -80,7 +80,6 @@ public class ServiceController {
         return new ModelAndView("index.html");
     }
 
-
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/home")
@@ -124,16 +123,8 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/profile")
     public String postProfile(@RequestBody ProfilePO profilePO){
-        Response<ProfilePO> response;
-        ProfilePO res = profileService.updateUserProfile(profilePO);
-        if(res!=null){
-            response = Response.buildSuccessResponse(ProfilePO.class, res);
-        }
-        else{
-            response = Response.buildFailedResponse(ErrorCode.PROFILE_EDIT_ERROR, "update profile failed");
-        }
-
-        return new Gson().toJson(response);
+        profileService.updateUserProfile(profilePO);
+        return new Gson().toJson(Response.buildSuccessResponse());
     }
 
 
@@ -143,21 +134,11 @@ public class ServiceController {
     @ResponseBody
     @GetMapping("/profile")
     public String getProfile(@RequestParam("userId") Long userId){
-        Response<ProfilePO> response;
         ProfilePO profilePO = profileService.getUserProfile(userId);
-        if(profilePO!=null){
-            response = Response.buildSuccessResponse(ProfilePO.class, profilePO);
-        }
-        else{
-            response = Response.buildFailedResponse();
-        }
-
-        return new Gson().toJson(response);
+        return new Gson().toJson(Response.buildSuccessResponse(ProfilePO.class, profilePO));
     }
 
 
-
-    // handles user avatar image update
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody

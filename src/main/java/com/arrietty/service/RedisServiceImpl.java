@@ -142,8 +142,6 @@ public class RedisServiceImpl {
         profile.setNetId(user.getNetId());
         profile.setUsername(user.getUsername());
         profile.setSchoolYear(user.getSchoolYear());
-        profile.setMajor(user.getMajor());
-        profile.setBio(user.getBio());
         profile.setAvatarImageId(user.getAvatarImageId());
         setUserProfile(userId, profile);
 

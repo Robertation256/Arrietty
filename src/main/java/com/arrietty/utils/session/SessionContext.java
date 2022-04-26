@@ -1,7 +1,11 @@
 package com.arrietty.utils.session;
 
+import com.arrietty.consts.ErrorCode;
 import com.arrietty.entity.User;
+import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.SessionPO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @Author: Yuechuan Zhang
@@ -9,6 +13,8 @@ import com.arrietty.pojo.SessionPO;
  */
 
 public class SessionContext {
+    private static final Logger logger = LoggerFactory.getLogger(SessionContext.class);
+
     private static ThreadLocal<SessionContext> threadLocal = new ThreadLocal<>();
     private String userSessionId;
     private SessionPO userInfo;
@@ -31,7 +37,11 @@ public class SessionContext {
 
     public static Long getUserId(){
         SessionContext context = threadLocal.get();
-        return context.userInfo==null? null : context.userInfo.getId();
+        if(context.userInfo==null){
+            logger.error("user info is null.");
+            throw new LogicException(ErrorCode.INTERNAL_ERROR, "Internal error.");
+        }
+        return context.userInfo.getId();
     }
 
     public static String getUserNetId(){
