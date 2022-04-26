@@ -18,13 +18,13 @@ public class ProfileServiceImpl {
     private UserMapper userMapper;
 
     public ProfilePO getUserProfile(Long userId){
-
+        ProfilePO profile;
         //userId 为空默认获取当前用户profile
+        boolean getCurrentUserProfile = false;
         if (userId==null){
             userId = SessionContext.getUserId();
+            getCurrentUserProfile = true;
         }
-
-        ProfilePO profile;
 
         // cache miss, go fetch from db
         if ((profile=redisService.getUserProfile(userId))==null){
@@ -38,6 +38,10 @@ public class ProfileServiceImpl {
             profile.setBio(user.getBio());
             profile.setAvatarImageId(user.getAvatarImageId());
             redisService.setUserProfile(userId, profile);
+        }
+
+        if(getCurrentUserProfile){
+            profile.setIsAdmin(SessionContext.getIsAdmin());
         }
 
         return profile;

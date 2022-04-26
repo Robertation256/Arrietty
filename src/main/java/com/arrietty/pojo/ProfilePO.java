@@ -12,4 +12,5 @@ public class ProfilePO {
     private String schoolYear;
     private Long avatarImageId;
     private String bio;
+    private Boolean isAdmin;
 }

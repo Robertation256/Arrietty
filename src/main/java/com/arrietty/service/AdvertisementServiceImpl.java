@@ -10,8 +10,11 @@ import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,8 +26,12 @@ import java.util.List;
 
 @Service
 public class AdvertisementServiceImpl {
+    private static final Logger logger = LoggerFactory.getLogger(AdvertisementServiceImpl.class);
 
-    private static final Integer MAX_IMAGE_NUM = 5;
+    @Value("${file.max-image-num-per-ad}")
+    private int MAX_IMAGE_NUM;
+
+
     private static final BigDecimal MIN_PRICE = new BigDecimal(0);
     private static final BigDecimal MAX_PRICE = new BigDecimal(10000);
 
@@ -78,19 +85,17 @@ public class AdvertisementServiceImpl {
 
 
     public AdvertisementResponsePO handlePostAdvertisement(String action, PostAdvertisementRequestPO requestPO) throws LogicException {
-        if("update".equals(action)){
-            if(requestPO.getId()==null){
-                checkAdvertisementFormat(requestPO);
-                return insertAdvertisement(requestPO);
-            }
+        if("add".equals(action)){
+            checkAdvertisementFormat(requestPO);
+            return insertAdvertisement(requestPO);
+        }
+        else if("update".equals(action)){
             return updateAdvertisement(requestPO);
-
         }
         else if ("delete".equals(action)){
             deleteAdvertisement(requestPO);
             return null;
         }
-
         throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid action type.");
     }
 
@@ -100,13 +105,11 @@ public class AdvertisementServiceImpl {
     public AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{
         List<String> imageIds = new ArrayList<>(requestPO.getImages().size());
         for(MultipartFile imageFile: requestPO.getImages()){
-            // TODO: 单张insert 改为batch insert
             Long imageId = imageService.insertAdvertisementImage(imageFile);
             imageIds.add(imageId.toString());
         }
 
         Date date = new Date();
-
         Advertisement advertisement = new Advertisement();
         advertisement.setUserId(SessionContext.getUserId());
         advertisement.setAdTitle(requestPO.getAdTitle());
@@ -122,28 +125,20 @@ public class AdvertisementServiceImpl {
             advertisementMapper.insert(advertisement);
         }
         catch (Exception e){
+            // clean up previously inserted images from file system
             imageService.deleteImageFiles(imageIds);
-            throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Insert to DB failed.");
+            logger.error("[advertisement upload failed]", e);
+            throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Advertisement upload failed");
         }
 
+        // push ad upload event to message queue for more further processing
         AdvertisementEvent advertisementEvent = new AdvertisementEvent();
         advertisementEvent.setAdvertisement(advertisement);
         advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPLOAD);
         advertisementEvent.setTimestamp(date);
         mqService.pushAdEvent(advertisementEvent);
 
-        AdvertisementResponsePO responsePO = new AdvertisementResponsePO();
-        responsePO.setId(advertisement.getId());
-        responsePO.setAdTitle(advertisement.getAdTitle());
-        responsePO.setIsTextbook(advertisement.getIsTextbook());
-        responsePO.setTagId(advertisement.getTagId());
-        responsePO.setImageIds(String.join( ",", imageIds));
-        responsePO.setComment(advertisement.getComment());
-        responsePO.setPrice(advertisement.getPrice());
-        responsePO.setNumberOfTaps(0);
-        responsePO.setCreateTime(date);
-
-        return responsePO;
+        return null;
     }
 
 
@@ -267,13 +262,13 @@ public class AdvertisementServiceImpl {
         }
 
 
+        // if the advertisement is about a textbook, it must come with a valid tag id
         if (
                 requestPO.getIsTextbook() &&
                         !redisService.existsTextbookTagId(requestPO.getTagId())
         ){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Tag id does not exist.");
         }
-
     }
 
 }

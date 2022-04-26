@@ -102,17 +102,19 @@ public class TapServiceImpl {
         List<Tap> taps = tapMapper.selectByReceiverId(userId);
         List<TapPO> result = new ArrayList<>(taps.size());
         for(Tap tap : taps){
+            Advertisement advertisement = advertisementMapper.selectByPrimaryKey(tap.getAdId());
+            if(advertisement==null){
+                continue;
+            }
             TapPO tapPO = new TapPO();
             tapPO.setId(tap.getId());
             ProfilePO profilePO = profileService.getUserProfile(tap.getSenderId());
             tapPO.setUsername(profilePO.getUsername());
             tapPO.setNetId(profilePO.getNetId());
             tapPO.setAvatarImageId(profilePO.getAvatarImageId());
-
-            //TODO: add caching for ad
-            Advertisement advertisement = advertisementMapper.selectByPrimaryKey(tap.getAdId());
             tapPO.setAdTitle(advertisement.getAdTitle());
             result.add(tapPO);
+
         }
         tapMapper.setUserNotificationAllRead(userId);
         redisService.setUserHasNewNotification(userId, false);

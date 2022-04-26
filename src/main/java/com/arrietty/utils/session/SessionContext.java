@@ -39,4 +39,9 @@ public class SessionContext {
         return context.userInfo==null? null : context.userInfo.getNetId();
     }
 
+    public static boolean getIsAdmin(){
+        SessionContext context = threadLocal.get();
+        return context.userInfo.isAdmin();
+    }
+
 }

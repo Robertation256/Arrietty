@@ -45,18 +45,9 @@ mybatis:
 elasticsearch:
   ip: localhost:9200
   page-size: 10
+  max-suggestion-size: 5
 
 
-
-logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n"
-  file: log/info.log
-  level:
-    com:
-      arrietty:
-        info
 
 auth:
   token-obtain-url: https://localhost:8001/app/rest/keycloak/auth?clientId=%s&authType=%s
@@ -65,7 +56,9 @@ auth:
   client-id: test
   disable-auto-create-new-user: false
 
+
 file:
+  max-image-num-per-ad: 5
   base-image-directory: C:/Users/yz391/Pictures/arrietty
   max-avatar-image-size: 1048576
   default-user-avatar-path: /common/default.jpg

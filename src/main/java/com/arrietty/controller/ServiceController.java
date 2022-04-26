@@ -1,6 +1,7 @@
 package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
+import com.arrietty.annotations.Log;
 import com.arrietty.annotations.RateLimit;
 import com.arrietty.consts.*;
 import com.arrietty.entity.*;
@@ -116,7 +117,8 @@ public class ServiceController {
     }
 
 
-    // 修改用户本人profile
+
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
@@ -135,6 +137,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
@@ -173,13 +176,14 @@ public class ServiceController {
     }
 
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RateLimit(rateLimit = RateLimitPolicy.STANDARD)
+    @RateLimit
     @GetMapping("/image")
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response) throws LogicException{
         imageService.getImage(id, response);
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -191,6 +195,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -201,6 +206,7 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -212,6 +218,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -223,6 +230,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -234,6 +242,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -244,6 +253,8 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
+
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -254,6 +265,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -266,6 +278,7 @@ public class ServiceController {
 
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -276,6 +289,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -284,6 +298,7 @@ public class ServiceController {
         List<String> result = searchService.handleKeywordSuggestion(type, keyword);
         return new Gson().toJson(Response.buildSuccessResponse(String.class, result));
     }
+
 
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
@@ -295,6 +310,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -305,6 +321,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -325,6 +342,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -334,6 +352,8 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
+
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -343,6 +363,8 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(SearchResultItem.class, result));
     }
 
+
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -353,6 +375,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -366,6 +389,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -376,6 +400,7 @@ public class ServiceController {
     }
 
 
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -386,6 +411,8 @@ public class ServiceController {
     }
 
 
+
+    @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -396,54 +423,11 @@ public class ServiceController {
     }
 
 
-    @Autowired
-    private RedisTemplate redisTemplate;
 
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
-//        PostAdvertisementRequestPO po = new PostAdvertisementRequestPO();
-//        po.setId(12L);
-//        advertisementService.handlePostAdvertisement("delete",po);
-
-//        System.out.println(searchService.getMyAdvertisement());
-
-
-        Set<String> result = redisTemplate.opsForSet().members(RedisKey.VALID_TEXTBOOK_TAG_ID_SET);
-        Long l = 11L;
-        Boolean bool1 = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, l.toString());
-        Boolean bool2 = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, l);
         return "hii";
-
-//        List<String> result = searchService.handleKeywordSuggestion("other","a");
-//        System.out.println(result);
-//        return "hii";
-
-//        PostSearchRequestPO testPo = new PostSearchRequestPO();
-//        testPo.setAdType("other");
-//        testPo.setTag("electronics");
-//
-//        List<SearchResultItem> ret = searchService.handleSearchRequest(testPo);
-//        System.out.println(ret);
-//        return "hii";
-
-
-//        BulkRequest request = new BulkRequest();
-//        Map<String,String> dataMap = new HashMap<>();
-//        dataMap.put("content","hello world");
-//        request.add(new IndexRequest("arrietty","test").id("666")
-//                .opType("create").source(dataMap,XContentType.JSON));
-//        BulkResponse bulkResponse =  esClient.bulk(request, RequestOptions.DEFAULT);
-        //return bulkResponse.getItems()[0].toString();
-
-
-//        List<TapPO> test = tapService.getCurrentUserNotifications();
-//        System.out.println(test);
-//
-//        return "hii";
-
-//        List<Bulletin> bulletins = bulletinService.getBulletin();
-//        return new Gson().toJson(Response.buildSuccessResponse(Bulletin.class, bulletins));
     }
 }

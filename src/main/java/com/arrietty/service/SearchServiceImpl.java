@@ -2,7 +2,6 @@ package com.arrietty.service;
 
 
 import com.arrietty.consts.ErrorCode;
-import com.arrietty.entity.Favorite;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionContext;
@@ -20,11 +19,11 @@ import org.elasticsearch.search.suggest.Suggest;
 import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
-import org.elasticsearch.search.suggest.completion.FuzzyOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,13 +35,17 @@ import java.util.Set;
 
 @Service
 public class SearchServiceImpl {
+    private static  final Logger logger = LoggerFactory.getLogger(SearchServiceImpl.class);
 
     private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
 
     @Value("${elasticsearch.page-size}")
-    private Integer PAGE_SIZE;
+    private int PAGE_SIZE;
+
+    @Value("${elasticsearch.max-suggestion-size}")
+    private int MAX_SUGGESTION_SIZE;
 
     @Autowired
     private RedisServiceImpl redisService;
@@ -208,16 +211,16 @@ public class SearchServiceImpl {
         else {
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid type.");
         }
+
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.indices("advertisement").types("_doc");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         SuggestBuilder suggestBuilder = new SuggestBuilder();
-        CompletionSuggestionBuilder completionSuggestionBuilder = new CompletionSuggestionBuilder("suggest").prefix(keyword).size(5);
+        CompletionSuggestionBuilder completionSuggestionBuilder = new CompletionSuggestionBuilder("suggest").prefix(keyword).size(MAX_SUGGESTION_SIZE);
         suggestBuilder.addSuggestion("advertisement_suggest", completionSuggestionBuilder);
         searchSourceBuilder.suggest(suggestBuilder);
         searchSourceBuilder.query(queryFilter);
         searchRequest.source(searchSourceBuilder);
-
 
         List<String> result = new LinkedList<>();
         try{
@@ -232,10 +235,8 @@ public class SearchServiceImpl {
             }
         }
         catch (Exception e){
-            // TODO: proper search error handling
-            e.printStackTrace();
+            logger.error("[suggestion failed] ", e);
         }
-
         return result;
     }
 

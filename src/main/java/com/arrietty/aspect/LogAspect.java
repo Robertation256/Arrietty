@@ -33,10 +33,9 @@ public class LogAspect {
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
 
-    @Pointcut("execution(* com.arrietty.controller.*.*(..))")
-    public void controllerLogPointCut(){}
 
-    @Around("controllerLogPointCut()")
+
+    @Around("@annotation(com.arrietty.annotations.Log)")
     public Object controllerLog(ProceedingJoinPoint joinPoint) {
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if(requestAttributes==null){

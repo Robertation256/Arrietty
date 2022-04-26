@@ -8,6 +8,8 @@ import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.ProfilePO;
 import com.arrietty.utils.session.SessionContext;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -31,6 +33,8 @@ import java.util.List;
 
 @Service
 public class ImageServiceImpl {
+
+    private static final Logger logger = LoggerFactory.getLogger(ImageServiceImpl.class);
 
     @Value("${file.base-image-directory}")
     private String BASE_PATH;
@@ -250,8 +254,7 @@ public class ImageServiceImpl {
                 file.delete();
             }
             catch (Exception e){
-                // TODO: log4j 日志
-                e.printStackTrace();
+                logger.error("[remove image file failed] ", e);
             }
         }
     }
