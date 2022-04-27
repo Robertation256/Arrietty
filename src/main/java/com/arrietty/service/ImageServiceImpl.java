@@ -55,6 +55,9 @@ public class ImageServiceImpl {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private RedisServiceImpl redisService;
+
 
 
     public void init() {
@@ -74,49 +77,28 @@ public class ImageServiceImpl {
         if (id==null){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid image id");
         }
-        // image id 路径的缓存？？
-
-        Image image = imageMapper.selectByPrimaryKey(id);
-        if (image==null){
-            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid image id");
-        }
-
-        String userNetId = profileService.getUserProfile(image.getUserId()).getNetId();
-
-        // TODO: 图片获取接口复用
-        try{
-            final InputStream in = new FileInputStream(BASE_PATH+"/"+userNetId+"/"+id.toString());
-
-            //TODO: 图片格式的匹配问题, 目前默认返回JPEG
-            response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-            IOUtils.copy(in, response.getOutputStream());
-        }
-        catch (FileNotFoundException e){
-            throw new LogicException(ErrorCode.IMAGE_NOT_FOUND, "Image not found.");
-        }
-        catch (IOException e){
-            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Image load failed.");
-        }
+        Long userId = getOwnerIdByImageId(id);
+        String filePath = BASE_PATH+"/user#"+userId.toString()+"/"+id.toString();
+        readFileIntoServletResponse(filePath, response);
     }
-
 
     public void getAvatar(HttpServletResponse response) throws LogicException {
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
-        boolean getDefaultAvatar = false;
-
-        if(profilePO==null || profilePO.getAvatarImageId()==null){
-            getDefaultAvatar=true;
+        boolean getDefaultAvatar = profilePO==null || profilePO.getAvatarImageId()==null;
+        String filePath;
+        if(getDefaultAvatar){
+            filePath = BASE_PATH+DEFAULT_AVATAR_PATH;
         }
+        else {
+            filePath = BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+profilePO.getAvatarImageId().toString();
+        }
+        readFileIntoServletResponse(filePath, response);
+    }
 
+    private void readFileIntoServletResponse(String filePath, HttpServletResponse response) throws LogicException {
         try{
-            final InputStream in;
-            if(getDefaultAvatar){
-                in = new FileInputStream(BASE_PATH+DEFAULT_AVATAR_PATH);
-            }
-            else{
-                in = new FileInputStream(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+profilePO.getAvatarImageId().toString());
-            }
-            //TODO: 图片格式的匹配问题, 目前默认返回JPEG
+            final InputStream in = new FileInputStream(filePath);
+            //return image as JPEG type
             response.setContentType(MediaType.IMAGE_JPEG_VALUE);
             IOUtils.copy(in, response.getOutputStream());
         }
@@ -124,29 +106,29 @@ public class ImageServiceImpl {
             throw new LogicException(ErrorCode.IMAGE_NOT_FOUND, "Image not found.");
         }
         catch (IOException e){
-            throw new LogicException(ErrorCode.IMAGE_LOAD_ERROR, "Image load failed.");
+            throw new LogicException(ErrorCode.INTERNAL_ERROR, "Image load failed.");
         }
-
     }
 
-    @Transactional(rollbackFor = Exception.class)
     public void updateAvatar(MultipartFile file) throws LogicException{
-
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
         if(profilePO==null){
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Cannot find user profile.");
         };
 
         File tempFile = checkFileFormat(file);
-        // update image table, update user profile if needed
-
         Image image = new Image();
         image.setImageType("avatar");
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
+
+        startUpdateAvatarTransaction(profilePO, image, tempFile);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void startUpdateAvatarTransaction(ProfilePO profilePO, Image image, File tempFile) throws LogicException{
         // new avatar
         if(profilePO.getAvatarImageId()==null){
-
             imageMapper.insertAndGetPrimaryKey(image);
             if(image.getId()==null){
                 tempFile.delete();
@@ -154,7 +136,6 @@ public class ImageServiceImpl {
             }
             profilePO.setAvatarImageId(image.getId());
             userMapper.updateProfile(profilePO);
-
         }
         else{
             image.setId(profilePO.getAvatarImageId());
@@ -212,8 +193,9 @@ public class ImageServiceImpl {
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Image does not exist");
         }
 
-        File file = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId.toString());
+        File file = new File(BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+imageId.toString());
         file.delete();
+        redisService.removeImageIdToOwnerIdCacheByImageId(imageId);
     }
 
     // copy from tmp file to user folder
@@ -221,12 +203,15 @@ public class ImageServiceImpl {
         FileChannel src = null;
         FileChannel dest = null;
 
-        File fileFolder = new File(BASE_PATH+"/"+SessionContext.getUserNetId());
+        File fileFolder = new File(BASE_PATH+"/user#"+SessionContext.getUserId());
         if(!fileFolder.exists()){
-            fileFolder.mkdir();
+            if(!fileFolder.mkdir()){
+                logger.error("[image save failed] cannot create folder for user: "+SessionContext.getUserNetId());
+                throw new LogicException(ErrorCode.INTERNAL_ERROR, "Save image failed");
+            }
         }
 
-        File filePath = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId.toString());
+        File filePath = new File(BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+imageId.toString());
         //overwrite old file
         if(filePath.exists()){
             filePath.delete();
@@ -242,7 +227,8 @@ public class ImageServiceImpl {
 
         }
         catch (IOException e){
-            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "File system save failed");
+            logger.error("[image save failed]", e);
+            throw new LogicException(ErrorCode.INTERNAL_ERROR, "Save image failed");
         }
         finally {
             file.delete();
@@ -254,7 +240,7 @@ public class ImageServiceImpl {
     public void deleteImageFiles(List<String> imageIds){
         for(String imageId: imageIds){
             try{
-                File file = new File(BASE_PATH+"/"+SessionContext.getUserNetId()+"/"+imageId);
+                File file = new File(BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+imageId);
                 file.delete();
             }
             catch (Exception e){
@@ -269,13 +255,16 @@ public class ImageServiceImpl {
         if(file==null || file.getSize()>MAX_AVATAR_SIZE){
             throw  new LogicException(ErrorCode.MAX_IMAGE_SIZE_EXCEEDED, "Image size exceeded.");
         }
+
         // use thread name to create temp file, avoid multiple thread writing to the same file
-        File tempFile = new File(BASE_PATH+"/"+Thread.currentThread().getName()+"-tmp");
+        String tempFilePath = BASE_PATH+"/"+Thread.currentThread().getName()+"-tmp";
+        File tempFile = new File(tempFilePath);
         try{
             tempFile.createNewFile();
         }
         catch (IOException e){
             tempFile.delete();
+            logger.error("[avatar image save failed] cannot open temp file with path: "+tempFilePath);
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Open temp file failed");
         }
 
@@ -292,4 +281,18 @@ public class ImageServiceImpl {
         return tempFile;
     }
 
+
+    public Long getOwnerIdByImageId(Long imageId) throws LogicException{
+        Long result = redisService.getOwnerUserIdByImageId(imageId);
+        //cache miss, read from db
+        if(result==null){
+            Image image = imageMapper.selectByPrimaryKey(imageId);
+            if(image==null){
+                throw new LogicException(ErrorCode.IMAGE_NOT_FOUND, "Invalid image id");
+            }
+            result = image.getUserId();
+            redisService.setImageIdToOwnerIdCache(imageId, result);
+        }
+        return result;
+    }
 }

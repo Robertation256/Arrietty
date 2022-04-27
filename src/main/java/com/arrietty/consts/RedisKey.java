@@ -23,8 +23,6 @@ public class RedisKey {
 
 
 
-
-
     /* -----------------------initialized on user login------------------------------------- */
     // extend timeout by 15 minutes upon each API request
 
@@ -51,6 +49,11 @@ public class RedisKey {
 
     /* -----------------------initialized on ad read------------------------------------- */
 
+
+
+    /* -----------------------initialized on image read------------------------------------- */
+    //delete on image delete
+    public static final String IMAGE_OWNER_ID = "image_owner_id:image_id=";
 
 
 

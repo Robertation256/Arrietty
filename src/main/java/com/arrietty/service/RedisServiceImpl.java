@@ -278,7 +278,7 @@ public class RedisServiceImpl {
     }
 
     public Integer getNumberOfTaps(Long adId){
-        return (Integer) redisTemplate.opsForValue().get(RedisKey.NUMBER_OF_TAPS);
+        return (Integer) redisTemplate.opsForValue().get(RedisKey.NUMBER_OF_TAPS+adId);
     }
 
 
@@ -419,6 +419,25 @@ public class RedisServiceImpl {
 
     public Set<String> getBlacklistedUserNetIds(){
         return redisTemplate.opsForSet().members(RedisKey.BLACKLISTED_USER_NET_ID_SET);
+    }
+
+    public Long getOwnerUserIdByImageId(Long imageId){
+        if(imageId==null){
+            return null;
+        }
+        String rawRet = (String) redisTemplate.opsForValue().get(RedisKey.IMAGE_OWNER_ID+imageId.toString());
+        if(rawRet==null) return null;
+        return Long.parseLong(rawRet);
+    }
+
+    public void setImageIdToOwnerIdCache(Long imageId, Long ownerId){
+        if(imageId==null || ownerId==null) return;
+        redisTemplate.opsForValue().set(RedisKey.IMAGE_OWNER_ID+imageId.toString(), ownerId.toString());
+    }
+
+    public void removeImageIdToOwnerIdCacheByImageId(Long imageId){
+        if(imageId==null) return;
+        redisTemplate.delete(RedisKey.IMAGE_OWNER_ID+imageId.toString());
     }
 
 }

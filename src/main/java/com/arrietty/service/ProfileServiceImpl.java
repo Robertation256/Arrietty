@@ -87,7 +87,7 @@ public class ProfileServiceImpl {
                         profilePO.getUsername()==null ||
                         profilePO.getUsername().length()>50 ||
                         (profilePO.getSchoolYear()!=null &&
-                                (profilePO.getSchoolYear()<2012 || profilePO.getSchoolYear()>currentYear)
+                                (profilePO.getSchoolYear()<2017 || profilePO.getSchoolYear()>currentYear+5)
                         )
         ){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Invalid profile fields");
