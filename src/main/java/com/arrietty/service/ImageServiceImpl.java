@@ -123,6 +123,11 @@ public class ImageServiceImpl {
         image.setUserId(SessionContext.getUserId());
 
         startUpdateAvatarTransaction(profilePO, image, tempFile);
+        synchronized (ProfileServiceImpl.PROFILE_READ_WRITE_LOCK){
+            profilePO = profileService.getUserProfile(SessionContext.getUserId());
+            profilePO.setAvatarImageId(image.getId());
+            redisService.setUserProfile(SessionContext.getUserId(), profilePO);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -134,8 +139,7 @@ public class ImageServiceImpl {
                 tempFile.delete();
                 throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Insert to DB failed.");
             }
-            profilePO.setAvatarImageId(image.getId());
-            userMapper.updateProfile(profilePO);
+            userMapper.updateUserAvatarImageId(SessionContext.getUserId(), image.getId());
         }
         else{
             image.setId(profilePO.getAvatarImageId());

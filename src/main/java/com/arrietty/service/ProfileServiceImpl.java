@@ -21,7 +21,7 @@ import java.util.Date;
 public class ProfileServiceImpl {
     private static final Logger logger = LoggerFactory.getLogger(ProfileServiceImpl.class);
     private static final Calendar CALENDAR = Calendar.getInstance();
-    private static final String PROFILE_READ_WRITE_LOCK = "profile_read_write_lock";
+    public static final String PROFILE_READ_WRITE_LOCK = "profile_read_write_lock";
 
     @Autowired
     private RedisServiceImpl redisService;
@@ -31,7 +31,7 @@ public class ProfileServiceImpl {
 
     public ProfilePO getUserProfile(Long userId){
         ProfilePO profile;
-        //userId 为空默认获取当前用户profile
+        // userId is null then fetch current user profile
         boolean getCurrentUserProfile = false;
         if (userId==null){
             userId = SessionContext.getUserId();
@@ -40,6 +40,7 @@ public class ProfileServiceImpl {
 
         if ((profile=redisService.getUserProfile(userId))==null){
             // cache miss, go fetch from db
+            // synchronize to avoid overwriting updates happening in between db read and
             synchronized (PROFILE_READ_WRITE_LOCK) {
                 User user = userMapper.selectByPrimaryKey(userId);
                 if (user == null){
@@ -79,6 +80,7 @@ public class ProfileServiceImpl {
             redisService.setUserProfile(target.getId(), target);
         }
     }
+
 
     private void checkProfileFormat(ProfilePO profilePO) throws LogicException{
         Integer currentYear = CALENDAR.get(Calendar.YEAR);

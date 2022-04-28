@@ -235,6 +235,7 @@ public class RedisServiceImpl {
         return gson.fromJson(jsonString, ProfilePO.class);
     }
 
+
     public boolean existsTextbookTagId(Long textbookTagId){
         if(textbookTagId==null) return false;
         Boolean result = redisTemplate.opsForSet().isMember(RedisKey.VALID_TEXTBOOK_TAG_ID_SET, textbookTagId.toString());

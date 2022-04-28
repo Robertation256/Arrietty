@@ -80,11 +80,11 @@
   </select>
 
   <!-- update fields that are not null -->
-  <update id="updateProfile">
+  <update id="updateProfile" parameterType="com.arrietty.pojo.ProfilePO">
     update user
-    set  username = #{username},
-    school_year = #{schoolYear},
-    where id = #{id}
+    set  username = #{username, jdbcType=VARCHAR},
+    school_year = #{schoolYear, jdbcType=INTEGER}
+    where id = #{id, jdbcType=BIGINT}
   </update>
 
   <select id="getTotalUserCount" resultType="java.lang.Integer">
@@ -107,6 +107,12 @@
     update user
     set access_control = #{accessControl, jdbcType=VARCHAR}
     where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <update id="updateUserAvatarImageId" parameterType="java.lang.Long">
+    update user
+    set avatar_image_id = #{imageId,jdbcType=BIGINT}
+    where id = #{userId,jdbcType=BIGINT}
   </update>
 
 </mapper>

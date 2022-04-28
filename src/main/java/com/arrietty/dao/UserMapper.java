@@ -62,4 +62,6 @@ public interface UserMapper {
 
     int updateAccessControl(User record);
 
+    int updateUserAvatarImageId(Long userId, Long imageId);
+
 }
