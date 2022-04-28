@@ -1,6 +1,5 @@
 package com.arrietty.service;
 
-import com.arrietty.annotations.Log;
 import com.arrietty.consts.ErrorCode;
 import com.arrietty.dao.ImageMapper;
 import com.arrietty.dao.UserMapper;
@@ -14,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import javax.imageio.ImageIO;
@@ -57,6 +59,11 @@ public class ImageServiceImpl {
 
     @Autowired
     private RedisServiceImpl redisService;
+
+    @Autowired
+    DataSourceTransactionManager transactionManager;
+    @Autowired
+    TransactionDefinition transactionDefinition;
 
 
 
@@ -110,7 +117,8 @@ public class ImageServiceImpl {
         }
     }
 
-    public void updateAvatar(MultipartFile file) throws LogicException{
+
+    public void updateAvatar(MultipartFile file) throws Exception{
         ProfilePO profilePO = profileService.getUserProfile(SessionContext.getUserId());
         if(profilePO==null){
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Cannot find user profile.");
@@ -122,22 +130,15 @@ public class ImageServiceImpl {
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
 
-        startUpdateAvatarTransaction(profilePO, image, tempFile);
-        synchronized (ProfileServiceImpl.PROFILE_READ_WRITE_LOCK){
-            profilePO = profileService.getUserProfile(SessionContext.getUserId());
-            profilePO.setAvatarImageId(image.getId());
-            redisService.setUserProfile(SessionContext.getUserId(), profilePO);
-        }
-    }
+        TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
 
-    @Transactional(rollbackFor = Exception.class)
-    public void startUpdateAvatarTransaction(ProfilePO profilePO, Image image, File tempFile) throws LogicException{
-        // new avatar
         if(profilePO.getAvatarImageId()==null){
             imageMapper.insertAndGetPrimaryKey(image);
             if(image.getId()==null){
                 tempFile.delete();
-                throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Insert to DB failed.");
+                logger.error("[avatar update failed] failed to insert to db");
+                transactionManager.rollback(transactionStatus);
+                throw new LogicException(ErrorCode.INTERNAL_ERROR, "Save image failed");
             }
             userMapper.updateUserAvatarImageId(SessionContext.getUserId(), image.getId());
         }
@@ -146,8 +147,29 @@ public class ImageServiceImpl {
             imageMapper.updateByPrimaryKey(image);
         }
 
-        save(tempFile, image.getId());
+
+        try{
+            save(tempFile, image.getId());
+        }
+        catch (Exception e){
+            logger.error("[avatar update failed]", e);
+            transactionManager.rollback(transactionStatus);
+            throw e;
+        }
+
+        transactionManager.commit(transactionStatus);
+
+
+        //update redis
+        synchronized (ProfileServiceImpl.PROFILE_WRITE_LOCK){
+            profilePO = profileService.getUserProfile(SessionContext.getUserId());
+            profilePO.setAvatarImageId(image.getId());
+            redisService.setUserProfile(SessionContext.getUserId(), profilePO);
+        }
     }
+
+
+
 
     @Transactional(rollbackFor = Exception.class)
     public Long insertAdvertisementImage(MultipartFile file) throws LogicException {
@@ -206,6 +228,7 @@ public class ImageServiceImpl {
     private void save(File file, Long imageId) throws LogicException{
         FileChannel src = null;
         FileChannel dest = null;
+
 
         File fileFolder = new File(BASE_PATH+"/user#"+SessionContext.getUserId());
         if(!fileFolder.exists()){

@@ -222,7 +222,7 @@ public class RedisServiceImpl {
         if (userId==null) return;
 
         String serialized = new Gson().toJson(profile, ProfilePO.class);
-        redisTemplate.opsForValue().set(RedisKey.USER_PROFILE+userId.toString(),serialized);
+        redisTemplate.opsForValue().set(RedisKey.USER_PROFILE+userId.toString(),serialized, 1, TimeUnit.HOURS);
     }
 
     public ProfilePO getUserProfile(Long  userId){

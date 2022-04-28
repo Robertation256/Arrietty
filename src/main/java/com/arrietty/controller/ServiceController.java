@@ -116,7 +116,7 @@ public class ServiceController {
     }
 
 
-    // test pending
+    // final test pending
     @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
@@ -143,7 +143,7 @@ public class ServiceController {
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/avatar")
-    public String updateAvatar(@RequestParam("file") MultipartFile uploadedFile) throws LogicException {
+    public String updateAvatar(@RequestParam("file") MultipartFile uploadedFile) throws Exception {
         imageService.updateAvatar(uploadedFile);
         return new Gson().toJson(Response.buildSuccessResponse());
     }

@@ -10,18 +10,15 @@ import com.arrietty.utils.session.SessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.Calendar;
-import java.util.Date;
 
 @Service
 public class ProfileServiceImpl {
     private static final Logger logger = LoggerFactory.getLogger(ProfileServiceImpl.class);
     private static final Calendar CALENDAR = Calendar.getInstance();
-    public static final String PROFILE_READ_WRITE_LOCK = "profile_read_write_lock";
+    public static final String PROFILE_WRITE_LOCK = "profile_read_write_lock";
 
     @Autowired
     private RedisServiceImpl redisService;
@@ -40,8 +37,8 @@ public class ProfileServiceImpl {
 
         if ((profile=redisService.getUserProfile(userId))==null){
             // cache miss, go fetch from db
-            // synchronize to avoid overwriting updates happening in between db read and
-            synchronized (PROFILE_READ_WRITE_LOCK) {
+            // synchronize to avoid overwriting redis updates that happen before the last redis set
+            synchronized (PROFILE_WRITE_LOCK) {
                 User user = userMapper.selectByPrimaryKey(userId);
                 if (user == null){
                     logger.warn("user profile info not found");
@@ -72,7 +69,7 @@ public class ProfileServiceImpl {
         target.setUsername(profile.getUsername());
         target.setSchoolYear(profile.getSchoolYear());
 
-        synchronized (PROFILE_READ_WRITE_LOCK){
+        synchronized (PROFILE_WRITE_LOCK){
             if(!userMapper.updateProfile(target)){
                 logger.error("[profile update failed] failed to update db");
                 throw new LogicException(ErrorCode.INTERNAL_ERROR, "Internal error.");
