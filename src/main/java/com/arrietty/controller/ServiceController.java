@@ -127,7 +127,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-    // test pending
+    // final test pending
     @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
@@ -138,7 +138,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(ProfilePO.class, profilePO));
     }
 
-    // test pending
+    // final test pending
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -148,7 +148,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-    // test pending
+    // final test pending
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/avatar")
@@ -157,7 +157,7 @@ public class ServiceController {
     }
 
 
-    // test pending
+    // final test pending
     @Auth(authMode = AuthModeEnum.REGULAR)
     @RateLimit
     @GetMapping("/image")
@@ -165,7 +165,7 @@ public class ServiceController {
         imageService.getImage(id, response);
     }
 
-
+    // final test pending
     @Log
     @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)

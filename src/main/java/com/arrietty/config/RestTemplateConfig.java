@@ -1,83 +1,93 @@
 package com.arrietty.config;
 
+
+import com.arrietty.service.AuthServiceImpl;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContexts;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.util.ResourceUtils;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
-import javax.net.ssl.*;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
-import java.security.*;
-import java.security.cert.CertificateException;
-import java.time.Duration;
+import java.io.InputStream;
+import java.security.KeyStore;
 
 
 @Configuration
 public class RestTemplateConfig {
-    @Value("${server.ssl.key-store}")
-    String clientPath;
-    @Value("${server.ssl.key-store-password}")
-    String clientPass;
-    @Value("${server.ssl.key-store-type}")
-    String clientKeyType;
-    @Value("${server.ssl.trust-store}")
-    String trustPath;
-    @Value("${server.ssl.trust-store-password}")
-    String trustPass;
-    @Value("${server.ssl.trust-store-type}")
-    String trustKeyType;
+    @Value("${server.ssl.sso-cert-path}")
+    private String CERTIFICATION_PATH;
 
-    @Bean
-    public RestTemplate restTemplate() {
-        RestTemplate restTemplate = null;
-        try {
-            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-            // 客户端证书类型
-            KeyStore clientStore = KeyStore.getInstance(clientKeyType);
-            // 加载客户端证书，即自己的私钥
-            clientStore.load(new FileInputStream(ResourceUtils.getFile(clientPath)), clientPass.toCharArray());
-            // 创建密钥管理工厂实例
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-            // 初始化客户端密钥库
-            keyManagerFactory.init(clientStore, clientPass.toCharArray());
-            KeyManager[] keyManagers = keyManagerFactory.getKeyManagers();
+    @Value("${server.ssl.sso-cert-pwd}")
+    private String CERTIFICATION_PWD;
 
-            // 创建信任库管理工厂实例
-            TrustManagerFactory trustManagerFactory = TrustManagerFactory
-                    .getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            KeyStore trustStore = KeyStore.getInstance(trustKeyType);
-            trustStore.load(new FileInputStream(ResourceUtils.getFile(trustPath)), trustPass.toCharArray());
 
-            // 初始化信任库
-            trustManagerFactory.init(trustStore);
-            TrustManager[] trustManagers = trustManagerFactory.getTrustManagers();
-            // 建立TLS连接
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            // 初始化SSLContext
-            sslContext.init(keyManagers, trustManagers, new SecureRandom());
-            // INSTANCE 忽略域名检查
-            SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE);
-            CloseableHttpClient httpclient = HttpClients
-                    .custom()
-                    .setSSLSocketFactory(sslConnectionSocketFactory)
-                    .setSSLHostnameVerifier(new NoopHostnameVerifier())
-                    .build();
-            requestFactory.setHttpClient(httpclient);
-            requestFactory.setConnectTimeout((int) Duration.ofSeconds(15).toMillis());
-            restTemplate = new RestTemplate(requestFactory);
-        } catch (KeyManagementException | FileNotFoundException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyStoreException | CertificateException | UnrecoverableKeyException | IOException e) {
-            e.printStackTrace();
-        }
+    @Bean(name = "httpsRestTemplate")
+    public RestTemplate restTemplate(HttpComponentsClientHttpRequestFactory httpsFactory) {
+        RestTemplate restTemplate = new RestTemplate(httpsFactory);
+        restTemplate.setErrorHandler(new ResponseErrorHandler() {
+            @Override
+            public boolean hasError(ClientHttpResponse clientHttpResponse) {
+                try{
+                    return !clientHttpResponse.getStatusCode().equals(HttpStatus.OK);
+                }
+                catch (IOException e){
+                    return true;
+                }
+            }
+
+            @Override
+            public void handleError(ClientHttpResponse clientHttpResponse) {
+                //handle non 200 status
+                try{
+                    AuthServiceImpl.logger.error(String.format("[request to keycloak failed] response status code: %d", clientHttpResponse.getRawStatusCode()));
+                }
+                catch (IOException e){
+                    AuthServiceImpl.logger.error("[request to keycloak failed]", e);
+                }
+            }
+        });
         return restTemplate;
     }
+
+    @Bean(name = "cerHttpsFactory")
+    public HttpComponentsClientHttpRequestFactory httpComponentsClientHttpRequestFactory() throws Exception {
+        CloseableHttpClient httpClient = createCloseableHttpClient();
+        HttpComponentsClientHttpRequestFactory httpsFactory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        httpsFactory.setReadTimeout(2000);
+        httpsFactory.setConnectTimeout(2000);
+        return httpsFactory;
+    }
+
+
+    private CloseableHttpClient createCloseableHttpClient() throws Exception {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(resourceLoader(CERTIFICATION_PATH), CERTIFICATION_PWD.toCharArray());
+        SSLContext sslContext = SSLContexts.custom()
+                .loadTrustMaterial(keyStore, new TrustSelfSignedStrategy()).build();
+
+        SSLConnectionSocketFactory sslFactory = new SSLConnectionSocketFactory(sslContext, new String[]{"TLSv1.2"}, null, NoopHostnameVerifier.INSTANCE);
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        CloseableHttpClient closeableHttpClient = httpClientBuilder.setSSLSocketFactory(sslFactory).build();
+        return closeableHttpClient;
+    }
+
+
+    private InputStream resourceLoader(String fileFullPath) throws IOException {
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        return resourceLoader.getResource(fileFullPath).getInputStream();
+    }
+
 }

@@ -17,6 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 @RestController
 public class AuthController {
 
+    @Value("${server.domain}")
+    private String DOMAIN;
+
     @Autowired
     private AuthServiceImpl authService;
 
@@ -31,12 +34,12 @@ public class AuthController {
 
 
         if(authService.login(token,clientId)){
-            response.setHeader("Location", "https://localhost:8000/home");
+            response.setHeader("Location", DOMAIN+"/home");
             return "login success";
         }
 
         // login failed redirect to 401 page
-        response.setHeader("Location", "https://localhost:8000/401");
+        response.setHeader("Location", DOMAIN+"/401");
         return "login failed";
     }
 

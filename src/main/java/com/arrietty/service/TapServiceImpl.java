@@ -124,23 +124,27 @@ public class TapServiceImpl {
 
     public void incrementNumberOfTaps(Long adId){
         synchronized (TAP_LOCK){
-            if(redisService.incrementNumberOfTaps(adId)==null){
-                int tapNum = tapMapper.getNumberOfTapsByAdId(adId);
-                redisService.setNumberOfTaps(adId, tapNum+1);
-            }
+            redisService.incrementNumberOfTaps(adId);
         }
-
     }
 
     public Integer getNumberOfTaps(Long adId){
-        synchronized (TAP_LOCK){
-            Integer result = redisService.getNumberOfTaps(adId);
-            if(result == null){
-                result = tapMapper.getNumberOfTapsByAdId(adId);
-                redisService.setNumberOfTaps(adId, result);
-            }
-            return result;
-        }
+        Integer result = redisService.getNumberOfTaps(adId);
+        // cache miss, go fetch from db
+        if(result == null){
+            // synchronize to make sure no incrementation happens between db read and redis set
+            synchronized (TAP_LOCK) {
+                // make sure it is still not in redis
+                result = redisService.getNumberOfTaps(adId);
+                if(result==null){
+                    result = tapMapper.getNumberOfTapsByAdId(adId);
+                    redisService.setNumberOfTaps(adId, result);
+                }
 
+            }
+        }
+        return result;
     }
+
+
 }

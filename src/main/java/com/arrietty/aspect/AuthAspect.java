@@ -78,15 +78,18 @@ public class AuthAspect {
             if(RedirectPolicyEnum.REDIRECT.equals(redirectPolicy)){
                 String redirectUrl = authService.getSSOUrl();
                 if(redirectUrl==null){
-                    //TODO: add a real error page
-                    redirectUrl = "/error";
+                    // failed to obtain a sso redirect url from keycloak, redirect to 500
+                    httpServletResponse.setHeader("Location", "/500");
                 }
-                httpServletResponse.setHeader("Location", redirectUrl);
-                logger.info("Redirect to Shibboleth SSO");
+                else {
+                    httpServletResponse.setHeader("Location", redirectUrl);
+                }
+                return null;
             }
+
             //redirect to 401 if non-login user visits an API annotated by NO_REDIRECT
             else {
-                httpServletResponse.setHeader("Location", "/404");
+                httpServletResponse.setHeader("Location", "/401");
             }
             return null;
         }

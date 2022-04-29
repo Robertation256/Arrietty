@@ -31,10 +31,10 @@ import java.util.Map;
 @Service
 public class AuthServiceImpl {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
+    public static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     @Value("${auth.token-obtain-url}")
-    private String TOKEN_OBTAIN_URL;
+    private String SSO_REDIRECT_URL_OBTAIN_URL;
 
     @Value("${auth.access-token-obtain-url}")
     private String ACCESS_TOKEN_OBTAIN_URL;
@@ -57,28 +57,32 @@ public class AuthServiceImpl {
     @Autowired
     private RestTemplate restTemplate;
 
+    private static final Type GET_SSO_REDIRECT_URL_RESPONSE_TYPE = new TypeToken<SSOResponsePO<TokenResponsePO>>(){}.getType();
+    private static final Type GET_ACCESS_TOKEN_RESPONSE_TYPE = new TypeToken<SSOResponsePO<AccessTokenResponsePO>>(){}.getType();
+    private static final Type USER_INFO_RESPONSE_TYPE = new TypeToken<SSOResponsePO<UserInfoResponsePO>>(){}.getType();
 
     // 获取SSO url, redirect user 去 SSO 页面
     public String getSSOUrl(){
 
-        String rawResponse = restTemplate.getForObject(
-                String.format(TOKEN_OBTAIN_URL,CLIENT_ID,"shibboleth-redirect"),
-                String.class);
-
-        Type type = new TypeToken<SSOResponsePO<TokenResponsePO>>(){}.getType();
-        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, type);
-        if(response==null || response.getResult()==null){
-            logger.warn(String.format("Invalid response format in obtaining SSO url: %s", rawResponse));
-            return null;
-        }
-        return response.getResult().getUrl();
+//        String rawResponse = restTemplate.getForObject(
+//                SSO_REDIRECT_URL_OBTAIN_URL,
+//                String.class);
+//
+//        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, GET_SSO_REDIRECT_URL_RESPONSE_TYPE);
+//        if(response==null || response.getResult()==null){
+//            logger.error("SSO redirect url request failed");
+//            return null;
+//        }
+//        return response.getResult().getUrl();
+        return "http://localhost:8001/sso.html";
     }
 
+    //TODO: change to real SSO callback in prod
     public Boolean login(String token, String netId){
 //        if(clientId==null || !clientId.equals(CLIENT_ID)){
 //            return false;
 //        }
-
+//
 //        String netId = getNetIdByToken(token);
 
         if (netId==null){
@@ -144,26 +148,26 @@ public class AuthServiceImpl {
     }
 
     private String getNetIdByToken(String token){
-        //TODO: exception handling
-
         String rawAccessTokenResponse = restTemplate.getForObject(
                 String.format(ACCESS_TOKEN_OBTAIN_URL,token),
                 String.class);
 
-        Type type1 = new TypeToken<SSOResponsePO<AccessTokenResponsePO>>(){}.getType();
-        SSOResponsePO<AccessTokenResponsePO> accessTokenResponse = new Gson().fromJson(rawAccessTokenResponse, type1);
-
+        SSOResponsePO<AccessTokenResponsePO> accessTokenResponse = new Gson().fromJson(rawAccessTokenResponse, GET_ACCESS_TOKEN_RESPONSE_TYPE);
+        if(accessTokenResponse==null || accessTokenResponse.getResult()==null){
+            logger.error("obtain access token failed");
+            return null;
+        }
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Authorization", String.format("Bearer %s", accessTokenResponse.getResult().getAccessToken()));
+        httpHeaders.add("Authorization", "Bearer " + accessTokenResponse.getResult().getAccessToken());
         HttpEntity<String> requestEntity = new HttpEntity<String>(null, httpHeaders);
         Map<String,String> param = new HashMap<>();
         ResponseEntity<String> rss = restTemplate.exchange(USER_INFO_OBTAIN_URL, HttpMethod.GET, requestEntity, String.class, param);
 
-
-        Type type2 = new TypeToken<SSOResponsePO<UserInfoResponsePO>>(){}.getType();
-        SSOResponsePO<UserInfoResponsePO> userInfoResponse = new Gson().fromJson(rss.getBody(), type2);
-
+        SSOResponsePO<UserInfoResponsePO> userInfoResponse = new Gson().fromJson(rss.getBody(), USER_INFO_RESPONSE_TYPE);
+        if(userInfoResponse==null || userInfoResponse.getResult()==null || userInfoResponse.getResult().getUsername()==null){
+            logger.error("obtain user info failed");
+            return null;
+        }
         return userInfoResponse.getResult().getUsername();
-
     }
 }

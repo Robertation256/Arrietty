@@ -39,3 +39,7 @@ log/
 # Configuration
 /src/main/resources/application-dev.yml
 
+
+#keystore
+/src/main/resources/ssl
+
