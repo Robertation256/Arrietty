@@ -91,8 +91,7 @@ public class SearchServiceImpl {
             }
         }
         catch (IOException e){
-            //TODO error handling
-            e.printStackTrace();
+            logger.error("failed to fetch current user advertisements", e);
         }
 
         return result;
@@ -161,10 +160,9 @@ public class SearchServiceImpl {
             for (SearchHit hit : hits) {
                 ESAdvertisementPO po = new Gson().fromJson(hit.getSourceAsString(), ESAdvertisementPO.class);
                 SearchResultItem searchResultItem = null;
-                //TODO: fix potential npe
                 Long adId = Long.parseLong(hit.getId());
 
-                // 自己的帖子和tap过的帖子默认显示用户信息
+                // show owner info if the ad belongs to current user or is unlocked by current user
                 if(currentUserTappedAdIds.contains(hit.getId()) ||
                     advertisementService.isCurrentUserAd(adId)
                 ){
@@ -187,8 +185,7 @@ public class SearchServiceImpl {
             }
         }
         catch (Exception e){
-            // TODO: proper search error handling
-            e.printStackTrace();
+            logger.error("[fetch advertisement search result failed]", e);
         }
 
         redisService.incrementSearchRequestNum();
@@ -235,7 +232,7 @@ public class SearchServiceImpl {
             }
         }
         catch (Exception e){
-            logger.error("[suggestion failed] ", e);
+            logger.error("[fetch suggestion failed] ", e);
         }
         return result;
     }

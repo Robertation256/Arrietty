@@ -23,6 +23,8 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,8 @@ import java.util.List;
 @Component
 @RabbitListener(queues = "AdvertisementQueue")
 public class AdvertisementConsumer {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdvertisementConsumer.class);
 
     private static final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
@@ -76,7 +80,7 @@ public class AdvertisementConsumer {
     private void handleAdvertisementUpload(Advertisement advertisement){
         redisService.incrementUserAdUploadNum();
 
-        // 对数据做聚合
+
         ESAdvertisementPO esDocument = new ESAdvertisementPO();
         esDocument.setUserId(advertisement.getUserId());
         esDocument.setAdTitle(advertisement.getAdTitle());
@@ -134,8 +138,7 @@ public class AdvertisementConsumer {
             System.out.println("[RESPONSE]: "+indexResponse.toString());
         }
         catch (IOException e){
-            //TODO: error log
-            //e.printStackTrace();
+            logger.error("[failed to insert to ES]", e);
         }
         
     }
@@ -158,8 +161,7 @@ public class AdvertisementConsumer {
             esClient.update(updateRequest);
         }
         catch (IOException e){
-            //TODO: error handling by logging
-            System.out.println(e.getStackTrace());
+            logger.error("[failed to update ES]", e);
         }
     }
 
@@ -171,8 +173,7 @@ public class AdvertisementConsumer {
             esClient.delete(deleteRequest);
         }
         catch (IOException e){
-            //TODO: error handling by logging
-            System.out.println(e.getStackTrace());
+            logger.error("[failed to delete from ES]", e);
         }
 
         redisService.adDeleteCleanUp(advertisement.getId());

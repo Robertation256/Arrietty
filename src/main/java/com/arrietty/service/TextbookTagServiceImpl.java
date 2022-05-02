@@ -22,9 +22,7 @@ public class TextbookTagServiceImpl {
 
     @Autowired
     private TextbookTagMapper textbookTagMapper;
-
-
-    //TODO: 加上缓存机制, getTextbookTagById 和 getAllTags 区分
+    
     public List<TextbookTag> getTextbookTagById(Long id){
         // id is null, return all TextbookTags
         if(id==null){

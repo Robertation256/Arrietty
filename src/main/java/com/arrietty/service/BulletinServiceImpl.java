@@ -45,6 +45,7 @@ public class BulletinServiceImpl {
                 throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Title and content cannot be empty.");
             }
 
+            // insert
             if (bulletin.getId()==null){
                 synchronized (BULLETIN_LOCK){
                     Date date = new Date();
@@ -55,6 +56,7 @@ public class BulletinServiceImpl {
                     redisService.setBulletin(bulletins);
                 }
             }
+            //update
             else {
                 synchronized (BULLETIN_LOCK){
                     Date date = new Date();

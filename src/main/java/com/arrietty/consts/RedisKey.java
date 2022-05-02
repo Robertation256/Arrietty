@@ -54,9 +54,4 @@ public class RedisKey {
     /* -----------------------initialized on image read------------------------------------- */
     //delete on image delete
     public static final String IMAGE_OWNER_ID = "image_owner_id:image_id=";
-
-
-
-
-
 }

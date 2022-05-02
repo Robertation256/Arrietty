@@ -253,6 +253,7 @@ public class RedisServiceImpl {
 
     public void addUserTappedAdId(Long userId, String adId){
         redisTemplate.opsForSet().add(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(),adId);
+        redisTemplate.expire(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(), 1, TimeUnit.HOURS);
 
     }
 
@@ -267,18 +268,24 @@ public class RedisServiceImpl {
         if(ret==null){
             return new HashSet<>();
         }
+        else{
+            redisTemplate.expire(RedisKey.CURRENT_USER_TAPPED_AD_ID_LIST+ userId.toString(), 1, TimeUnit.HOURS);
+        }
         return ret;
     }
 
     public Long incrementNumberOfTaps(Long adId){
-        return redisTemplate.opsForValue().increment(RedisKey.NUMBER_OF_TAPS+adId.toString(), 1L);
+         Long ret = redisTemplate.opsForValue().increment(RedisKey.NUMBER_OF_TAPS+adId.toString(), 1L);
+         redisTemplate.expire(RedisKey.NUMBER_OF_TAPS+adId.toString(), 1, TimeUnit.HOURS);
+         return ret;
     }
 
     public void setNumberOfTaps(Long adId, Integer num){
-        redisTemplate.opsForValue().set(RedisKey.NUMBER_OF_TAPS+adId.toString(), num);
+        redisTemplate.opsForValue().set(RedisKey.NUMBER_OF_TAPS+adId.toString(), num, 1, TimeUnit.HOURS);
     }
 
     public Integer getNumberOfTaps(Long adId){
+        redisTemplate.expire(RedisKey.NUMBER_OF_TAPS+adId.toString(), 1, TimeUnit.HOURS);
         return (Integer) redisTemplate.opsForValue().get(RedisKey.NUMBER_OF_TAPS+adId);
     }
 
@@ -306,7 +313,6 @@ public class RedisServiceImpl {
     public void setUserHasNewNotification(Long userId, boolean hasNew){
         redisTemplate.opsForValue().set(RedisKey.USER_NOTIFICATION_HAS_NEW+userId.toString(), hasNew?"true":"false");
     }
-
 
 
     public Set<String> getUserMarkedAdIds(Long userId){
