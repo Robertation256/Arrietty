@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
@@ -86,8 +87,8 @@ public class RestTemplateConfig {
 
 
     private InputStream resourceLoader(String fileFullPath) throws IOException {
-        ResourceLoader resourceLoader = new DefaultResourceLoader();
-        return resourceLoader.getResource(fileFullPath).getInputStream();
+        ResourceLoader resourceLoader = new FileSystemResourceLoader();
+        return resourceLoader.getResource(fileFullPath).getURI().toURL().openStream();
     }
 
 }

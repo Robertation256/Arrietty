@@ -84,6 +84,7 @@ public class AdvertisementServiceImpl {
     }
 
 
+    @Transactional(rollbackFor = Exception.class)
     public AdvertisementResponsePO handlePostAdvertisement(String action, PostAdvertisementRequestPO requestPO) throws LogicException {
         if("add".equals(action)){
             checkAdvertisementFormat(requestPO);
@@ -104,25 +105,30 @@ public class AdvertisementServiceImpl {
     @Transactional(rollbackFor = Exception.class)
     public AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{
         List<String> imageIds = new ArrayList<>(requestPO.getImages().size());
-        for(MultipartFile imageFile: requestPO.getImages()){
-            Long imageId = imageService.insertAdvertisementImage(imageFile);
-            imageIds.add(imageId.toString());
-        }
-
-        Date date = new Date();
-        Advertisement advertisement = new Advertisement();
-        advertisement.setUserId(SessionContext.getUserId());
-        advertisement.setAdTitle(requestPO.getAdTitle());
-        advertisement.setIsTextbook(requestPO.getIsTextbook());
-        advertisement.setTagId(requestPO.getTagId());
-        advertisement.setImageIds(String.join( ",", imageIds));
-        advertisement.setComment(requestPO.getComment());
-        advertisement.setPrice(requestPO.getPrice());
-        advertisement.setNumberOfTaps(0);
-        advertisement.setCreateTime(date);
-
         try{
+            for(MultipartFile imageFile: requestPO.getImages()){
+                Long imageId = imageService.insertAdvertisementImage(imageFile);
+                imageIds.add(imageId.toString());
+            }
+
+            Date date = new Date();
+            Advertisement advertisement = new Advertisement();
+            advertisement.setUserId(SessionContext.getUserId());
+            advertisement.setAdTitle(requestPO.getAdTitle());
+            advertisement.setIsTextbook(requestPO.getIsTextbook());
+            advertisement.setTagId(requestPO.getTagId());
+            advertisement.setImageIds(String.join( ",", imageIds));
+            advertisement.setComment(requestPO.getComment());
+            advertisement.setPrice(requestPO.getPrice());
+            advertisement.setNumberOfTaps(0);
+            advertisement.setCreateTime(date);
             advertisementMapper.insert(advertisement);
+            // push ad upload event to message queue for more further processing
+            AdvertisementEvent advertisementEvent = new AdvertisementEvent();
+            advertisementEvent.setAdvertisement(advertisement);
+            advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPLOAD);
+            advertisementEvent.setTimestamp(date);
+            mqService.pushAdEvent(advertisementEvent);
         }
         catch (Exception e){
             // clean up previously inserted images from file system
@@ -130,13 +136,6 @@ public class AdvertisementServiceImpl {
             logger.error("[advertisement upload failed]", e);
             throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Advertisement upload failed");
         }
-
-        // push ad upload event to message queue for more further processing
-        AdvertisementEvent advertisementEvent = new AdvertisementEvent();
-        advertisementEvent.setAdvertisement(advertisement);
-        advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPLOAD);
-        advertisementEvent.setTimestamp(date);
-        mqService.pushAdEvent(advertisementEvent);
 
         return null;
     }
@@ -147,8 +146,10 @@ public class AdvertisementServiceImpl {
     public AdvertisementResponsePO updateAdvertisement(PostAdvertisementRequestPO requestPO){
         if(
                 requestPO.getPrice()==null ||
-                        (requestPO.getPrice().compareTo(MIN_PRICE)<0 ||
-                                requestPO.getPrice().compareTo(MAX_PRICE)>0)
+                        (requestPO.getPrice().compareTo(MIN_PRICE)<0 || requestPO.getPrice().compareTo(MAX_PRICE)>0) ||
+                        (requestPO.getComment()!=null && requestPO.getComment().length()>255) ||
+                        requestPO.getImages()==null ||
+                        requestPO.getImages().size()>MAX_IMAGE_NUM
 
         ){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
@@ -162,44 +163,43 @@ public class AdvertisementServiceImpl {
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Advertisement does not exist.");
         }
 
-        // 新照片全增
+
         List<String> imageIds = new ArrayList<>();
-        if(requestPO.getImages()!=null){
-            for(MultipartFile imageFile: requestPO.getImages()){
-                // TODO: 单张insert 改为batch insert
-                Long imageId = imageService.insertAdvertisementImage(imageFile);
-                imageIds.add(imageId.toString());
+
+        try{
+            // insert newly uploaded images
+            if(requestPO.getImages()!=null){
+                for(MultipartFile imageFile: requestPO.getImages()){
+                    Long imageId = imageService.insertAdvertisementImage(imageFile);
+                    imageIds.add(imageId.toString());
+                }
             }
-        }
-
-
-        //旧照片全删
-        if(ad.getImageIds()!=null && ad.getImageIds().length()>0){
-            String[] tmp = ad.getImageIds().split(",");
-            for(String strId: tmp){
-                Long id = Long.parseLong(strId);
-                imageService.deleteImage(id);
+            // delete all old pictures
+            if(ad.getImageIds()!=null && ad.getImageIds().length()>0){
+                String[] tmp = ad.getImageIds().split(",");
+                for(String strId: tmp){
+                    Long id = Long.parseLong(strId);
+                    imageService.deleteImage(id);
+                }
             }
+            Date date = new Date();
+            ad.setCreateTime(date);
+            ad.setImageIds(String.join(",", imageIds));
+            ad.setPrice(requestPO.getPrice());
+            ad.setComment(requestPO.getComment());
+            advertisementMapper.updateByPrimaryKey(ad);
+
+            AdvertisementEvent advertisementEvent = new AdvertisementEvent();
+            advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPDATE);
+            advertisementEvent.setAdvertisement(ad);
+            mqService.pushAdEvent(advertisementEvent);
+        }
+        catch (Exception e){
+            logger.error("[advertisement update failed]", e);
+            imageService.deleteImageFiles(imageIds);
+            throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Advertisement update failed");
         }
 
-
-
-        Date date = new Date();
-        ad.setCreateTime(date);
-        ad.setImageIds(String.join(",", imageIds));
-        ad.setPrice(requestPO.getPrice());
-        ad.setComment(requestPO.getComment());
-
-
-        int count = advertisementMapper.updateByPrimaryKey(ad);
-        if(count==0){
-            throw new LogicException(ErrorCode.ADVERTISEMENT_SAVE_ERROR, "Update to DB failed.");
-        }
-
-        AdvertisementEvent advertisementEvent = new AdvertisementEvent();
-        advertisementEvent.setEventType(EventType.ADVERTISEMENT_UPDATE);
-        advertisementEvent.setAdvertisement(ad);
-        mqService.pushAdEvent(advertisementEvent);
 
         AdvertisementResponsePO responsePO = new AdvertisementResponsePO();
         responsePO.setId(ad.getId());
@@ -209,13 +209,11 @@ public class AdvertisementServiceImpl {
         responsePO.setComment(ad.getComment());
         responsePO.setPrice(ad.getPrice());
         responsePO.setNumberOfTaps(ad.getNumberOfTaps());
-        responsePO.setCreateTime(date);
-
+        responsePO.setCreateTime(ad.getCreateTime());
         return responsePO;
-
     }
 
-    @Transactional(rollbackFor = Exception.class)
+
     public void deleteAdvertisement(PostAdvertisementRequestPO requestPO) throws  LogicException {
         if(requestPO.getId()==null){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
@@ -241,7 +239,6 @@ public class AdvertisementServiceImpl {
         event.setEventType(EventType.ADVERTISEMENT_DELETE);
         event.setAdvertisement(ad);
         mqService.pushAdEvent(event);
-
     }
 
 
@@ -256,7 +253,8 @@ public class AdvertisementServiceImpl {
                 (requestPO.getIsTextbook() && requestPO.getTagId()==null) ||
                 requestPO.getPrice()==null ||
                 requestPO.getPrice().compareTo(MIN_PRICE)<0 ||
-                requestPO.getPrice().compareTo(MAX_PRICE)>0
+                requestPO.getPrice().compareTo(MAX_PRICE)>0 ||
+                (requestPO.getComment()!=null && requestPO.getComment().length()>255)
         ){
             throw new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Bad form format.");
         }

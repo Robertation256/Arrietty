@@ -94,7 +94,7 @@ public class ImageServiceImpl {
         boolean getDefaultAvatar = profilePO==null || profilePO.getAvatarImageId()==null;
         String filePath;
         if(getDefaultAvatar){
-            filePath = BASE_PATH+DEFAULT_AVATAR_PATH;
+            filePath = DEFAULT_AVATAR_PATH;
         }
         else {
             filePath = BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+profilePO.getAvatarImageId().toString();
@@ -211,24 +211,18 @@ public class ImageServiceImpl {
         return image.getId();
     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteImage(Long imageId) throws LogicException {
 
-        int count = imageMapper.deleteByPrimaryKey(imageId);
-        if(count==0){
-            throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Image does not exist");
-        }
-
+    public void deleteImage(Long imageId){
+        imageMapper.deleteByPrimaryKey(imageId);
+        redisService.removeImageIdToOwnerIdCacheByImageId(imageId);
         File file = new File(BASE_PATH+"/user#"+SessionContext.getUserId()+"/"+imageId.toString());
         file.delete();
-        redisService.removeImageIdToOwnerIdCacheByImageId(imageId);
     }
 
     // copy from tmp file to user folder
     private void save(File file, Long imageId) throws LogicException{
         FileChannel src = null;
         FileChannel dest = null;
-
 
         File fileFolder = new File(BASE_PATH+"/user#"+SessionContext.getUserId());
         if(!fileFolder.exists()){
@@ -255,7 +249,7 @@ public class ImageServiceImpl {
         }
         catch (IOException e){
             logger.error("[image save failed]", e);
-            throw new LogicException(ErrorCode.INTERNAL_ERROR, "Save image failed");
+            throw new LogicException(ErrorCode.INTERNAL_ERROR, "temp file transfer failed");
         }
         finally {
             file.delete();

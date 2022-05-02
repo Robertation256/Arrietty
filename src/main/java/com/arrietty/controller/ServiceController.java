@@ -73,42 +73,42 @@ public class ServiceController {
     @Autowired
     private AdminServiceImpl adminService;
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/")
     public ModelAndView root(){
         return new ModelAndView("index.html");
     }
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/home")
     public ModelAndView userHome(){
         return new ModelAndView("index.html");
     }
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/myPosts")
     public ModelAndView userPosts(){
         return new ModelAndView("index.html");
     }
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/favorite")
     public ModelAndView userFavorite(){
         return new ModelAndView("index.html");
     }
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.REGULAR, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/notification")
     public ModelAndView userNotification(){
         return new ModelAndView("index.html");
     }
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
+
     @Auth(authMode=AuthModeEnum.ADMIN, redirectPolicy = RedirectPolicyEnum.REDIRECT)
     @GetMapping("/admin")
     public ModelAndView userAdmin(){
@@ -118,7 +118,6 @@ public class ServiceController {
 
     // final test pending
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/profile")
@@ -129,7 +128,6 @@ public class ServiceController {
 
     // final test pending
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/profile")
@@ -139,7 +137,6 @@ public class ServiceController {
     }
 
     // final test pending
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/avatar")
@@ -149,7 +146,6 @@ public class ServiceController {
     }
 
     // final test pending
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/avatar")
     public void getAvatar(HttpServletResponse response) throws LogicException{
@@ -159,7 +155,6 @@ public class ServiceController {
 
     // final test pending
     @Auth(authMode = AuthModeEnum.REGULAR)
-    @RateLimit
     @GetMapping("/image")
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response) throws LogicException{
         imageService.getImage(id, response);
@@ -167,7 +162,6 @@ public class ServiceController {
 
     // final test pending
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/course")
@@ -179,7 +173,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @PostMapping("/course")
@@ -190,7 +183,6 @@ public class ServiceController {
     }
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/textbook")
@@ -202,7 +194,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @PostMapping("/textbook")
@@ -214,7 +205,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/otherTag")
@@ -226,7 +216,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @PostMapping("/otherTag")
@@ -238,7 +227,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/advertisement")
@@ -249,7 +237,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/myAdvertisement")
@@ -262,7 +249,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/search")
@@ -273,7 +259,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/suggest")
@@ -283,7 +268,6 @@ public class ServiceController {
     }
 
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/lastModified")
@@ -294,7 +278,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/tap")
@@ -305,7 +288,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/getNotification")
@@ -315,7 +297,6 @@ public class ServiceController {
     }
 
 
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/hasNew")
@@ -326,7 +307,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/mark")
@@ -337,7 +317,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/getFavorite")
@@ -348,7 +327,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @GetMapping("/bulletin")
@@ -359,7 +337,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @PostMapping("/bulletin")
@@ -373,7 +350,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @GetMapping("/blacklist")
@@ -384,7 +360,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @PostMapping("/updateBlacklist")
@@ -396,7 +371,6 @@ public class ServiceController {
 
 
     @Log
-    @RateLimit(rateLimit = RateLimitPolicy.STRICT)
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
     @GetMapping("/adminStatistics")

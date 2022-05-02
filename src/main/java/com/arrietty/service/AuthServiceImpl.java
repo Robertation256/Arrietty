@@ -63,7 +63,6 @@ public class AuthServiceImpl {
 
     // 获取SSO url, redirect user 去 SSO 页面
     public String getSSOUrl(){
-
 //        String rawResponse = restTemplate.getForObject(
 //                SSO_REDIRECT_URL_OBTAIN_URL,
 //                String.class);
@@ -78,12 +77,13 @@ public class AuthServiceImpl {
     }
 
     //TODO: change to real SSO callback in prod
-    public Boolean login(String token, String netId){
+    public Boolean login(String token, String clientId){
 //        if(clientId==null || !clientId.equals(CLIENT_ID)){
 //            return false;
 //        }
 //
 //        String netId = getNetIdByToken(token);
+        String netId = clientId;
 
         if (netId==null){
             return false;
