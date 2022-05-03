@@ -36,7 +36,11 @@ public class RestTemplateConfig {
 
 
     @Bean(name = "httpsRestTemplate")
-    public RestTemplate restTemplate(HttpComponentsClientHttpRequestFactory httpsFactory) {
+    public RestTemplate restTemplate() {
+        HttpComponentsClientHttpRequestFactory httpsFactory = new HttpComponentsClientHttpRequestFactory();
+        httpsFactory.setConnectionRequestTimeout(3000);
+        httpsFactory.setConnectTimeout(3000);
+        httpsFactory.setReadTimeout(5000);
         RestTemplate restTemplate = new RestTemplate(httpsFactory);
         restTemplate.setErrorHandler(new ResponseErrorHandler() {
             @Override

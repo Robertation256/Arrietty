@@ -9,6 +9,7 @@ public class LogicException extends RuntimeException{
     public int errorCode;
     public String errorMessage;
     public LogicException(int errorCode, String errorMessage){
+        super(errorMessage);
         this.errorCode = errorCode;
         this.errorMessage = errorMessage;
     }

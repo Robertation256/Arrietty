@@ -113,24 +113,6 @@ public class RedisServiceImpl {
             }
         }
 
-        
-    }
-
-    public long incrementRequestNum(String ip){
-        Long timestamp = Instant.now().getEpochSecond()/60;
-        String key = String.format("rate_limit:ip=%s:timestamp=%d",ip, timestamp);
-        List<Object> txResults = (List<Object>) redisTemplate.execute(new SessionCallback<List<Object>>() {
-            public List<Object> execute(RedisOperations operations) throws DataAccessException {
-                operations.multi();
-                Long requestNum = operations.opsForValue().increment(key);
-                if(requestNum==null || requestNum.equals(1L)){
-                    operations.expire(key,1, TimeUnit.MINUTES);
-                }
-                // This will contain the results of all ops in the transaction
-                return operations.exec();
-            }
-        });
-        return (long) txResults.get(0);
     }
 
     public void loadUserCache(User user){

@@ -59,7 +59,6 @@ public class AdvertisementServiceImpl {
 
 
     public Advertisement getAdvertisementById(Long id){
-        //TODO caching?
         return advertisementMapper.selectByPrimaryKey(id);
     }
 

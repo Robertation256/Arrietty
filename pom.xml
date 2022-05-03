@@ -114,7 +114,9 @@
         </dependency>
 
     </dependencies>
-<!--    only used when auto generating mappers-->
+
+
+
     <build>
         <plugins>
             <plugin>
@@ -122,14 +124,11 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.1.0</version>
             </plugin>
-
-
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-            <!--添加mybatis generator maven插件-->
+            <!--used for auto generating mapper xml-->
 <!--            <plugin>-->
 <!--                <groupId>org.mybatis.generator</groupId>-->
 <!--                <artifactId>mybatis-generator-maven-plugin</artifactId>-->

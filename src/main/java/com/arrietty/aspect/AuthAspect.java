@@ -35,7 +35,7 @@ import java.lang.reflect.Method;
 
 @Aspect
 @Component
-@Order(1)
+@Order(0)
 public class AuthAspect {
 
     public static final Logger logger = LoggerFactory.getLogger(AuthAspect.class);

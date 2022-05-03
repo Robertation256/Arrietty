@@ -2,7 +2,6 @@ package com.arrietty.controller;
 
 import com.arrietty.annotations.Auth;
 import com.arrietty.annotations.Log;
-import com.arrietty.annotations.RateLimit;
 import com.arrietty.consts.*;
 import com.arrietty.entity.*;
 import com.arrietty.exception.LogicException;
@@ -381,10 +380,10 @@ public class ServiceController {
 
 
 
-    @Auth(authMode = AuthModeEnum.REGULAR)
+
     @GetMapping("/test")
     @ResponseBody
     public String mqTest() throws Exception{
-        return "hii";
+        throw new LogicException(ErrorCode.INTERNAL_ERROR, "this is a test");
     }
 }

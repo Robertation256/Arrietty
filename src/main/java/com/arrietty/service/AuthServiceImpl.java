@@ -76,7 +76,7 @@ public class AuthServiceImpl {
         return "http://localhost:8001/sso.html";
     }
 
-    //TODO: change to real SSO callback in prod
+
     public Boolean login(String token, String clientId){
 //        if(clientId==null || !clientId.equals(CLIENT_ID)){
 //            return false;

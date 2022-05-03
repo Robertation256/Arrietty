@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter;
 
 @Aspect
 @Component
-@Order(2)
+@Order(1)
 public class LogAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LogAspect.class);
