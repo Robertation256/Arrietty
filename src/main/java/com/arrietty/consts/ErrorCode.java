@@ -23,6 +23,7 @@ public class ErrorCode {
 
     //advertisement related error
     public static final int ADVERTISEMENT_SAVE_ERROR = 4001;
+    public static final int ADVERTISEMENT_NUM_EXCEEDED = 4002;
 
     //search related error
     public static final int INVALID_SEARCH_PARAM = 5001;

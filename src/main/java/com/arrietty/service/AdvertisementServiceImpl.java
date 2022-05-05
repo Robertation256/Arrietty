@@ -6,13 +6,11 @@ import com.arrietty.consts.EventType;
 import com.arrietty.dao.AdvertisementMapper;
 import com.arrietty.dao.ImageMapper;
 import com.arrietty.entity.Advertisement;
-import com.arrietty.entity.Image;
 import com.arrietty.exception.LogicException;
 import com.arrietty.pojo.*;
 import com.arrietty.utils.session.SessionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,9 @@ public class AdvertisementServiceImpl {
 
     @Value("${file.max-image-num-per-ad}")
     private int MAX_IMAGE_NUM;
+
+    @Value("${file.max-ad-num-per-user}")
+    private int MAX_AD_NUM;
 
 
     private static final BigDecimal MIN_PRICE = new BigDecimal(0);
@@ -103,6 +104,10 @@ public class AdvertisementServiceImpl {
 
     @Transactional(rollbackFor = Exception.class)
     public AdvertisementResponsePO insertAdvertisement(PostAdvertisementRequestPO requestPO) throws LogicException{
+        int existingAdNum = advertisementMapper.selectAdNumByUserId(SessionContext.getUserId());
+        if(existingAdNum>=MAX_AD_NUM){
+            throw new LogicException(ErrorCode.ADVERTISEMENT_NUM_EXCEEDED, "Maximum advertisement limit exceeded.");
+        }
         List<String> imageIds = new ArrayList<>(requestPO.getImages().size());
         try{
             for(MultipartFile imageFile: requestPO.getImages()){

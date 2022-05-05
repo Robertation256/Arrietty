@@ -52,4 +52,6 @@ public interface AdvertisementMapper {
     Integer getTotalAdNum();
 
     Date getLatestAdCreateTime();
+
+    int selectAdNumByUserId(Long userId);
 }

@@ -45,6 +45,9 @@ public class ImageServiceImpl {
     @Value("${file.max-avatar-image-size}")
     private Integer MAX_AVATAR_SIZE;
 
+    @Value("${file.max-ad-image-size}")
+    private Integer MAX_AD_IMAGE_SIZE;
+
     @Value("${file.default-user-avatar-path}")
     private String DEFAULT_AVATAR_PATH;
 
@@ -124,7 +127,7 @@ public class ImageServiceImpl {
             throw new LogicException(ErrorCode.IMAGE_SAVE_ERROR, "Cannot find user profile.");
         };
 
-        File tempFile = checkFileFormat(file);
+        File tempFile = checkFileFormat(file, "avatar");
         Image image = new Image();
         image.setImageType("avatar");
         image.setImageSize((int)(file.getSize()/1024));
@@ -173,7 +176,7 @@ public class ImageServiceImpl {
 
     @Transactional(rollbackFor = Exception.class)
     public Long insertAdvertisementImage(MultipartFile file) throws LogicException {
-        File tempFile = checkFileFormat(file);
+        File tempFile = checkFileFormat(file, "advertisement");
 
         Image image = new Image();
         image.setImageType("advertisement");
@@ -192,7 +195,7 @@ public class ImageServiceImpl {
     
     @Transactional(rollbackFor = Exception.class)
     public Long updateAdvertisementImage(MultipartFile file, Long imageId) throws LogicException {
-        File tempFile = checkFileFormat(file);
+        File tempFile = checkFileFormat(file, "advertisement");
         // update image table, update user profile if needed
 
         Image image = new Image();
@@ -272,8 +275,14 @@ public class ImageServiceImpl {
 
 
 
-    private File checkFileFormat(MultipartFile file) throws LogicException{
-        if(file==null || file.getSize()>MAX_AVATAR_SIZE){
+    private File checkFileFormat(MultipartFile file, String imageType) throws LogicException{
+        if(file==null){
+            throw  new LogicException(ErrorCode.INVALID_REQUEST_BODY, "Image file is empty");
+        }
+
+        if(("avatar".equals(imageType) && file.getSize()>MAX_AVATAR_SIZE) ||
+                ("advertisement".equals(imageType) && file.getSize()>MAX_AD_IMAGE_SIZE)
+        ){
             throw  new LogicException(ErrorCode.MAX_IMAGE_SIZE_EXCEEDED, "Image size exceeded.");
         }
 
