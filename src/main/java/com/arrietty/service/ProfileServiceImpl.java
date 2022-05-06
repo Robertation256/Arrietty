@@ -68,6 +68,7 @@ public class ProfileServiceImpl {
         target.setId(SessionContext.getUserId());
         target.setUsername(profile.getUsername());
         target.setSchoolYear(profile.getSchoolYear());
+        target.setNetId(SessionContext.getUserNetId());
 
         synchronized (PROFILE_WRITE_LOCK){
             if(!userMapper.updateProfile(target)){

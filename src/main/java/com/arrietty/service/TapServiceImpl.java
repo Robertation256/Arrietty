@@ -113,6 +113,7 @@ public class TapServiceImpl {
             tapPO.setNetId(profilePO.getNetId());
             tapPO.setAvatarImageId(profilePO.getAvatarImageId());
             tapPO.setAdTitle(advertisement.getAdTitle());
+            tapPO.setCreateTime(tap.getCreateTime());
             result.add(tapPO);
 
         }

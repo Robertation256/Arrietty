@@ -26,6 +26,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 
 
@@ -132,6 +133,7 @@ public class ImageServiceImpl {
         image.setImageType("avatar");
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
+        image.setUploadTime(new Date());
 
         TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
 
@@ -182,6 +184,7 @@ public class ImageServiceImpl {
         image.setImageType("advertisement");
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
+        image.setUploadTime(new Date());
 
         imageMapper.insertAndGetPrimaryKey(image);
         if(image.getId()==null){
@@ -203,6 +206,7 @@ public class ImageServiceImpl {
         image.setImageType("advertisement");
         image.setImageSize((int)(file.getSize()/1024));
         image.setUserId(SessionContext.getUserId());
+        image.setUploadTime(new Date());
 
         int count = imageMapper.updateByPrimaryKey(image);
         if(count==0){

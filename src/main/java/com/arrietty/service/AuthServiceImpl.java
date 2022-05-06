@@ -63,27 +63,27 @@ public class AuthServiceImpl {
 
     // 获取SSO url, redirect user 去 SSO 页面
     public String getSSOUrl(){
-//        String rawResponse = restTemplate.getForObject(
-//                SSO_REDIRECT_URL_OBTAIN_URL,
-//                String.class);
-//
-//        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, GET_SSO_REDIRECT_URL_RESPONSE_TYPE);
-//        if(response==null || response.getResult()==null){
-//            logger.error("SSO redirect url request failed");
-//            return null;
-//        }
-//        return response.getResult().getUrl();
-        return "http://localhost:8001/sso.html";
+        String rawResponse = restTemplate.getForObject(
+                SSO_REDIRECT_URL_OBTAIN_URL,
+                String.class);
+
+        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, GET_SSO_REDIRECT_URL_RESPONSE_TYPE);
+        if(response==null || response.getResult()==null){
+            logger.error("SSO redirect url request failed");
+            return null;
+        }
+        return response.getResult().getUrl();
+//        return "http://localhost:8001/sso.html";
     }
 
 
     public Boolean login(String token, String clientId){
-//        if(clientId==null || !clientId.equals(CLIENT_ID)){
-//            return false;
-//        }
-//
-//        String netId = getNetIdByToken(token);
-        String netId = clientId;
+        if(clientId==null || !clientId.equals(CLIENT_ID)){
+            return false;
+        }
+
+        String netId = getNetIdByToken(token);
+//        String netId = clientId;
 
         if (netId==null){
             return false;
@@ -117,6 +117,7 @@ public class AuthServiceImpl {
             user = new User();
             user.setNetId(netId);
             user.setAccessControl(AccessControl.REGULAR);
+            user.setLastLoginTime(new Date());
             userMapper.insert(user);
             logger.info(String.format("[netId: %s] New user account created.", netId));
         }

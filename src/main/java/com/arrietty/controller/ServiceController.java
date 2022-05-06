@@ -381,9 +381,9 @@ public class ServiceController {
 
 
 
-    @GetMapping("/test")
-    @ResponseBody
-    public String mqTest() throws Exception{
-        throw new LogicException(ErrorCode.INTERNAL_ERROR, "this is a test");
-    }
+//    @GetMapping("/test")
+//    @ResponseBody
+//    public String mqTest() throws Exception{
+//        throw new LogicException(ErrorCode.INTERNAL_ERROR, "this is a test");
+//    }
 }
