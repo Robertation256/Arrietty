@@ -5,11 +5,11 @@ server:
 
 #    below four configs are used for local testing, remove them for production
     enable: true  #for dev turn on ssl; for production, turn off ssl since we use nginx for ssl service
-    key-store: classpath:arrietty.jks    #put any .jks file under class path, used for ssl, can be a self signed .jks
-    key-store-password: 1234
+    key-store: classpath:dev.jks  #this .jks file is for dev purpose
+    key-store-password: arrietty
     keyStoreType: JKS   # don't change this. our service use .jks as keystore type
 
-#    below two configs are used for production, no need for local testing
+#    below two configs are used for production, no need to change for local testing
     sso-cert-path: full_path_to_nyush_keycloak_certification_keystore_file
     sso-cert-pwd: keystore_password
 

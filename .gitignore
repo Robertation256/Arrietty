@@ -41,7 +41,3 @@ log/
 /src/main/resources/application-test.yml
 /src/main/resources/application-prod.yml
 
-
-#keystore
-/src/main/resources/*.jks
-
