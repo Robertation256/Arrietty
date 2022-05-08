@@ -40,6 +40,4 @@ log/
 /src/main/resources/application-*.yml
 
 
-#keystore
-/src/main/resources/*.jks
 

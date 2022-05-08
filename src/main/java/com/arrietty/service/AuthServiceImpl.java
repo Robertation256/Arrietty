@@ -73,7 +73,6 @@ public class AuthServiceImpl {
             return null;
         }
         return response.getResult().getUrl();
-//        return "http://localhost:8001/sso.html";
     }
 
 
@@ -83,7 +82,6 @@ public class AuthServiceImpl {
         }
 
         String netId = getNetIdByToken(token);
-//        String netId = clientId;
 
         if (netId==null){
             return false;
