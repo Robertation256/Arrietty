@@ -61,7 +61,7 @@ public class AuthServiceImpl {
     private static final Type GET_ACCESS_TOKEN_RESPONSE_TYPE = new TypeToken<SSOResponsePO<AccessTokenResponsePO>>(){}.getType();
     private static final Type USER_INFO_RESPONSE_TYPE = new TypeToken<SSOResponsePO<UserInfoResponsePO>>(){}.getType();
 
-    // 获取SSO url, redirect user 去 SSO 页面
+    // obtain SSO redirect url from NYUSH keycloak service and redirect user to Shibboleth SSO
     public String getSSOUrl(){
         String rawResponse = restTemplate.getForObject(
                 SSO_REDIRECT_URL_OBTAIN_URL,

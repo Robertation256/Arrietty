@@ -104,7 +104,7 @@ public class SearchServiceImpl {
         List<SearchResultItem> result = new LinkedList<>();
 
         SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("advertisement").types("_doc");
+        searchRequest.indices("advertisement");
 
         BoolQueryBuilder queryFilter = QueryBuilders.boolQuery();
         queryFilter.filter(QueryBuilders.termQuery("is_textbook", "textbook".equals(requestPO.getAdType())));
@@ -112,10 +112,14 @@ public class SearchServiceImpl {
         // textbook match by textbook title, other item match by ad title
         if(requestPO.getKeyword()!=null && requestPO.getKeyword().length()>0){
             if("textbook".equals(requestPO.getAdType())){
-                queryFilter.must(QueryBuilders.matchQuery("textbook_tag.title", requestPO.getKeyword()).fuzziness(Fuzziness.AUTO).prefixLength(3));
+                queryFilter.must(QueryBuilders.multiMatchQuery(requestPO.getKeyword(),"textbook_tag.title", "ad_title", "comment")
+                        .operator(Operator.OR)
+                        .fuzziness(Fuzziness.AUTO).prefixLength(3));
             }
             else {
-                queryFilter.must(QueryBuilders.matchQuery("ad_title", requestPO.getKeyword()).fuzziness(Fuzziness.AUTO).prefixLength(3));
+                queryFilter.must(QueryBuilders.multiMatchQuery(requestPO.getKeyword(),"ad_title", "comment")
+                        .operator(Operator.OR)
+                        .fuzziness(Fuzziness.AUTO).prefixLength(3));
             }
         }
         
@@ -194,32 +198,35 @@ public class SearchServiceImpl {
 
 
     public List<String> handleKeywordSuggestion(String type, String keyword) throws  LogicException {
+        List<String> result = new LinkedList<>();
         if(keyword==null || keyword.length()==0){
             throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Keyword is empty.");
         }
 
-        BoolQueryBuilder queryFilter = QueryBuilders.boolQuery();
         if("textbook".equals(type)){
-            queryFilter.filter(QueryBuilders.termQuery("is_textbook", true));
+            keyword = "T:"+keyword;
         }
         else if ("other".equals(type)){
-            queryFilter.filter(QueryBuilders.termQuery("is_textbook", false));
+            keyword = "O:"+keyword;
         }
         else {
-            throw new LogicException(ErrorCode.INVALID_URL_PARAM, "Invalid type.");
+            logger.warn("[Keyword suggestion failed] invalid suggestion type");
+            return result;
         }
 
         SearchRequest searchRequest = new SearchRequest();
-        searchRequest.indices("advertisement").types("_doc");
+        searchRequest.indices("advertisement");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         SuggestBuilder suggestBuilder = new SuggestBuilder();
-        CompletionSuggestionBuilder completionSuggestionBuilder = new CompletionSuggestionBuilder("suggest").prefix(keyword).size(MAX_SUGGESTION_SIZE);
+        CompletionSuggestionBuilder completionSuggestionBuilder = new CompletionSuggestionBuilder("suggest")
+                .prefix(keyword)
+                .size(MAX_SUGGESTION_SIZE)
+                .skipDuplicates(true);
         suggestBuilder.addSuggestion("advertisement_suggest", completionSuggestionBuilder);
         searchSourceBuilder.suggest(suggestBuilder);
-        searchSourceBuilder.query(queryFilter);
         searchRequest.source(searchSourceBuilder);
 
-        List<String> result = new LinkedList<>();
+
         try{
             SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
             Suggest suggest = response.getSuggest();
@@ -227,7 +234,7 @@ public class SearchServiceImpl {
             for (CompletionSuggestion.Entry entry : completionSuggestion.getEntries()) {
                 for (CompletionSuggestion.Entry.Option option : entry) {
                     String suggestText = option.getText().string();
-                    result.add(suggestText);
+                    result.add(suggestText.substring(2));
                 }
             }
         }

@@ -62,15 +62,13 @@ public class ProfileServiceImpl {
 
     public void updateUserProfile(ProfilePO profile) throws LogicException {
         checkProfileFormat(profile);
-        ProfilePO target = new ProfilePO();
-
-        // only allow update to current user's own profile
-        target.setId(SessionContext.getUserId());
-        target.setUsername(profile.getUsername());
-        target.setSchoolYear(profile.getSchoolYear());
-        target.setNetId(SessionContext.getUserNetId());
 
         synchronized (PROFILE_WRITE_LOCK){
+            ProfilePO target = getUserProfile(SessionContext.getUserId());
+            target.setId(SessionContext.getUserId());
+            target.setUsername(profile.getUsername());
+            target.setSchoolYear(profile.getSchoolYear());
+
             if(!userMapper.updateProfile(target)){
                 logger.error("[profile update failed] failed to update db");
                 throw new LogicException(ErrorCode.INTERNAL_ERROR, "Internal error.");

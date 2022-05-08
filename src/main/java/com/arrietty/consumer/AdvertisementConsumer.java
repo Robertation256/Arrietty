@@ -111,7 +111,7 @@ public class AdvertisementConsumer {
             esRelatedCoursePO.setSubject(course.getSubject());
 
             esTextbookTagPO.setRelatedCourse(esRelatedCoursePO);
-            esDocument.setSuggest(textbookTag.getTitle());
+            esDocument.setSuggest("T:"+textbookTag.getTitle());
             esDocument.setTextbookTag(esTextbookTagPO);
         }
         else {
@@ -122,7 +122,7 @@ public class AdvertisementConsumer {
                 }
             }
 
-            esDocument.setSuggest(advertisement.getAdTitle());
+            esDocument.setSuggest("O:"+advertisement.getAdTitle());
 
         }
 

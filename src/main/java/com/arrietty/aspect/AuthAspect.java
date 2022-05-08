@@ -65,6 +65,7 @@ public class AuthAspect {
 
         SessionPO session = null;
 
+
         // user session expires or user has not yet logged in
         if(userSessionId==null || (session = redisService.getUserSession(userSessionId))==null){
             HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
@@ -91,6 +92,20 @@ public class AuthAspect {
             else {
                 httpServletResponse.setHeader("Location", "/401");
             }
+            return null;
+        }
+
+        // check if user is blacklisted
+        if(redisService.isNetIdBlacklisted(session.getNetId())){
+            redisService.removeUserSession(session.getId());
+            HttpServletResponse httpServletResponse = ((ServletRequestAttributes) requestAttributes).getResponse();
+            if(httpServletResponse==null){
+                logger.warn("HttpServletResponse is null.");
+                return null;
+            }
+            httpServletResponse.setStatus(302);
+            httpServletResponse.setHeader("Location", "/401");
+            logger.info(String.format("[netId: %s] user request blocked due to blacklist.", session.getNetId()));
             return null;
         }
 
