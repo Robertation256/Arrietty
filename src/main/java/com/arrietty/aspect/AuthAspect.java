@@ -6,10 +6,8 @@ import com.arrietty.consts.RedirectPolicyEnum;
 import com.arrietty.pojo.SessionPO;
 import com.arrietty.service.AuthServiceImpl;
 import com.arrietty.service.RedisServiceImpl;
-
 import com.arrietty.utils.session.SessionContext;
 import com.arrietty.utils.wrappers.HttpServletRequestWrapper;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,10 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
 
 
 /**

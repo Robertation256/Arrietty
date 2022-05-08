@@ -63,27 +63,27 @@ public class AuthServiceImpl {
 
     // obtain SSO redirect url from NYUSH keycloak service and redirect user to Shibboleth SSO
     public String getSSOUrl(){
-        String rawResponse = restTemplate.getForObject(
-                SSO_REDIRECT_URL_OBTAIN_URL,
-                String.class);
-
-        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, GET_SSO_REDIRECT_URL_RESPONSE_TYPE);
-        if(response==null || response.getResult()==null){
-            logger.error("SSO redirect url request failed");
-            return null;
-        }
-        return response.getResult().getUrl();
-//        return "http://localhost:8001/sso.html";
+//        String rawResponse = restTemplate.getForObject(
+//                SSO_REDIRECT_URL_OBTAIN_URL,
+//                String.class);
+//
+//        SSOResponsePO<TokenResponsePO> response = new Gson().fromJson(rawResponse, GET_SSO_REDIRECT_URL_RESPONSE_TYPE);
+//        if(response==null || response.getResult()==null){
+//            logger.error("SSO redirect url request failed");
+//            return null;
+//        }
+//        return response.getResult().getUrl();
+        return "http://localhost:8001/sso.html";
     }
 
 
     public Boolean login(String token, String clientId){
-        if(clientId==null || !clientId.equals(CLIENT_ID)){
-            return false;
-        }
-
-        String netId = getNetIdByToken(token);
-//        String netId = clientId;
+//        if(clientId==null || !clientId.equals(CLIENT_ID)){
+//            return false;
+//        }
+//
+//        String netId = getNetIdByToken(token);
+        String netId = clientId;
 
         if (netId==null){
             return false;

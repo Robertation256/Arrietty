@@ -1,0 +1,74 @@
+server:
+  domain: https://localhost:8000
+  port: 8000
+  ssl:
+
+#    below four configs are used for local testing, remove them for production
+    enable: true  #for dev turn on ssl; for production, turn off ssl since we use nginx for ssl service
+    key-store: classpath:arrietty.jks    #put any .jks file under class path, used for ssl, can be a self signed .jks
+    key-store-password: 1234
+    keyStoreType: JKS   # don't change this. our service use .jks as keystore type
+
+#    below two configs are used for production, no need for local testing
+    sso-cert-path: full_path_to_nyush_keycloak_certification_keystore_file
+    sso-cert-pwd: keystore_password
+
+  error:
+    path: /error
+    whitelabel:
+      enabled: false
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  datasource:
+    username: root
+    password: 123
+    url: jdbc:mysql://localhost:3306/{db_name}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone={timezone_consistent_with_host}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    hostname: 127.0.0.1
+    port: 6379
+    database: 0
+    password:
+    lettuce:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+    timeout: 5000
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+
+
+mybatis:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  type-aliases-package: com.arrietty.entity
+
+elasticsearch:
+  ip: localhost:9200
+  page-size: 5      # elastic search page size per search under pagination
+  max-suggestion-size: 5  # max suggestion num for user input completion
+
+
+
+auth:
+  token-obtain-url: https://review.shanghai.nyu.edu/app/rest/keycloak/auth?clientId=SIAP&authType=shibboleth-redirect
+  access-token-obtain-url: https://review.shanghai.nyu.edu/app/rest/keycloak/token?token=%s
+  user-info-obtain-url: https://review.shanghai.nyu.edu/app/rest/keycloak/welcome
+  client-id: SIAP
+  disable-auto-create-new-user: false   #turn this on to prevent creating account for new users
+
+
+file:
+  max-image-num-per-ad: 5
+  base-image-directory: full_path_of_user_image_base_dir
+  max-avatar-image-size: 1048576    #in bytes
+  max-ad-image-size: 5242880        #in bytes
+  default-user-avatar-path: full_path_of_default_user_avatar_img
+  max-ad-num-per-user: 5

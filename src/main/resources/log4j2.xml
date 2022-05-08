@@ -11,7 +11,7 @@
        -->
     <properties>
 <!--        <property name="LOG_HOME">C:/Users/yz391/Desktop/log</property>-->
-        <property name="LOG_HOME">/var/log/arrietty-log</property>
+        <property name="LOG_HOME">C:/Users/yz391/Desktop/log</property>
         <property name="SERVICE_LOG_FILE_NAME">service-log</property>
     </properties>
 

@@ -37,7 +37,9 @@ log/
 .DS_Store
 
 # Configuration
-/src/main/resources/application-*.yml
+/src/main/resources/application-dev.yml
+/src/main/resources/application-test.yml
+/src/main/resources/application-prod.yml
 
 
 #keystore
