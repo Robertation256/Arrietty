@@ -24,7 +24,7 @@ public class AuthController {
     private AuthServiceImpl authService;
 
 
-    // 接受shibboleth 回调
+    // receive shibboleth callback
     @GetMapping(value = "/SSOCallback")
     public String ssoCallback(@RequestParam("token") String token, @RequestParam("clientId") String clientId){
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();

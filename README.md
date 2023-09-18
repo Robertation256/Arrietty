@@ -1,5 +1,5 @@
 # Intro
-Arrietty is a second-hand item advertising platform dedicated to the NYUSH student community in the hope of increasing the utilization of second-hand items/textbooks (school can be expensive, especially when you are talking about Calculus hardcopies costing a couple hundred bucks). The website was deployed around April 2021 and then shut down after we graduated in May (server acces was revoked). This repo is the backend implementation. Frontend repo can be found [here](https://github.com/juanjuanjks/arrietty-fe).
+Arrietty is a second-hand item advertising platform dedicated to the NYUSH student community in the hope of increasing the utilization of second-hand items/textbooks (school can be expensive, especially when you are talking about Calculus hardcopies costing a couple hundred bucks). The website was open to public service around April 2022 and then shut down after we graduated in May (server access revoked). This repo is the backend implementation. Frontend repo can be found [here](https://github.com/juanjuanjks/arrietty-fe).
 
 # Architecture
 The backend service is built on top of Spring Boot with MySQL as the primary database. Redis is used for user session caching and fast lookups. Elasticsearch is used for supporting text searches. Finally, Rabbit MQ is introduced to facilitate asynchrounous post processing (ie. synchronization btween MySQL and Elasticsearch)
@@ -13,7 +13,7 @@ The backend service is built on top of Spring Boot with MySQL as the primary dat
 url:/suggest?type=<textbook/other>&keyword=com
 method:post
 request: null
-note： at most 10 suggestions at a time
+note: at most 10 suggestions at a time
 
 response: 
 {
@@ -471,10 +471,9 @@ response:
 
 url: /bulletin?action=<update/delete>
 method: post
-备注： 新增时无需传入id
 request: 
 {
-    id: 12,	// 新增时无需传入id
+    id: 12,	
     "title": "Site Policy and User Agreement",
     "content": "User must provide true and accruate ...",
 }

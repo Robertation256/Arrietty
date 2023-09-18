@@ -32,19 +32,6 @@ public class ElasticsearchRestClient {
         HttpHost httpHost =  new HttpHost(ip, port, "http");
         RestClientBuilder clientBuilder = RestClient.builder(httpHost);
         return new RestHighLevelClient(clientBuilder);
-
-//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-//        credentialsProvider.setCredentials(AuthScope.ANY,
-//                new UsernamePasswordCredentials("elastic", "88sf8Aii4n1iU4DegTrT"));
-//        RestClientBuilder clientBuilder = RestClient.builder(httpHost)
-//                .setMaxRetryTimeoutMillis(3500)
-//                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
-//                    @Override
-//                    public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpClientBuilder) {
-//                        return httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-//                    }
-//                });
-//        return new RestHighLevelClient(clientBuilder);
     }
 
 

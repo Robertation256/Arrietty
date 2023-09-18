@@ -115,7 +115,7 @@ public class ServiceController {
     }
 
 
-    // final test pending
+
     @Log
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
@@ -125,7 +125,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-    // final test pending
+
     @Log
     @Auth(authMode=AuthModeEnum.REGULAR)
     @ResponseBody
@@ -135,7 +135,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse(ProfilePO.class, profilePO));
     }
 
-    // final test pending
+
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
     @PostMapping("/avatar")
@@ -144,7 +144,7 @@ public class ServiceController {
         return new Gson().toJson(Response.buildSuccessResponse());
     }
 
-    // final test pending
+
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/avatar")
     public void getAvatar(HttpServletResponse response) throws LogicException{
@@ -152,14 +152,14 @@ public class ServiceController {
     }
 
 
-    // final test pending
+
     @Auth(authMode = AuthModeEnum.REGULAR)
     @GetMapping("/image")
     public void getImage(@RequestParam("id") Long id, HttpServletResponse response) throws LogicException{
         imageService.getImage(id, response);
     }
 
-    // final test pending
+
     @Log
     @Auth(authMode = AuthModeEnum.REGULAR)
     @ResponseBody
@@ -170,7 +170,7 @@ public class ServiceController {
         return new Gson().toJson(response);
     }
 
-    // final test pending
+
     @Log
     @Auth(authMode = AuthModeEnum.ADMIN)
     @ResponseBody
@@ -377,13 +377,4 @@ public class ServiceController {
         List<AdminDailyStatistics> result = adminService.getAdminStatistics();
         return new Gson().toJson(Response.buildSuccessResponse(AdminDailyStatistics.class, result));
     }
-
-
-
-
-//    @GetMapping("/test")
-//    @ResponseBody
-//    public String mqTest() throws Exception{
-//        throw new LogicException(ErrorCode.INTERNAL_ERROR, "this is a test");
-//    }
 }

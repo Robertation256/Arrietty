@@ -10,7 +10,7 @@ import java.util.Map;
  * @Date: 2021/7/5 16:54
  */
 
-// 取出cookie 而已
+// wrapper for extracting cookies
 public class HttpServletRequestWrapper {
 
     private final Map<String, String> cookieMap;
