@@ -1,91 +1,19 @@
-# Redis
+# Intro
+Arrietty is a second-hand item advertising platform dedicated to the NYUSH student community in the hope of increasing the utilization of second-hand items/textbooks (school can be expensive, especially when you are talking about Calculus hardcopies costing a couple hundred bucks). The website was deployed around April 2021 and then shut down after we graduated in May (server acces was revoked). This repo is the backend implementation. Frontend repo can be found [here](https://github.com/juanjuanjks/arrietty-fe).
 
-extend by 15 min upon each API request
-
-内存超限替换策略：volatile-lfu
-
-
-
-# 日志
-
-采用log4j2
-
-默认保留40个日志文件，每天新增一个
+# Architecture
+The backend service is built on top of Spring Boot with MySQL as the primary database. Redis is used for user session caching and fast lookups. Elasticsearch is used for supporting text searches. Finally, Rabbit MQ is introduced to facilitate asynchrounous post processing (ie. synchronization btween MySQL and Elasticsearch)
 
 
+# APIs
 
-
-
-
-
-
-
-# Elasticsearch 结构
-
-更新ES mapping instruction
-
-- 删除旧mapping： 
-
-​		method: delete
-
-​		url: localhost:9200/advertisement
-
-- 新增mapping：
-
-  method： put
-
-  url: localhost:9200/advertisement
-
-  body: 带上下面的数据
-
-```json
-{
-    "mappings": {
-        "properties": {
-            "ad_title": {"type": "text"},
-            "is_textbook": {"type":"boolean"},
-            "user_id": {"type": "long", "index": "false"},
-            "textbook_tag": {
-                "properties": {
-                    "title": {"type": "text"},
-                    "isbn": {"type": "keyword"},
-                    "author": {"type": "text", "index":false},
-                    "publisher": {"type": "text", "index":false},
-                    "edition": {"type": "text", "index":false},
-                    "original_price": {"type": "scaled_float", "scaling_factor": 100, "index":false},
-                    "related_course": {
-                        "properties": {
-                            "course_code": {"type": "keyword"},
-                            "course_name": {"type": "text"},
-                            "subject": {"type": "keyword"}
-                        }
-                    }
-                }
-            },  
-            "other_tag": {"type": "keyword"},
-            "image_ids": {"type":"text", "index": false},
-            "price": {"type": "scaled_float", "scaling_factor": 100},
-            "comment": {"type": "text", "index": false},
-            "create_time": {"type":"date"}
-             
-        }
-      }
-}
-```
-
-
-
-
-
-# 接口格式
-
-### Advertisement搜索接口
+### Advertisement listing search
 
 ```json
 url:/suggest?type=<textbook/other>&keyword=com
 method:post
 request: null
-备注：最多返回10条suggestion
+note： at most 10 suggestions at a time
 
 response: 
 {
@@ -110,10 +38,10 @@ request:
 {
     "adType": "textbook/other", // not null
     "keyword": "calculus",	// not null
-    "priceOrder":"asc/desc", //为空则不排序
-    "minPrice": 0,	// 为空代表用户未采用这个filter
-    "maxPrice": 100,// 为空代表用户未采用这个filter
-    "tag": "furniture",// 为空代表用户未采用这个filter
+    "priceOrder":"asc/desc", 
+    "minPrice": 0,	
+    "maxPrice": 100,
+    "tag": "furniture",
     "pageNum": 2
 }
 
@@ -144,7 +72,7 @@ response:
                     price:
                     comment:
                     createTime:
-                    isMarked: true，
+                    isMarked: true,
                     numberOfTaps: 12
                 }
         ]
@@ -185,14 +113,13 @@ response:
 
 
 
-## Admin标签输入界面
+## Admin tag edit
 
 ### API
 
 ```json
 url:/course?id=
 method:get
-备注：不传id默认获取全部course
 request:null
 
 response:
@@ -213,10 +140,10 @@ response:
 
 url:/course?action=delete
 method:post
-备注：action={update/delete} action=update时，request body里传id代表修改， 不传代表新增。
+note: action={update/delete} when action=update, carry in id request body for update otherwise it is treated as a insert
 request:
 {
-    "id":1,	//这个不传值代表新增
+    "id":1,	
     "courseCode": "CSCI-SHU 360",
     "subject": "Computer Science"
 }
@@ -238,7 +165,7 @@ response:
     
 url:/textbook?id=
 method:get
-备注：不传id默认获取全部textbook标签
+
 request: null
     
 response:
@@ -264,11 +191,11 @@ response:
 
 url:/textbook?action=delete
 method:post
-备注：action={update/delete} action=update时，request body里传id代表修改， 不传代表新增。
+
 request:
 
 {
-    "id":1, //不传值代表新增
+    "id":1, 
     "title": "Intro to Pyschology",	// not null
     "isbn":"571-324234-B32",	// not null
     "author": "John",
@@ -287,7 +214,7 @@ response:
         "message": "Success"
     },
     "body": {
-        "id":1, //不传值代表新增
+        "id":1,
         "title": "Intro to Pyschology",	// not null
         "isbn":"571-324234-B32",	// not null
         "author": "John",
@@ -302,7 +229,6 @@ response:
     
 url:/otherTag?id=1
 method:get
-备注：不传id默认获取全部otherTag标签
 request: null
     
 response:
@@ -323,7 +249,6 @@ response:
 
 url:/otherTag?action=delete
 method:post
-备注：action={update/delete} action=update时，request body里传id代表修改， 不传代表新增。
 request:
 
 {
@@ -352,14 +277,13 @@ response:
 
 
 
-## Advertisement表单增删改查
+## Advertisement listing insert/update/deletion
 
 ### API
 
 ```json
 url:/myAdvertisement
 method:get
-备注：获取当前请求用户发的所有ad
 request:null
 
 response:
@@ -373,7 +297,7 @@ response:
             "id":1,
             "adTitle": "I want to sell a book",
             "isTextbook": true,
-            "tagId": 12,	// 后端组装
+            "tagId": 12,	
             "imageIds":"1,12,4,55",
             "price": 256,
             "comment": "Nothing really..",
@@ -387,11 +311,6 @@ response:
 
 url:/advertisement?action=<update/delete>
 method:post
-备注：update时id=null默认新增
-image 传递方法参见 https://stackoverflow.com/questions/49845355/spring-boot-controller-upload-multipart-and-json-to-dto
-
-update只允许修改images，price， comment
-images为全删全增
 
 request:
 {
@@ -423,20 +342,20 @@ response:
 }
 ```
 
-## 图片接口
+## Image APIs
 
 ```json
 url:/avatar
 method: get
-备注：获取当前用户头像
+note: get profile image of the current user
 
 url:/avatar
 method: post
-备注：修改当前用户头像
+note: update profile image
 
 url:/image?id=1
 method: get
-备注：获取id对应图像资源
+
 ```
 
 ### Notification
@@ -527,31 +446,6 @@ response:
     ]
 }
 ```
-
-#### 实现
-
-favorite
-
-on
-
-- 检查 adId 是否存在
-- 插入数据库（重复抛出异常）
-- 修改redis 用户favorite 缓存
-
-off
-
-- 检查adId是否已被mark
-- 删除数据库数据，修改redis
-
-
-
-favorite
-
-- favorite 表拉取数据，advertisement service匹配
-
-ES 增加 isMarked
-
-
 
 ### Bulletin
 
