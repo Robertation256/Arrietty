@@ -9,44 +9,44 @@ The backend service is built on top of Spring Boot with MySQL as the primary dat
 
 ### Advertisement listing search
 
+- url:`/suggest?type=<textbook/other>&keyword=com`
+- method:`post`
+- request: `null`
+- note: at most 10 suggestions at a time
+- response: 
 ```json
-url:/suggest?type=<textbook/other>&keyword=com
-method:post
-request: null
-note: at most 10 suggestions at a time
-
-response: 
 {
     "responseStatus": {
         "status": "Ok",
         "message": "Success"
     },
     "body": ["computation theory", "commonsense 101", "comtemporary art"]
-    }
     
 }
+```
 
 
 
 
 
+- url:`/search`
+- method: `post`
 
-url:/search
-method: post
-
-request: 
+- request: 
+```json
 {
-    "adType": "textbook/other", // not null
-    "keyword": "calculus",	// not null
+    "adType": "textbook/other", 
+    "keyword": "calculus",	
     "priceOrder":"asc/desc", 
     "minPrice": 0,	
     "maxPrice": 100,
     "tag": "furniture",
     "pageNum": 2
 }
+```
 
-
-response: 
+- response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -54,37 +54,40 @@ response:
     },
     "body": [
                 {
-                    id: 1,
-                    username:
-                    userNetId:
-                    userAvatarImageId:
-                    adType:"textbook",
-                    adTitle: "",
-                    textbookTitle:"",
-                    isbn:"",
-                    author:
-                    publisher:
-                    edition:
-                    originalPrice:
-                    relatedCourse: "CSCI-369,CSCI-101",
-                    otherTag:
-                    imageIds: "12,13,14,15"
-                    price:
-                    comment:
-                    createTime:
-                    isMarked: true,
-                    numberOfTaps: 12
+                    "id": 1,
+                    "username": "",
+                    "userNetId": "",
+                    "userAvatarImageId": 12,
+                    "adType":"textbook",
+                    "adTitle": "",
+                    "textbookTitle":"",
+                    "isbn":"",
+                    "author": "",
+                    "publisher": "",
+                    "edition": "",
+                    "originalPrice": "",
+                    "relatedCourse": "CSCI-369,CSCI-101",
+                    "otherTag": "",
+                    "imageIds": "12,13,14,15",
+                    "price": 100,
+                    "comment": "",
+                    "createTime": "",
+                    "isMarked": true,
+                    "numberOfTaps": 12
                 }
         ]
     }
     
 }
+```
 
 
-url: /lastModified
-method: get
-request: null
+
+url: `/lastModified`
+method: `get`
+request: `null`
 response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -92,21 +95,24 @@ response:
     },
     "body":"April 03 2000"
 }
+```
 
-url: /tap?id=1
-method: get
-request: null
-备注: id is advertisment id
-response: 
+
+- url: `/tap?id=1`
+- method: `get`
+- request: `null`
+- note: id refers to advertisement id
+- response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
         "message": "Success"
     },
     "body":{
-        username: "yuechuan"
-        netId: "yz3919"
-        avatarImageId: 12
+        "username": "yuechuan",
+        "netId": "yz3919",
+        "avatarImageId": 12
     }
 }
 ```
@@ -117,12 +123,12 @@ response:
 
 ### API
 
-```json
-url:/course?id=
-method:get
-request:null
 
-response:
+- url:`/course?id=`
+- method:`get`
+- request:`null`
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -136,19 +142,21 @@ response:
         }
     ]
 }
+```
 
-
-url:/course?action=delete
-method:post
-note: action={update/delete} when action=update, carry in id request body for update otherwise it is treated as a insert
-request:
+- url:`/course?action=delete`
+- method:`post`
+- note: `action={update/delete}`, when `action=update`, specify id in request body for an update otherwise it is treated as an insert
+- request:
+```json
 {
     "id":1,	
     "courseCode": "CSCI-SHU 360",
     "subject": "Computer Science"
 }
-
-response:
+```
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -161,14 +169,14 @@ response:
         }
     
 }
+```   
     
+- url:`/textbook?id=`
+- method:`get`
+- request: `null`
     
-url:/textbook?id=
-method:get
-
-request: null
-    
-response:
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -187,27 +195,27 @@ response:
         }
     ]
 }
+```
 
-
-url:/textbook?action=delete
-method:post
-
-request:
-
+- url:`/textbook?action=delete`
+- method:`post`
+- request:
+```json
 {
     "id":1, 
-    "title": "Intro to Pyschology",	// not null
-    "isbn":"571-324234-B32",	// not null
+    "title": "Intro to Pyschology",	
+    "isbn":"571-324234-B32",	
     "author": "John",
     "publisher": "Centric",
     "edition":"3rd edition",
     "originalPrice": 123.05,
     "courseId": [1,2]		
 }
+```
 
 
-
-response:
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -215,8 +223,8 @@ response:
     },
     "body": {
         "id":1,
-        "title": "Intro to Pyschology",	// not null
-        "isbn":"571-324234-B32",	// not null
+        "title": "Intro to Pyschology",
+        "isbn":"571-324234-B32",
         "author": "John",
         "publisher": "Centric",
         "edition":"3rd edition",
@@ -224,14 +232,14 @@ response:
         "courseId": [1,2]		
     }
 }
+```    
     
     
-    
-url:/otherTag?id=1
-method:get
-request: null
-    
-response:
+- url:`/otherTag?id=1`
+- method:`get`
+- request: `null` 
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -244,21 +252,20 @@ response:
         }
     ]
 }
+```
 
 
-
-url:/otherTag?action=delete
-method:post
-request:
-
+- url:`/otherTag?action=delete`
+- method:`post`
+- request:
+```json
 {
     "id":1,
     "name":"Furniture"		
 }
-
-
-
-response:
+```
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -269,10 +276,6 @@ response:
         "name":"Furniture"		
     }
 }
-
-
-
-
 ```
 
 
@@ -281,12 +284,12 @@ response:
 
 ### API
 
-```json
-url:/myAdvertisement
-method:get
-request:null
+- url:`/myAdvertisement`
+- method:`get`
+- request:`null`
 
-response:
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -307,23 +310,25 @@ response:
         }
     ]
 }
+```
 
+- url:`/advertisement?action=<update/delete>`
+- method:`post`
 
-url:/advertisement?action=<update/delete>
-method:post
-
-request:
+- request:
+```json
 {
     "id":null,
     "isTextbook": true,
     "tagId": 12,
-    "images": 传递方法见备注,		
+    "images": "image_binary...",		
     "price": 256,
-    "comment": "Nothing really..",
+    "comment": "Nothing really.."
 }
+```
 
-
-response:
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -344,28 +349,25 @@ response:
 
 ## Image APIs
 
-```json
-url:/avatar
-method: get
-note: get profile image of the current user
+- url:`/avatar`
+- method: `get`
+- note: get profile image of the current user
 
-url:/avatar
-method: post
-note: update profile image
+- url:`/avatar`
+- method: `post`
+- note: update profile image
 
-url:/image?id=1
-method: get
+- url:`/image?id=1`
+- method: `get`
 
-```
 
 ### Notification
 
+- url: `/getNotification`
+- method: `get`
+- request: `null`
+- response:
 ```json
-url: /getNotification
-method: get
-request: null
-response:
-response:
 {
     "responseStatus": {
         "status": "Ok",
@@ -373,20 +375,22 @@ response:
     },
     "body": [
         {
-            id: 12,
-            username: "Yuechuan Zhang",
-            netid: "yz3919",
-            avatarImageId: 12,
-            adTitle: "I want to get rid of this book ASAP!",
-            createTime: xxx
+            "id": 12,
+            "username": "Yuechuan Zhang",
+            "netid": "yz3919",
+            "avatarImageId": 12,
+            "adTitle": "I want to get rid of this book ASAP!",
+            "createTime": "some timestamp"
         }
     ]
 }
-        
-url: /hasNew
-method: get
-request: null
-response: 
+```        
+
+- url: `/hasNew`
+- method: `get`
+- request: `null`
+- response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -398,23 +402,24 @@ response:
 
 ### Favorite
 
+- url: `/mark?id=12&status=<on/off>`
+- method: `get`
+- request: `null`
+- response: 
 ```json
-url: /mark?id=12&status=<on/off>
-method: get
-request: null
-response: 
 {
     "responseStatus": {
         "status": "Ok",
         "message": "Success"
     }
 }
+```
 
-
-url: /getFavorite
-method: get
-request: null
-response:
+- url: `/getFavorite`
+- method: `get`
+- request: `null`
+- response:
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -422,26 +427,26 @@ response:
     },
     "body": [
         {
-                    id: 1,
-                    username:
-                    netId:
-                    avatarImageId:
-                    adType:"textbook",
-                    adTitle: "",
-                    textbookTitle:"",
-                    isbn:"",
-                    author:
-                    publisher:
-                    edition:
-                    originalPrice:
-                    relatedCourse: "CSCI-369,CSCI-101",
-                    otherTag:
-                    imageIds: "12,13,14,15"
-                    price:
-                    comment:
-                    createTime:
-            		isMarked: true,
-         			numberOfTaps: 12
+                    "id": 1,
+                    "username": "",
+                    "netId": "",
+                    "avatarImageId": "",
+                    "adType":"textbook",
+                    "adTitle": "",
+                    "textbookTitle":"",
+                    "isbn":"",
+                    "author": "",
+                    "publisher": "",
+                    "edition": "",
+                    "originalPrice": "",
+                    "relatedCourse": "CSCI-369,CSCI-101",
+                    "otherTag": "",
+                    "imageIds": "12,13,14,15",
+                    "price":"",
+                    "comment":"",
+                    "createTime": "",
+            		"isMarked": true,
+         			"numberOfTaps": 12
                 }
     ]
 }
@@ -449,11 +454,11 @@ response:
 
 ### Bulletin
 
+- url: `/bulletin`
+- method: `get`
+- request: `null`
+- response: 
 ```json
-url: /bulletin
-method: get
-request: null
-response: 
 {
     "responseStatus": {
         "status": "Ok",
@@ -464,21 +469,24 @@ response:
             "id":1,
             "title": "Site Policy and User Agreement",
             "content": "User must provide true and accruate ...",
-            "createTime": xxxx
+            "createTime": "xxxx"
         }
     ]
 }
+```
 
-url: /bulletin?action=<update/delete>
-method: post
-request: 
+- url: `/bulletin?action=<update/delete>`
+- method: `post`
+- request: 
+```json
 {
-    id: 12,	
+    "id": 12,	
     "title": "Site Policy and User Agreement",
     "content": "User must provide true and accruate ...",
 }
-
-response: 
+```
+- response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -488,29 +496,32 @@ response:
         "id":1,
         "title": "Site Policy and User Agreement",
         "content": "User must provide true and accruate ...",
-        "createTime": xxxx
+        "createTime": "xxxx"
     }
 }
 ```
 
 ### Manage Blacklist
 
+
+- url: `/updateBlacklist?action=<add/delete>&netId=yz3919`
+- method: `post`
+- request: `null`
+- response: 
 ```json
-url: /updateBlacklist?action=<add/delete>&netId=yz3919
-method: post
-request: null
-response: 
 {
     "responseStatus": {
         "status": "Ok",
         "message": "Success"
     }
 }
+```
 
-url:/blacklist
-method:get
-request:null
-response: 
+- url:`/blacklist`
+- method:`get`
+- request:`null`
+- response: 
+```json
 {
     "responseStatus": {
         "status": "Ok",
@@ -522,11 +533,11 @@ response:
 
 ### Admin Statistics
 
+- url:`/adminStatistics`
+- method:`get`
+- request:`null`
+- response: 
 ```json
-url:/adminStatistics
-method:get
-request:null
-response: 
 {
     "responseStatus": {
         "status": "Ok",
